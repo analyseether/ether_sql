@@ -2,7 +2,6 @@ from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP
 from sqlalchemy import LargeBinary, BigInteger, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.dialects import postgresql
 
 db = declarative_base()
 
@@ -195,7 +194,7 @@ class Traces(db):
                               ForeignKey('transactions.transaction_hash'),
                               index=True)
     trace_type = Column(String, nullable=False)
-    trace_address = Column(postgresql.Array(Integer), nullable=False)
+    trace_address = Column(String, nullable=False)
     subtraces = Column(Integer, nullable=True)
     transaction_index = Column(Integer, nullable=True)
     sender = Column(String(42), nullable=True)
