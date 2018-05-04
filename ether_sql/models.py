@@ -2,10 +2,10 @@ from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP, LargeBina
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
 
+db = declarative_base()
 
-class Blocks(Base):
+class Blocks(db):
     __tablename__ = 'blocks'
     block_number = Column(Integer, primary_key=True)
     block_hash = Column(String(66), unique=True, nullable=False)
