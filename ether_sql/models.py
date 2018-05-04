@@ -1,7 +1,8 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP
-from sqlalchemy import LargeBinary, BigInteger
+from sqlalchemy import LargeBinary, BigInteger, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects import postgresql
 
 db = declarative_base()
 
@@ -51,7 +52,7 @@ class Blocks(db):
 
 class Transactions(db):
     __tablename__ = 'transactions'
-    transaction_hash = Column(String(66), primary_key=True)
+    transaction_hash = Column(String(66), primary_key=True, index=True)
     block_number = Column(Integer, ForeignKey('blocks.block_number'))
     nonce = Column(Integer, nullable=False)
     sender = Column(String(42), nullable=False)
@@ -62,6 +63,8 @@ class Transactions(db):
     gas_price = Column(Integer, nullable=False)
     timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
     transaction_index = Column(Integer, nullable=False)
+    logs = relationship('Logs', backref='receipt')
+    traces = relationship('Traces', backref='traces')
 
     def to_dict(self):
         return {
@@ -84,7 +87,7 @@ class Transactions(db):
 class Uncles(db):
     __tablename__ = 'uncles'
 
-    uncle_hash = Column(String(66), primary_key=True, unique=True)
+    uncle_hash = Column(String(66), primary_key=True, unique=True, index=True)
     uncle_blocknumber = Column(Integer, nullable=False)
     parent_hash = Column(String(66), nullable=False)
     difficulty = Column(String(66), unique=True, nullable=False)
@@ -111,7 +114,115 @@ class Uncles(db):
                 'gas_limit': self.gas_limit
                 }
 
-        def __repr__(self):
-            return "<Uncle {}>".format(self.uncle_hash)
+    def __repr__(self):
+        return "<Uncle {}>".format(self.uncle_hash)
 
-# class Receipts(db):
+
+class Receipts(db):
+    __tablename__ = 'receipts'
+
+    transaction_hash = Column(String(66),
+                              ForeignKey('transactions.transaction_hash'),
+                              primary_key=True, index=True)
+    status = Column(Boolean, nullable=True)
+    gas_used = Column(Integer, nullable=False)
+    cumulative_gas_used = Column(Integer, nullable=False)
+    contract_address = Column(String(42))
+    block_number = Column(Integer, ForeignKey('blocks.block_number'))
+    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
+    transaction_index = Column(Integer, nullable=False)
+    logs = relationship('Logs', backref='receipt')
+    traces = relationship('Traces', backref='traces')
+
+    def to_dict(self):
+        return {
+            'transaction_hash': self.transaction_hash,
+            'status': self.status,
+            'gas_used': self.gas_used,
+            'cumulative_gas_used': self.cumulative_gas_used,
+            'contract_address': self.contract_address,
+            'block_number': self.block_number,
+            'timestamp': self.timestamp,
+            'transaction_index': self.transaction_index
+            }
+
+    def __repr__(self):
+        return "<Receipt {}>".format(self.transaction_hash)
+
+
+class Logs(db):
+    __tablename__ = 'logs'
+    id = Column(Integer, primary_key=True)
+    transaction_hash = Column(String(66),
+                              ForeignKey('transactions.transaction_hash'),
+                              index=True)
+    address = Column(String(42))
+    data = Column(LargeBinary)
+    block_number = Column(Integer, ForeignKey('blocks.block_number'))
+    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
+    transaction_index = Column(Integer, nullable=False)
+    transaction_log_index = Column(Integer, nullable=False)
+    log_index = Column(Integer, nullable=False)
+    topics_count = Column(Integer, nullable=False)
+    topic_1 = Column(String(66), nullable=True)
+    topic_2 = Column(String(66), nullable=True)
+    topic_3 = Column(String(66), nullable=True)
+    topic_4 = Column(String(66), nullable=True)
+
+    def to_dict(self):
+        return {
+                'transaction_hash': self.transaction_hash,
+                'address': self.address,
+                'data': self.data,
+                'block_number': self.block_number,
+                'timestamp': self.timestamp,
+                'transaction_index': self.transaction_index,
+                'transaction_log_index': self.transaction_log_index,
+                'log_index': self.log_index,
+                'topics_count': self.topics_count,
+                'topic_1': self.topic_1,
+                'topic_2': self.topic_2,
+                'topic_3': self.topic_3,
+                'topic_4': self.topic_4
+        }
+
+
+class Traces(db):
+    __tablename__ = 'traces'
+    id = Column(Integer, primary_key=True)
+    block_number = Column(Integer, ForeignKey('blocks.block_number'))
+    transaction_hash = Column(String(66),
+                              ForeignKey('transactions.transaction_hash'),
+                              index=True)
+    trace_type = Column(String, nullable=False)
+    trace_address = Column(postgresql.Array(Integer), nullable=False)
+    subtraces = Column(Integer, nullable=True)
+    transaction_index = Column(Integer, nullable=True)
+    sender = Column(String(42), nullable=True)
+    receiver = Column(String(42), nullable=True)
+    value_wei = Column(BigInteger, nullable=True)
+    start_gas = Column(Integer)
+    input_data = Column(LargeBinary)
+    gas_used = Column(Integer)
+    contract_address = Column(String(42), nullable=True)
+    output = Column(LargeBinary)
+    error = Column(String(42))
+
+    def to_dict(self):
+        {
+         'block_number': self.block_number,
+         'transaction_hash': self.transaction_hash,
+         'trace_type': self.trace_type,
+         'trace_address': self.trace_address,
+         'subtraces': self.subtraces,
+         'transaction_index': self.transaction_index,
+         'sender': self.sender,
+         'receiver': self.receiver,
+         'value_wei': self.value_wei,
+         'start_gas': self.start_gas,
+         'input_data': self.input_data,
+         'gas_used': self.gas_used,
+         'contract_address': self.contract_address,
+         'output': self.output,
+         'error': self.error
+        }
