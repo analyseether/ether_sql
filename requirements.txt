@@ -1,0 +1,10 @@
+# modified ethjsonrpc
+-e git://github.com/analyseether/ethjsonrpc.git#egg=ethjsonrpc
+
+# SqlAlchemy
+sqlalchemy==1.2.4
+sqlalchemy-migrate==0.11.0
+psycopg2-binary==2.7.4
+
+# CLI
+Click==6.7
