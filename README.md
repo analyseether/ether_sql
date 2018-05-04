@@ -13,14 +13,14 @@ It currently supports Parity node but will be expanded to use several nodes.
 # Installation guide
 1. Install the required Linux dependencies
 
-`#installing psql`
-`sudo apt-get install postgresql`
-`#installing pyethereum dependencies`
+`#installing psql`     
+`sudo apt-get install postgresql`     
+`#installing pyethereum dependencies`     
 `sudo apt-get install libssl-dev build-essential automake pkg-config libtool libffi-dev libgmp-dev libyaml-cpp-dev`
 
 2. Create and activate a virtual environment
 
-`virtualenv envname`
+`virtualenv envname`     
 `envname\bin\activate`
 
 3. Install the required python dependencies
@@ -42,5 +42,6 @@ This prompts for a user password, use the same password in the settings.py file
 `createdb ether_sql`
 
 3. Create the tables by executing this command from the repo ether_sql  
+
 `python ether_sql.py create_tables`
 
