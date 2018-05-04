@@ -3,9 +3,10 @@ Python library to push ethereum blockchain data into an sql database.
 
 # Build Status
 
-ether-sql is written in Python and uses ethjsonrpc for geting data using JSON-RPC calls.
+ether_sql is written in Python 2.7, uses [ethjsonrpc](https://github.com/analyseether/ethjsonrpc) for geting data using JSON-RPC calls and uses SqlAlchemy to connect to postgressql database.
 
-ether-sql was built by Analyse Ether, with the goal of making Ethereum data queryable to everyone. This is currently in very alpha beta, and not recommended for production use until it has received sufficient testing.
+ether_sql was built by Analyse Ether, with the goal of making Ethereum data
+easily to everyone. This library can be used as a backbone for creating block explorers or as a backbone for data analysis needs. This is currently in very alpha beta, and not recommended for production use until it has received sufficient testing.
 
 It currently supports Parity node but will be expanded to use several nodes.
 
@@ -21,4 +22,4 @@ It currently supports Parity node but will be expanded to use several nodes.
 
 This prompts for a user password, use the same password in the settings.py file
 
-`createdb ether-sql`
+`createdb ether_sql`
