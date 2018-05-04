@@ -23,8 +23,9 @@ class Blocks(db):
     timestamp = Column(TIMESTAMP, unique=True, nullable=False)
     sha3uncles = Column(String(66), nullable=False)
     extra_data = Column(LargeBinary)
+    gas_limit = Column(Integer, nullable=False)
     transactions = relationship('Transactions', backref='block')
-    # uncles = relationship('Uncles', backref='block')
+    uncles = relationship('Uncles', backref='block')
     uncle_count = Column(Integer, nullable=False)
     transaction_count = Column(Integer, nullable=False)
 
@@ -39,6 +40,7 @@ class Blocks(db):
             'timestamp': self.timestamp,
             'sha3uncles': self.sha3uncles,
             'extra_data': self.extra_data,
+            'gas_limit': self.gas_limit,
             'uncle_count': self.uncle_count,
             'transaction_count': self.transaction_count
             }
@@ -72,4 +74,44 @@ class Transactions(db):
                 'receiver': self.receiver,
                 'data': self.data,
                 'gas_price': self.gas_price,
-                'timestamp': self.timestamp}
+                'timestamp': self.timestamp,
+                'transaction_index': self.transaction_index}
+
+    def __repr__(self):
+        return "<Transaction {}>".format(self.transaction_hash)
+
+
+class Uncles(db):
+    __tablename__ = 'uncles'
+
+    uncle_hash = Column(String(66), primary_key=True, unique=True)
+    uncle_blocknumber = Column(Integer, nullable=False)
+    parent_hash = Column(String(66), nullable=False)
+    difficulty = Column(String(66), unique=True, nullable=False)
+    current_blocknumber = Column(Integer, unique=True, index=True)
+    gas_used = Column(Integer, nullable=False)
+    miner = Column(String(42), nullable=False)
+    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
+    sha3uncles = Column(String(66), nullable=False)
+    extra_data = Column(LargeBinary)
+    gas_limit = Column(Integer, nullable=False)
+
+    def to_dict(self):
+        return {
+                'uncle_hash': self.uncle_hash,
+                'uncle_blocknumber': self.uncle_blocknumber,
+                'parent_hash': self.parent_hash,
+                'difficulty': self.difficulty,
+                'current_blocknumber': self.current_blocknumber,
+                'gas_used': self.gas_used,
+                'miner': self.miner,
+                'timestamp': self.timestamp,
+                'sha3uncles': self.sha3uncles,
+                'extra_data': self.extra_data,
+                'gas_limit': self.gas_limit
+                }
+
+        def __repr__(self):
+            return "<Uncle {}>".format(self.uncle_hash)
+
+# class Receipts(db):
