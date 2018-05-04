@@ -43,3 +43,4 @@ This prompts for a user password, use the same password in the settings.py file
 
 3. Create the tables by executing this command from the repo ether_sql  
 `python ether_sql.py create_tables`
+
