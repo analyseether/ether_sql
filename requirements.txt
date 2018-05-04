@@ -2,3 +2,4 @@
 # installing the ethjsonrpc library from github
 sqlalchemy==1.2.4
 sqlalchemy-migrate==0.11.0
+psycopg2==2.7.4
