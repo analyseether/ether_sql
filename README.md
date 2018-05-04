@@ -11,15 +11,35 @@ easily to everyone. This library can be used as a backbone for creating block ex
 It currently supports Parity node but will be expanded to use several nodes.
 
 # Installation guide
+1. Install the required Linux dependencies
 
-1. Install PostgreSQL
-
+`#installing psql`
 `sudo apt-get install postgresql`
+`#installing pyethereum dependencies`
+`sudo apt-get install libssl-dev build-essential automake pkg-config libtool libffi-dev libgmp-dev libyaml-cpp-dev`
 
-2. Create a new psql user and database
+2. Create and activate a virtual environment
+
+`virtualenv envname`
+`envname\bin\activate`
+
+3. Install the required python dependencies
+
+`pip install -r requirements`
+
+
+# Database setup guide
+
+
+1. Create a new psql user and database
 
 `sudo -u postgres createuser -s -P -e $USER`
 
 This prompts for a user password, use the same password in the settings.py file
 
+2. Create the ether_sql database in psql
+
 `createdb ether_sql`
+
+3. Create the tables by executing this command from the repo ether_sql  
+`python ether_sql.py create_tables`
