@@ -15,6 +15,10 @@ It currently supports Parity node but will be expanded to use several nodes.
 
 `sudo apt-get install postgresql`
 
-2. Create a new user and database
-`sudo -u postgres createuser $username --no-superuser --no-createdb --no-createrole`
-`sudo -u postgres createdb ether-sql --owner=$username`
+2. Create a new psql user and database
+
+`sudo -u postgres createuser -s -P -e $USER`
+
+This prompts for a user password, use the same password in the settings.py file
+
+`createdb ether-sql`
