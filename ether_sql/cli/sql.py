@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 @click.group()
 def cli():
-    """Manage the database (create/drop tables)."""
+    """Manages the sql (create/drop/query tables)."""
 
 
 @cli.command()
