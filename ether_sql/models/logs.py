@@ -5,6 +5,12 @@ from ether_sql.models import base
 
 
 class Logs(base):
+    """
+    Class defining a transaction in the ethereum blockchain, its properties are more
+    accurately defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
+
+    
+    """
     __tablename__ = 'logs'
     id = Column(Integer, primary_key=True)
     transaction_hash = Column(String(66),

@@ -5,6 +5,19 @@ from ether_sql.models import base
 
 
 class Receipts(base):
+    """
+    Class defining a receipt in the ethereum blockchain, its properties are more
+    clearly defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
+
+    :param str transaction_hash: The Keccak 256-bit hash of this transaction
+    :param bool status: Success or failure of this transaction, included after the Byzantinium fork
+    :param int gas_used: Amount of gas used by this specific transaction alone
+    :param int cumulative_gas_used: Total amount of gas used after this transaction was included in the block
+    :param str contract_address: Contract address create if transaction was a contract create transaction, else null
+    :param int block_number: Number of the block containing this transaction
+    :param int timestamp: Unix time at the at this transactions blocks
+    :param int transaction_index: Position of this transaction in the transaction list of this block
+    """
     __tablename__ = 'receipts'
 
     transaction_hash = Column(String(66),

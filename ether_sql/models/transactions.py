@@ -6,6 +6,23 @@ from ether_sql.models import base
 
 
 class Transactions(base):
+    """
+    Class defining a transaction in the ethereum blockchain, its properties are more
+    accurately defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
+
+    :param str transaction_hash: The Keccak 256-bit hash of this transaction
+    :param int block_number: Number of the block containing this transaction
+    :param int nonce: Number of transactions sent by this sender
+    :param str sender: Address of account which initiated this transaction
+    :param int start_gas: Maximum amount of gas to be used while executing this transaction
+    :param int value_wei: Number of wei to be transferred to the receiver of this transaction
+    :param str receiver: Address of the recepient of this transaction, null if transaction creates a smart-contract
+    :param bytes data: Unlimited size text specifying input data of message call or code of a contract create
+    :param int gas_price: Number of wei to pay the miner per unit of gas
+    :param int timestamp: Unix time at the at this transactions blocks
+    :param int transaction_index: Position of this transaction in the transaction list of this block
+
+    """
     __tablename__ = 'transactions'
     transaction_hash = Column(String(66), primary_key=True, index=True)
     block_number = Column(Integer, ForeignKey('blocks.block_number'))
