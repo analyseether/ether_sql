@@ -20,5 +20,5 @@ SQLALCHEMY_DB = 'ether_sql'
 
 # Logging settings
 LOG_STDOUT = "TRUE"
-LOG_FORMAT = "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s"
+LOG_FORMAT = "[%(asctime)s][%(levelname)s][%(name)s] %(message)s"
 LOG_LEVEL = "DEBUG"

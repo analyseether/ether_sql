@@ -1,4 +1,7 @@
 import click
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @click.group()
@@ -13,7 +16,7 @@ def create_tables():
     from ether_sql import session
 
     db.metadata.create_all(session)
-    click.echo('Created the tables')
+    logger.info('Created the tables')
 
 
 @cli.command()
@@ -23,4 +26,4 @@ def drop_tables():
     from ether_sql import session
 
     db.metadata.drop_all(session)
-    click.echo('Dropped the tables')
+    logger.info('Dropped the tables')
