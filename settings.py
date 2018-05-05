@@ -22,3 +22,9 @@ SQLALCHEMY_DB = 'ether_sql'
 LOG_STDOUT = "TRUE"
 LOG_FORMAT = "[%(asctime)s][%(levelname)s][%(name)s] %(message)s"
 LOG_LEVEL = "DEBUG"
+
+# Node settings
+NODE_TYPE = "INFURA"
+NODE_API_TOKEN = ""
+NODE_HOST = 'localhost'
+NODE_PORT = 8545
