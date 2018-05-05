@@ -2,7 +2,7 @@ import logging
 import settings
 import sqlalchemy
 import sys
-from ethjsonrpc import EthJsonRpc, ParityJsonRpc, InfuraJsonRpc
+from ethjsonrpc import EthJsonRpc, ParityEthJsonRpc, InfuraEthJsonRpc
 
 logger = logging.getLogger(__name__)
 
@@ -58,16 +58,16 @@ def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
     """
 
     if node_type == 'Parity':
-        node = ParityJsonRpc(host=host, port=port)
+        node = ParityEthJsonRpc(host=host, port=port)
     elif node_type == 'Geth':
         node = EthJsonRpc(host=host, port=port)
     elif node_type == 'Infura':
         network = host.split('.')[0]  # getting the network name
-        node = InfuraJsonRpc(network=network, infura_token=api_token)
+        node = InfuraEthJsonRpc(network=network, infura_token=api_token)
     else:
         raise ValueError('Node {} not supported'.format(node_type))
 
-    logging.info('Connected to a {} node'.format(node_type))
+    logging.info('Connected to {} node'.format(node_type))
 
     return node
 
