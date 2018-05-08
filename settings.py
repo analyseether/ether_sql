@@ -26,5 +26,5 @@ LOG_LEVEL = "DEBUG"
 # Node settings
 NODE_TYPE = "Infura"  # Available options 'Geth', 'Parity', 'Infura'
 NODE_API_TOKEN = ""
-NODE_HOST = 'localhost'
+NODE_HOST = 'mainnet.infura.io'
 NODE_PORT = 8545
