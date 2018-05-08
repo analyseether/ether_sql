@@ -12,18 +12,18 @@ def cli():
 @cli.command()
 def create_tables():
     """Create the database tables."""
-    from ether_sql.models import db
-    from ether_sql import session
+    from ether_sql.models import base
+    from ether_sql import db_engine
 
-    db.metadata.create_all(session)
+    base.metadata.create_all(db_engine)
     logger.info('Created the tables')
 
 
 @cli.command()
 def drop_tables():
     """Drop the database tables."""
-    from ether_sql.models import db
-    from ether_sql import session
+    from ether_sql.models import base
+    from ether_sql import db_engine
 
-    db.metadata.drop_all(session)
+    base.metadata.drop_all(db_engine)
     logger.info('Dropped the tables')

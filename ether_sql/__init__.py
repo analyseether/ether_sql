@@ -1,8 +1,10 @@
 import logging
 import settings
 import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 import sys
 from ethjsonrpc import EthJsonRpc, ParityEthJsonRpc, InfuraEthJsonRpc
+from ether_sql.models import base
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +41,21 @@ def setup_db_session(user, password, db, host='localhost', port=5432):
     url = 'postgresql://{}:{}@{}:{}/{}'
     url = url.format(user, password, host, port, db)
 
-    # The return value of create_engine() is our connection object
-    session = sqlalchemy.create_engine(url, client_encoding='utf8')
+    # Create an engine that stores data in the PostgreSQL
+    engine = sqlalchemy.create_engine(url, client_encoding='utf8')
+    # Bind the engine to the metadata of the Base class so that the
+    # declaratives can be accessed through a DBSession instance
+    base.metadata.bind = engine
+
+    # A DBSession() instance establishes all conversations with the database
+    # and represents a "staging zone" for all the objects loaded into the
+    # database session object. Any change made against the objects in the
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
 
     logging.info('Connected to the db {}'.format(db))
 
-    return session
+    return session, engine
 
 
 def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
@@ -74,9 +85,9 @@ def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
 
 setup_logging()
 
-db_session = setup_db_session(user=settings.SQLALCHEMY_USER,
-                              password=settings.SQLALCHEMY_PASSWORD,
-                              db=settings.SQLALCHEMY_DB)
+db_session, db_engine = setup_db_session(user=settings.SQLALCHEMY_USER,
+                                         password=settings.SQLALCHEMY_PASSWORD,
+                                         db=settings.SQLALCHEMY_DB)
 
 node_session = setup_node_session(node_type=settings.NODE_TYPE,
                                   host=settings.NODE_HOST,
