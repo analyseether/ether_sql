@@ -34,10 +34,12 @@ class Blocks(base):
     sha3uncles = Column(String(66), nullable=False)
     extra_data = Column(LargeBinary)
     gas_limit = Column(Integer, nullable=False)
-    transactions = relationship('Transactions', backref='block')
-    uncles = relationship('Uncles', backref='block')
     uncle_count = Column(Integer, nullable=False)
     transaction_count = Column(Integer, nullable=False)
+    transactions = relationship('Transactions', backref='blocks')
+    uncles = relationship('Uncles', backref='blocks')
+    logs = relationship('Logs', backref='blocks')
+    traces = relationship('Traces', backref='blocks')
 
     def to_dict(self):
         return {

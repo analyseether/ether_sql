@@ -9,7 +9,7 @@ class Logs(base):
     Class defining a transaction in the ethereum blockchain, its properties are more
     accurately defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
 
-    
+
     """
     __tablename__ = 'logs'
     id = Column(Integer, primary_key=True)
@@ -19,7 +19,7 @@ class Logs(base):
     address = Column(String(42))
     data = Column(LargeBinary)
     block_number = Column(Integer, ForeignKey('blocks.block_number'))
-    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
+    timestamp = Column(TIMESTAMP)
     transaction_index = Column(Integer, nullable=False)
     transaction_log_index = Column(Integer, nullable=False)
     log_index = Column(Integer, nullable=False)

@@ -30,10 +30,11 @@ class Uncles(base):
     uncle_blocknumber = Column(Integer, nullable=False)
     parent_hash = Column(String(66), nullable=False)
     difficulty = Column(String(66), unique=True, nullable=False)
-    current_blocknumber = Column(Integer, unique=True, index=True)
+    current_blocknumber = Column(Integer,  ForeignKey('blocks.block_number'),
+                                 unique=True)
     gas_used = Column(Integer, nullable=False)
     miner = Column(String(42), nullable=False)
-    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
+    timestamp = Column(TIMESTAMP)
     sha3uncles = Column(String(66), nullable=False)
     extra_data = Column(LargeBinary)
     gas_limit = Column(Integer, nullable=False)

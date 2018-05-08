@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP, Boolean
-from sqlalchemy.orm import relationship
 
 from ether_sql.models import base
 
@@ -28,10 +27,8 @@ class Receipts(base):
     cumulative_gas_used = Column(Integer, nullable=False)
     contract_address = Column(String(42))
     block_number = Column(Integer, ForeignKey('blocks.block_number'))
-    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
+    timestamp = Column(TIMESTAMP)
     transaction_index = Column(Integer, nullable=False)
-    logs = relationship('Logs', backref='receipt')
-    traces = relationship('Traces', backref='traces')
 
     def to_dict(self):
         return {

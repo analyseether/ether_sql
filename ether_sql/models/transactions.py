@@ -33,10 +33,11 @@ class Transactions(base):
     value_szabo = Column(BigInteger, nullable=False)
     data = Column(LargeBinary)
     gas_price = Column(Integer, nullable=False)
-    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
+    timestamp = Column(TIMESTAMP)
     transaction_index = Column(Integer, nullable=False)
-    logs = relationship('Logs', backref='receipt')
-    traces = relationship('Traces', backref='traces')
+    receipt = relationship('Receipts', backref='transactions')
+    logs = relationship('Logs', backref='transactions')
+    traces = relationship('Traces', backref='transactions')
 
     def to_dict(self):
         return {
