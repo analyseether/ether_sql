@@ -66,7 +66,7 @@ def add_block_number(block_number):
             db_session.add(log)  # adding the log in db session
 
         if PUSH_TRACE:
-            dict_trace_list = node_session.trace_transaction(transaction_hash)
+            dict_trace_list = node_session.trace_transaction(transaction_data['hash'])
             if dict_trace_list is not None:
                 for dict_trace in dict_trace_list:
                     trace = Traces.add_trace(dict_trace,
