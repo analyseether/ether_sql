@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP, Boolean
+from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP, Boolean
 from ethereum import utils
 
 from ether_sql.models import base
@@ -25,12 +25,12 @@ class Receipts(base):
                               ForeignKey('transactions.transaction_hash'),
                               primary_key=True, index=True)
     status = Column(Boolean, nullable=True)
-    gas_used = Column(Integer, nullable=False)
-    cumulative_gas_used = Column(Integer, nullable=False)
+    gas_used = Column(Numeric, nullable=False)
+    cumulative_gas_used = Column(Numeric, nullable=False)
     contract_address = Column(String(42))
-    block_number = Column(Integer, ForeignKey('blocks.block_number'))
+    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
     timestamp = Column(TIMESTAMP)
-    transaction_index = Column(Integer, nullable=False)
+    transaction_index = Column(Numeric, nullable=False)
 
     def to_dict(self):
         return {

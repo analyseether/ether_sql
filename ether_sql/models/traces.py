@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
-from sqlalchemy import LargeBinary, BigInteger
+from sqlalchemy import Column, String, Numeric, ForeignKey, Text
 from ethereum import utils
 import logging
 
@@ -11,23 +10,23 @@ logger = logging.getLogger(__name__)
 
 class Traces(base):
     __tablename__ = 'traces'
-    id = Column(Integer, primary_key=True)
-    block_number = Column(Integer, ForeignKey('blocks.block_number'))
+    id = Column(Numeric, primary_key=True)
+    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
     transaction_hash = Column(String(66),
                               ForeignKey('transactions.transaction_hash'),
                               index=True)
     trace_type = Column(String, nullable=False)
     trace_address = Column(String, nullable=False)
-    subtraces = Column(Integer, nullable=True)
-    transaction_index = Column(Integer, nullable=True)
+    subtraces = Column(Numeric, nullable=True)
+    transaction_index = Column(Numeric, nullable=True)
     sender = Column(String(42), nullable=True)
     receiver = Column(String(42), nullable=True)
-    value_wei = Column(BigInteger, nullable=True)
-    start_gas = Column(Integer)
-    input_data = Column(LargeBinary)
-    gas_used = Column(Integer)
+    value = Column(Numeric, nullable=True)
+    start_gas = Column(Numeric)
+    input_data = Column(Text)
+    gas_used = Column(Numeric)
     contract_address = Column(String(42), nullable=True)
-    output = Column(LargeBinary)
+    output = Column(Text)
     error = Column(String(42))
 
     def to_dict(self):
@@ -40,7 +39,7 @@ class Traces(base):
          'transaction_index': self.transaction_index,
          'sender': self.sender,
          'receiver': self.receiver,
-         'value_wei': self.value_wei,
+         'value': self.value,
          'start_gas': self.start_gas,
          'input_data': self.input_data,
          'gas_used': self.gas_used,
@@ -51,7 +50,9 @@ class Traces(base):
 
     @classmethod
     def add_trace(cls, dict_trace, block_number, timestamp):
+        """
 
+        """
         trace = cls(transaction_hash=dict_trace['transactionHash'],
                     block_number=dict_trace['blockNumber'],
                     trace_address=dict_trace['traceAddress'],

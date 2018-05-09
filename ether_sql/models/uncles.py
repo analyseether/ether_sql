@@ -1,5 +1,5 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP
-from sqlalchemy import LargeBinary
+from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
+from sqlalchemy import Text
 
 
 from ether_sql.models import base
@@ -27,17 +27,17 @@ class Uncles(base):
     __tablename__ = 'uncles'
 
     uncle_hash = Column(String(66), primary_key=True, unique=True, index=True)
-    uncle_blocknumber = Column(Integer, nullable=False)
+    uncle_blocknumber = Column(Numeric, nullable=False)
     parent_hash = Column(String(66), nullable=False)
     difficulty = Column(String(66), unique=True, nullable=False)
-    current_blocknumber = Column(Integer,  ForeignKey('blocks.block_number'),
+    current_blocknumber = Column(Numeric,  ForeignKey('blocks.block_number'),
                                  unique=True)
-    gas_used = Column(Integer, nullable=False)
+    gas_used = Column(Numeric, nullable=False)
     miner = Column(String(42), nullable=False)
     timestamp = Column(TIMESTAMP)
     sha3uncles = Column(String(66), nullable=False)
-    extra_data = Column(LargeBinary)
-    gas_limit = Column(Integer, nullable=False)
+    extra_data = Column(Text)
+    gas_limit = Column(Numeric, nullable=False)
 
     def to_dict(self):
         return {

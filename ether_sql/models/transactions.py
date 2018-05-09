@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP
-from sqlalchemy import LargeBinary, BigInteger
+from sqlalchemy import Column, String, Numeric, ForeignKey, Text, TIMESTAMP
 from sqlalchemy.orm import relationship
+from ethereum import utils
 
 from ether_sql.models import base
 
@@ -25,16 +25,16 @@ class Transactions(base):
     """
     __tablename__ = 'transactions'
     transaction_hash = Column(String(66), primary_key=True, index=True)
-    block_number = Column(Integer, ForeignKey('blocks.block_number'))
-    nonce = Column(Integer, nullable=False)
+    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    nonce = Column(Numeric, nullable=False)
     sender = Column(String(42), nullable=False)
     receiver = Column(String(42))
-    start_gas = Column(Integer, nullable=False)
-    value_szabo = Column(BigInteger, nullable=False)
-    data = Column(LargeBinary)
-    gas_price = Column(Integer, nullable=False)
+    start_gas = Column(Numeric, nullable=False)
+    value = Column(Numeric)
+    data = Column(Text)
+    gas_price = Column(Numeric, nullable=False)
     timestamp = Column(TIMESTAMP)
-    transaction_index = Column(Integer, nullable=False)
+    transaction_index = Column(Numeric, nullable=False)
     receipt = relationship('Receipts', backref='transactions')
     logs = relationship('Logs', backref='transactions')
     traces = relationship('Traces', backref='transactions')
@@ -46,7 +46,7 @@ class Transactions(base):
                 'nonce': self.nonce,
                 'sender': self.sender,
                 'start_gas': self.start_gas,
-                'value_szabo': self.value_szabo,
+                'value': self.value,
                 'receiver': self.receiver,
                 'data': self.data,
                 'gas_price': self.gas_price,
@@ -55,3 +55,26 @@ class Transactions(base):
 
     def __repr__(self):
         return "<Transaction {}>".format(self.transaction_hash)
+
+    @classmethod
+    def add_transaction(cls, transaction_data, block_number, iso_timestamp):
+        """
+        Creates a new transaction object from data received from JSON-RPC call
+        eth_getBlockByNumber.
+
+        :param dict transaction_data: data received from JSON RPC call
+        :param datetime iso_timestamp: timestamp when the block containing the transaction was mined
+        """
+
+        transaction = cls(block_number=block_number,
+                          nonce=utils.parse_int_or_hex(transaction_data['nonce']),
+                          transaction_hash=transaction_data['hash'],
+                          sender=transaction_data['from'],
+                          start_gas=utils.parse_int_or_hex(transaction_data['gas']),
+                          value=int(str(utils.parse_int_or_hex(transaction_data['value']))),
+                          receiver=transaction_data['to'],
+                          data=transaction_data['input'],
+                          gas_price=str(utils.parse_int_or_hex(transaction_data['gasPrice'])),
+                          timestamp=iso_timestamp)
+
+        return transaction
