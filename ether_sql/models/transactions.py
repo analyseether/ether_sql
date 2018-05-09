@@ -1,9 +1,11 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, Text, TIMESTAMP
 from sqlalchemy.orm import relationship
 from ethereum import utils
+import logging
 
 from ether_sql.models import base
 
+logger = logging.getLogger(__name__)
 
 class Transactions(base):
     """
@@ -65,7 +67,6 @@ class Transactions(base):
         :param dict transaction_data: data received from JSON RPC call
         :param datetime iso_timestamp: timestamp when the block containing the transaction was mined
         """
-
         transaction = cls(block_number=block_number,
                           nonce=utils.parse_int_or_hex(transaction_data['nonce']),
                           transaction_hash=transaction_data['hash'],
@@ -75,6 +76,7 @@ class Transactions(base):
                           receiver=transaction_data['to'],
                           data=transaction_data['input'],
                           gas_price=str(utils.parse_int_or_hex(transaction_data['gasPrice'])),
-                          timestamp=iso_timestamp)
+                          timestamp=iso_timestamp,
+                          transaction_index=utils.parse_int_or_hex(transaction_data['transactionIndex']))
 
         return transaction
