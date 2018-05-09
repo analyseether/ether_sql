@@ -8,7 +8,7 @@ def cli():
 
 
 cli.add_command(sql.cli, "sql")
-cli.add_command(node.cli, "node")
+cli.add_command(node.cli, "ether")
 
 
 @cli.command()
