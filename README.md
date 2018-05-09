@@ -20,7 +20,7 @@ It currently supports Parity node but will be expanded to use several nodes.
 2. Create and activate a virtual environment
 
 `virtualenv envname`     
-`envname\bin\activate`
+`source envname\bin\activate`
 
 3. Install the required python dependencies
 
@@ -43,4 +43,3 @@ This prompts for a user password, use the same password in the settings.py file
 3. Create the tables by executing this command from the repo ether_sql  
 
 `python ether_sql.py create_tables`
-
