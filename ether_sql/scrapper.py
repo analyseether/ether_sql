@@ -1,6 +1,12 @@
 from ethereum import utils
+from datetime import datetime
+import logging
+
 from ether_sql import node_session, PUSH_TRACE
 from ether_sql.models import Blocks, Transactions, Uncles, Receipts, Logs, Traces
+from ether_sql import db_session
+
+logger = logging.getLogger(__name__)
 
 
 def add_block_number(block_number):
@@ -13,33 +19,42 @@ def add_block_number(block_number):
 
     # getting the block_data from the node
     block_data = node_session.eth_getBlockByNumber(block_number)
+    timestamp = utils.parse_int_or_hex(block_data['timestamp'])
+    iso_timestamp = datetime.fromtimestamp(timestamp).isoformat()
+    block = Blocks.add_block(block_data=block_data, iso_timestamp=iso_timestamp)
+    db_session.add(block)
+
     transaction_list = block_data['transactions']
     uncle_list = block_data['uncles']
-    block_data.pop('transactions', None)
-    block_data.pop('uncles', None)
-    timestamp = utils.parse_int_or_hex(block_data['timestamp'])
 
     for transaction_data in transaction_list:
         transaction_hash = transaction_data['hash']
         receipt_data = node_session.eth_getTransactionReceipt(transaction_hash)
         receipt = Receipts.add_receipt(receipt_data,
                                        block_number=block_number,
-                                       timestamp=timestamp)
+                                       timestamp=iso_timestamp)
+        db_session.add(receipt)
+        logger.debug('Reached transaction index: {}'.format(receipt.transaction_index))
 
         dict_logs_list = receipt_data['logs']
-        log_list = []
         for dict_log in dict_logs_list:
             log = Logs.add_log(dict_log, block_number=block_number,
                                timestamp=timestamp)
-            log_list.append(log)
+            # adding the log
+            db_session.add(log)
 
         if PUSH_TRACE:
-            trace_list = []
             dict_trace_list = node_session.trace_transaction(transaction_hash)
             if dict_trace_list is not None:
                 for dict_trace in dict_trace_list:
                     trace = Traces.add_trace(dict_trace,
                                              block_number=block_number,
                                              timestamp=timestamp)
-                    trace_list.append(trace)
-    
+                    db_session.add(trace)
+
+        transaction = Transactions.add_transaction(transaction_data,
+                                                   block_number=block_number,
+                                                   iso_timestamp=iso_timestamp)
+        db_session.add(transaction)
+
+    return db_session
