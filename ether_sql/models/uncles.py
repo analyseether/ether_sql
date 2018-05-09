@@ -9,7 +9,8 @@ class Uncles(base):
 
     """
     Class defining an uncle in the ethereum blockchain, its properties are more
-    accurately defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
+    accurately defined in the ethereum yellow paper
+    https://github.com/ethereum/yellowpaper.
 
     :param str uncle_hash: The Keccak 256-bit hash of this uncle
     :param int uncle_blocknumber: Number of blocks behind this uncle
