@@ -53,7 +53,7 @@ def setup_db_session(user, password, db, host='localhost', port=5432):
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
 
-    logging.info('Connected to the db {}'.format(db))
+    logger.info('Connected to the db {}'.format(db))
 
     return session, engine
 
@@ -67,9 +67,10 @@ def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
     :param int port: Port number of the connection
     :param str api_token: Api token if needed
     """
-
+    PUSH_TRACE = 0
     if node_type == 'Parity':
         node = ParityEthJsonRpc(host=host, port=port)
+        PUSH_TRACE = 1
     elif node_type == 'Geth':
         node = EthJsonRpc(host=host, port=port)
     elif node_type == 'Infura':
@@ -78,9 +79,9 @@ def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
     else:
         raise ValueError('Node {} not supported'.format(node_type))
 
-    logging.info('Connected to {} node'.format(node_type))
+    logger.info('Connected to {} node'.format(node_type))
 
-    return node
+    return node, PUSH_TRACE
 
 
 setup_logging()
@@ -89,7 +90,7 @@ db_session, db_engine = setup_db_session(user=settings.SQLALCHEMY_USER,
                                          password=settings.SQLALCHEMY_PASSWORD,
                                          db=settings.SQLALCHEMY_DB)
 
-node_session = setup_node_session(node_type=settings.NODE_TYPE,
-                                  host=settings.NODE_HOST,
-                                  port=settings.NODE_PORT,
-                                  api_token=settings.NODE_API_TOKEN)
+node_session, PUSH_TRACE = setup_node_session(node_type=settings.NODE_TYPE,
+                                              host=settings.NODE_HOST,
+                                              port=settings.NODE_PORT,
+                                              api_token=settings.NODE_API_TOKEN)
