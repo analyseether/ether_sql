@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 
 from ether_sql import node_session, PUSH_TRACE
-from ether_sql.models import Blocks, Transactions, Uncles, Receipts, Logs,
+from ether_sql.models import Blocks, Transactions, Uncles, Receipts, Logs
 from ether_sql.models import Traces
 from ether_sql import db_session
 
