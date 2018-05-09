@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
 from sqlalchemy import Text
-
+from ethereum import utils
 
 from ether_sql.models import base
 
@@ -56,3 +56,30 @@ class Uncles(base):
 
     def __repr__(self):
         return "<Uncle {}>".format(self.uncle_hash)
+
+    @classmethod
+    def add_uncle(cls, uncle_data, block_number, iso_timestamp):
+        """
+        Creates a new block object from data received from JSON-RPC call
+        eth_getUncleByBlockNumberAndIndex.
+
+        :param dict uncle_data: uncle data received from JSON RPC call
+        :param int block_number: block number where this uncle was included
+        :param datetime iso_timestamp: timestamp when the block was mined
+
+        :return Uncle: return completed uncle
+        """
+
+        uncle = cls(uncle_hash=uncle_data['hash'],
+                    uncle_blocknumber=utils.parse_int_or_hex(uncle_data['number']),  # 'uncle_blocknumber'
+                    parent_hash=uncle_data['parentHash'],  # parent_hash
+                    difficulty=utils.parse_int_or_hex(uncle_data['difficulty']),  # 'difficulty
+                    current_blocknumber=block_number,  # current_blocknumber
+                    gas_used=utils.parse_int_or_hex(uncle_data['gasUsed']),  # gas_used
+                    miner=uncle_data['miner'],  # miner
+                    timestamp=iso_timestamp,
+                    sha3uncles=uncle_data['sha3Uncles'],  # SHA3uncles
+                    extra_data=uncle_data['extraData'],  # extra_data
+                    gas_limit=utils.parse_int_or_hex(uncle_data['gasLimit']))
+
+        return uncle
