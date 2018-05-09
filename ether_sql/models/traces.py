@@ -61,7 +61,7 @@ class Traces(base):
                     trace_type=dict_trace['type'],
                     sender='',
                     receiver='',
-                    start_gas='',
+                    start_gas=None,
                     value=None,
                     input_data='',
                     gas_used=None,
