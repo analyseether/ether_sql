@@ -15,34 +15,34 @@ Currently supports Geth, Infura and Parity node, but transaction traces (eg. int
 ## Linux dependencies
 
 * Install postgresql as database      
-`sudo apt-get install postgresql`     
+`$ sudo apt-get install postgresql`     
 
 * Install pyethereum dependencies     
-`sudo apt-get install libssl-dev build-essential automake pkg-config libtool libffi-dev libgmp-dev libyaml-cpp-dev`
+`$ sudo apt-get install libssl-dev build-essential automake pkg-config libtool libffi-dev libgmp-dev libyaml-cpp-dev`
 
 
 ## Python dependencies
 
 * Create and activate a virtual environment     
-`virtualenv envname`     
-`source envname\bin\activate`
+`$ virtualenv envname`     
+`$ source envname\bin\activate`
 
 * Install python libraries     
-`pip install -r requirements`
+`$ pip install -r requirements`
 
 
 ## Database setup
 
 * Create a new psql user and database     
-`sudo -u postgres createuser -s -P -e $USER`
+`$ sudo -u postgres createuser -s -P -e $USER`
 
 This prompts for a user password, use the same password in the settings.py file
 
 * Create the ether_sql database in psql     
-`createdb ether_sql`
+`$ createdb ether_sql`
 
 * Create the tables by executing this command from the repo ether_sql       
-`python ether_sql.py create_tables`
+`$ python ether_sql.py create_tables`
 
 ## Node settings
 Details of connecting to a node are available in the settings.py. Use the settings below for the three supported nodes.
