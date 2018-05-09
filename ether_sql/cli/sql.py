@@ -27,3 +27,14 @@ def drop_tables():
 
     base.metadata.drop_all(db_engine)
     logger.info('Dropped the tables')
+
+
+@cli.command()
+def sql_blockNumber():
+    """ Gives the current highest block in database"""
+    from ether_sql import db_session
+    from ether_sql.models import Blocks
+    from sqlalchemy import func
+
+    max_block_number = db_session.query(func.max(Blocks.block_number)).scalar()
+    click.echo("{}".format(max_block_number))
