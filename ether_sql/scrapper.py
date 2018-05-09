@@ -19,14 +19,6 @@ def scrape_blocks(sql_block_number=None, node_block_number=None):
     :param int node_block_number: end block number of scraping
     """
 
-    if node_block_number is None:
-        node_block_number = node_session.eth_blockNumber()
-    if sql_block_number is None:
-        sql_block_number = db_session.query(func.max(Blocks.block_number)).scalar()
-        if sql_block_number is None:
-            sql_block_number = 0
-
-
     logger.debug("Start block: {}".format(sql_block_number))
     logger.debug('End block: {}'.format(node_block_number))
     print range(sql_block_number+1, node_block_number+1)
