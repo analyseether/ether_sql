@@ -57,13 +57,13 @@ class Traces(base):
                     block_number=dict_trace['blockNumber'],
                     trace_address=dict_trace['traceAddress'],
                     subtraces=dict_trace['subtraces'],
-                    transaction_position=dict_trace['transactionPosition'],
-                    type=dict_trace['type'],
+                    transaction_index=dict_trace['transactionPosition'],
+                    trace_type=dict_trace['type'],
                     sender='',
                     receiver='',
                     start_gas='',
-                    value='',
-                    input='',
+                    value=None,
+                    input_data='',
                     gas_used='',
                     output='',
                     contract_address='',
@@ -71,13 +71,13 @@ class Traces(base):
 
         action = dict_trace['action']
 
-        if trace.type == 'call':
+        if trace.trace_type == 'call':
             # parsing action
             trace.sender = action['from']
             trace.receiver = action['to']
             trace.start_gas = utils.parse_int_or_hex(action['gas'])
-            trace.value_wei = utils.parse_int_or_hex(action['value'])
-            trace.input = action['input']
+            trace.value = utils.parse_int_or_hex(action['value'])
+            trace.input_data = action['input']
             # parsing result
             if 'result' in dict_trace.keys():
                 result = dict_trace['result']
@@ -85,12 +85,12 @@ class Traces(base):
                 trace.output = result['output']
             else:
                 trace.error = dict_trace['error']
-        elif trace.type == 'create':
+        elif trace.trace_type == 'create':
             logger.debug('Type {}, action {}'.format(dict_trace['type'], action))
             # parsing action
             trace.start_gas = utils.parse_int_or_hex(action['gas'])
-            trace.value_wei = utils.parse_int_or_hex(action['value'])
-            trace.input = action['init']
+            trace.value = utils.parse_int_or_hex(action['value'])
+            trace.input_data = action['init']
             # parsing result
             if 'result' in dict_trace.keys():
                 result = dict_trace['result']
@@ -99,12 +99,12 @@ class Traces(base):
                 trace.contract_address = result['address']
             else:
                 trace.error = dict_trace['error']
-        elif trace.type == 'suicide':
+        elif trace.trace_type == 'suicide':
             logger.debug('Type {}, action {}'.format(dict_trace['type'], action))
             # parsing action
             trace.sender = action['address']
             trace.receiver = action['refundAddress']
-            trace.value_wei = utils.parse_int_or_hex(action['balance'])
+            trace.value = utils.parse_int_or_hex(action['balance'])
             # parsing result
             logger.debug('Type encountered {}'.format(dict_trace['type']))
 
