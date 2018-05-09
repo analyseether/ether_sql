@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
-from sqlalchemy import Text
+from sqlalchemy import Text, Integer
 import logging
 from ethereum import utils
 from ether_sql.models import base
@@ -15,7 +15,7 @@ class Logs(base):
 
     """
     __tablename__ = 'logs'
-    id = Column(Numeric, primary_key=True)
+    id = Column(Integer, primary_key=True)
     transaction_hash = Column(String(66),
                               ForeignKey('transactions.transaction_hash'),
                               index=True)
@@ -48,8 +48,13 @@ class Logs(base):
         }
 
     @classmethod
-    def add_log(cls, log_data, block_number, timestamp):
+    def add_log(cls, log_data, block_number, iso_timestamp):
         """
+        Creates a new log object from data received from JSON-RPC call
+        eth_getTransactionReceipt.
+
+        :param dict log_data: data received from receipt JSON RPC call
+        :param datetime iso_timestamp: timestamp when the block containing the transaction was mined
 
         """
         topics_count = len(log_data['topics'])
@@ -81,10 +86,11 @@ class Logs(base):
                   log_index=utils.parse_int_or_hex(log_data['logIndex']),
                   data=log_data['data'],
                   block_number=block_number,
-                  timestamp=timestamp,
+                  timestamp=iso_timestamp,
                   topic_1=log_data['topics'][0],
                   topic_2=log_data['topics'][1],
                   topic_3=log_data['topics'][2],
                   topic_4=log_data['topics'][3])
+        logger.debug("tx_hash: {}, log_index: {}".format(log.transaction_hash, log.log_index))
 
         return log

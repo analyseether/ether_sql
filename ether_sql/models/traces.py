@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Numeric, ForeignKey, Text
+from sqlalchemy import Column, String, Numeric, ForeignKey, Text, Integer
 from ethereum import utils
 import logging
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Traces(base):
     __tablename__ = 'traces'
-    id = Column(Numeric, primary_key=True)
+    id = Column(Integer, primary_key=True)
     block_number = Column(Numeric, ForeignKey('blocks.block_number'))
     transaction_hash = Column(String(66),
                               ForeignKey('transactions.transaction_hash'),
