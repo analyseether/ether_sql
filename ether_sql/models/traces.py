@@ -64,7 +64,7 @@ class Traces(base):
                     start_gas='',
                     value=None,
                     input_data='',
-                    gas_used='',
+                    gas_used=None,
                     output='',
                     contract_address='',
                     error='')
