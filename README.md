@@ -28,7 +28,8 @@ Currently supports Geth, Infura and Parity node, but transaction traces (eg. int
 `virtualenv envname`     
 `source envname\bin\activate`
 
-* Install python libraries
+* Install python libraries     
+
 `pip install -r requirements`
 
 
