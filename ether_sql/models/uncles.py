@@ -29,7 +29,7 @@ class Uncles(base):
     uncle_hash = Column(String(66), primary_key=True, unique=True, index=True)
     uncle_blocknumber = Column(Numeric, nullable=False)
     parent_hash = Column(String(66), nullable=False)
-    difficulty = Column(String(66), unique=True, nullable=False)
+    difficulty = Column(String(66), nullable=False)
     current_blocknumber = Column(Numeric,  ForeignKey('blocks.block_number'),
                                  unique=True)
     gas_used = Column(Numeric, nullable=False)
