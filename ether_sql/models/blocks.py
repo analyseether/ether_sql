@@ -1,5 +1,7 @@
-from sqlalchemy import Column, String, Integer, TIMESTAMP, LargeBinary
+from sqlalchemy import Column, String, Numeric, TIMESTAMP, Text
 from sqlalchemy.orm import relationship
+from ethereum import utils
+
 
 from ether_sql.models import base
 
@@ -24,20 +26,22 @@ class Blocks(base):
 
     """
     __tablename__ = 'blocks'
-    block_number = Column(Integer, primary_key=True, index=True)
+    block_number = Column(Numeric, primary_key=True, index=True)
     block_hash = Column(String(66), unique=True, nullable=False)
     parent_hash = Column(String(66), unique=True, nullable=False)
-    difficulty = Column(Integer, nullable=False)
-    gas_used = Column(Integer, nullable=False)
+    difficulty = Column(Numeric, nullable=False)
+    gas_used = Column(Numeric, nullable=False)
     miner = Column(String(42), nullable=False)
     timestamp = Column(TIMESTAMP, unique=True, nullable=False)
     sha3uncles = Column(String(66), nullable=False)
-    extra_data = Column(LargeBinary)
-    gas_limit = Column(Integer, nullable=False)
-    transactions = relationship('Transactions', backref='block')
-    uncles = relationship('Uncles', backref='block')
-    uncle_count = Column(Integer, nullable=False)
-    transaction_count = Column(Integer, nullable=False)
+    extra_data = Column(Text)
+    gas_limit = Column(Numeric, nullable=False)
+    uncle_count = Column(Numeric, nullable=False)
+    transaction_count = Column(Numeric, nullable=False)
+    transactions = relationship('Transactions', backref='blocks')
+    uncles = relationship('Uncles', backref='blocks')
+    logs = relationship('Logs', backref='blocks')
+    traces = relationship('Traces', backref='blocks')
 
     def to_dict(self):
         return {
@@ -57,3 +61,28 @@ class Blocks(base):
 
     def __repr__(self):
         return "<Block {}>".format(self.block_number)
+
+    @classmethod
+    def add_block(cls, block_data, iso_timestamp):
+        """
+        Creates a new block object from data received from JSON-RPC call
+        eth_getBlockByNumber.
+
+        :param dict block_data: data received from JSON RPC call
+        :param datetime iso_timestamp: timestamp when the block was mined
+        """
+
+        block = cls(block_hash=block_data['hash'],
+                    parent_hash=block_data['parentHash'],
+                    difficulty=utils.parse_int_or_hex(block_data['difficulty']),
+                    block_number=utils.parse_int_or_hex(block_data['number']),
+                    gas_used=utils.parse_int_or_hex(block_data['gasUsed']),
+                    miner=block_data['miner'],
+                    timestamp=iso_timestamp,
+                    sha3uncles=block_data['sha3Uncles'],
+                    extra_data=block_data['extraData'],
+                    gas_limit=utils.parse_int_or_hex(block_data['gasLimit']),
+                    transaction_count=len(block_data['transactions']),
+                    uncle_count=len(block_data['uncles']))
+
+        return block

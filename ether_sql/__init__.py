@@ -1,7 +1,12 @@
 import logging
 import settings
 import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 import sys
+from ethjsonrpc import EthJsonRpc, ParityEthJsonRpc, InfuraEthJsonRpc
+from ether_sql.models import base
+
+logger = logging.getLogger(__name__)
 
 
 def setup_logging():
@@ -16,7 +21,7 @@ def setup_logging():
     logging.getLogger().setLevel(settings.LOG_LEVEL)
 
 
-def connect(user, password, db, host='localhost', port=5432):
+def setup_db_session(user, password, db, host='localhost', port=5432):
     """
     Connects to the psql database given its parameters and returns the
     connection session
@@ -36,12 +41,56 @@ def connect(user, password, db, host='localhost', port=5432):
     url = 'postgresql://{}:{}@{}:{}/{}'
     url = url.format(user, password, host, port, db)
 
-    # The return value of create_engine() is our connection object
-    session = sqlalchemy.create_engine(url, client_encoding='utf8')
+    # Create an engine that stores data in the PostgreSQL
+    engine = sqlalchemy.create_engine(url, client_encoding='utf8')
+    # Bind the engine to the metadata of the Base class so that the
+    # declaratives can be accessed through a DBSession instance
+    base.metadata.bind = engine
 
-    return session
+    # A DBSession() instance establishes all conversations with the database
+    # and represents a "staging zone" for all the objects loaded into the
+    # database session object. Any change made against the objects in the
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
+
+    logger.info('Connected to the db {}'.format(db))
+
+    return session, engine
+
+
+def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
+    """
+    Connects to appropriate node using values specified in settings.py
+
+    :param str node_type: Type of node, available options 'Parity', 'Geth' and 'Infura'
+    :param str host: Name of host
+    :param int port: Port number of the connection
+    :param str api_token: Api token if needed
+    """
+    PUSH_TRACE = 0
+    if node_type == 'Parity':
+        node = ParityEthJsonRpc(host=host, port=port)
+        PUSH_TRACE = 1
+    elif node_type == 'Geth':
+        node = EthJsonRpc(host=host, port=port)
+    elif node_type == 'Infura':
+        network = host.split('.')[0]  # getting the network name
+        node = InfuraEthJsonRpc(network=network, infura_token=api_token)
+    else:
+        raise ValueError('Node {} not supported'.format(node_type))
+
+    logger.info('Connected to {} node'.format(node_type))
+
+    return node, PUSH_TRACE
 
 
 setup_logging()
-session = connect(settings.SQLALCHEMY_USER, settings.SQLALCHEMY_PASSWORD,
-                  settings.SQLALCHEMY_DB)
+
+db_session, db_engine = setup_db_session(user=settings.SQLALCHEMY_USER,
+                                         password=settings.SQLALCHEMY_PASSWORD,
+                                         db=settings.SQLALCHEMY_DB)
+
+node_session, PUSH_TRACE = setup_node_session(node_type=settings.NODE_TYPE,
+                                              host=settings.NODE_HOST,
+                                              port=settings.NODE_PORT,
+                                              api_token=settings.NODE_API_TOKEN)

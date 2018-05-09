@@ -1,5 +1,5 @@
 import os
-
+from netrc import netrc
 
 def all_settings():
     """Return list of all settings"""
@@ -20,5 +20,11 @@ SQLALCHEMY_DB = 'ether_sql'
 
 # Logging settings
 LOG_STDOUT = "TRUE"
-LOG_FORMAT = "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s"
+LOG_FORMAT = "[%(asctime)s][%(levelname)s][%(name)s] %(message)s"
 LOG_LEVEL = "DEBUG"
+
+# Node settings
+NODE_TYPE = "Infura"  # Available options 'Geth', 'Parity', 'Infura'
+NODE_API_TOKEN = netrc().authenticators('infura.io')[2]  # saved the api key in .netrc file with machine name infura.io
+NODE_HOST = 'mainnet.infura.io'
+NODE_PORT = 8545

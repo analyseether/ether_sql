@@ -1,7 +1,8 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP, Boolean
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP, Boolean
+from ethereum import utils
 
 from ether_sql.models import base
+from ether_sql import constants
 
 
 class Receipts(base):
@@ -24,14 +25,12 @@ class Receipts(base):
                               ForeignKey('transactions.transaction_hash'),
                               primary_key=True, index=True)
     status = Column(Boolean, nullable=True)
-    gas_used = Column(Integer, nullable=False)
-    cumulative_gas_used = Column(Integer, nullable=False)
+    gas_used = Column(Numeric, nullable=False)
+    cumulative_gas_used = Column(Numeric, nullable=False)
     contract_address = Column(String(42))
-    block_number = Column(Integer, ForeignKey('blocks.block_number'))
-    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
-    transaction_index = Column(Integer, nullable=False)
-    logs = relationship('Logs', backref='receipt')
-    traces = relationship('Traces', backref='traces')
+    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    timestamp = Column(TIMESTAMP)
+    transaction_index = Column(Numeric, nullable=False)
 
     def to_dict(self):
         return {
@@ -47,3 +46,28 @@ class Receipts(base):
 
     def __repr__(self):
         return "<Receipt {}>".format(self.transaction_hash)
+
+    @classmethod
+    def add_receipt(cls, receipt_data, block_number, timestamp):
+        """
+        Creates a new receipt object from data received from JSON-RPC call
+        eth_getTransactionReceipt.
+
+        :param dict receipt_data: receipt data received from JSON RPC callable
+        :param int timestamp: timestamp of the block where this transaction was included
+        """
+        if block_number > constants.FORK_BLOCK_NUMBER['Byzantium']:
+            status = bool(utils.parse_int_or_hex(receipt_data['status']))
+        else:
+            status = None
+
+        receipt = cls(transaction_hash=receipt_data['transactionHash'],
+                      status=status,
+                      gas_used=int(utils.parse_int_or_hex(receipt_data['gasUsed'])),
+                      cumulative_gas_used=int(utils.parse_int_or_hex(receipt_data['cumulativeGasUsed'])),
+                      contract_address=receipt_data['contractAddress'],
+                      block_number=block_number,
+                      timestamp=timestamp,
+                      transaction_index=int(utils.parse_int_or_hex(receipt_data['transactionIndex'])))
+
+        return receipt

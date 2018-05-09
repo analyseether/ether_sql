@@ -1,15 +1,18 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP
-from sqlalchemy import LargeBinary
-
+from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
+from sqlalchemy import Text, Integer
+import logging
+from ethereum import utils
 from ether_sql.models import base
+
+logger = logging.getLogger(__name__)
 
 
 class Logs(base):
     """
-    Class defining a transaction in the ethereum blockchain, its properties are more
+    Class defining a log in the ethereum blockchain, its properties are more
     accurately defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
 
-    
+
     """
     __tablename__ = 'logs'
     id = Column(Integer, primary_key=True)
@@ -17,13 +20,12 @@ class Logs(base):
                               ForeignKey('transactions.transaction_hash'),
                               index=True)
     address = Column(String(42))
-    data = Column(LargeBinary)
-    block_number = Column(Integer, ForeignKey('blocks.block_number'))
-    timestamp = Column(TIMESTAMP, ForeignKey('blocks.timestamp'))
-    transaction_index = Column(Integer, nullable=False)
-    transaction_log_index = Column(Integer, nullable=False)
-    log_index = Column(Integer, nullable=False)
-    topics_count = Column(Integer, nullable=False)
+    data = Column(Text)
+    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    timestamp = Column(TIMESTAMP)
+    transaction_index = Column(Numeric, nullable=False)
+    log_index = Column(Numeric, nullable=False)
+    topics_count = Column(Numeric, nullable=False)
     topic_1 = Column(String(66), nullable=True)
     topic_2 = Column(String(66), nullable=True)
     topic_3 = Column(String(66), nullable=True)
@@ -37,7 +39,6 @@ class Logs(base):
                 'block_number': self.block_number,
                 'timestamp': self.timestamp,
                 'transaction_index': self.transaction_index,
-                'transaction_log_index': self.transaction_log_index,
                 'log_index': self.log_index,
                 'topics_count': self.topics_count,
                 'topic_1': self.topic_1,
@@ -45,3 +46,51 @@ class Logs(base):
                 'topic_3': self.topic_3,
                 'topic_4': self.topic_4
         }
+
+    @classmethod
+    def add_log(cls, log_data, block_number, iso_timestamp):
+        """
+        Creates a new log object from data received from JSON-RPC call
+        eth_getTransactionReceipt.
+
+        :param dict log_data: data received from receipt JSON RPC call
+        :param datetime iso_timestamp: timestamp when the block containing the transaction was mined
+
+        """
+        topics_count = len(log_data['topics'])
+        print topics_count
+        if topics_count == 0:
+            log_data['topics'] = []
+            log_data['topics'].append('')
+            log_data['topics'].append('')
+            log_data['topics'].append('')
+            log_data['topics'].append('')
+        elif topics_count == 1:
+            log_data['topics'].append('')
+            log_data['topics'].append('')
+            log_data['topics'].append('')
+        elif topics_count == 2:
+            log_data['topics'].append('')
+            log_data['topics'].append('')
+        elif topics_count == 3:
+            log_data['topics'].append("")
+        elif topics_count == 4:
+            logger.debug('4 topics found')
+        else:
+            logger.error('More than 4 topics are not possible')
+
+        log = cls(transaction_hash=log_data['transactionHash'],
+                  transaction_index=utils.parse_int_or_hex(log_data['transactionIndex']),
+                  topics_count=topics_count,
+                  address=log_data['address'],
+                  log_index=utils.parse_int_or_hex(log_data['logIndex']),
+                  data=log_data['data'],
+                  block_number=block_number,
+                  timestamp=iso_timestamp,
+                  topic_1=log_data['topics'][0],
+                  topic_2=log_data['topics'][1],
+                  topic_3=log_data['topics'][2],
+                  topic_4=log_data['topics'][3])
+        logger.debug("tx_hash: {}, log_index: {}".format(log.transaction_hash, log.log_index))
+
+        return log
