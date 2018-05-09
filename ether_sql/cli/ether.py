@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 def cli():
     """Manages the ether node (query the node)."""
 
+
 @cli.command()
 def eth_blockNumber():
     """
