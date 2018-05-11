@@ -6,9 +6,9 @@ ether_sql
 
 ether_sql is a Python library to push ethereum blockchain data into an sql database.
 
-It is maintained by `Analyse Ether <https://www.analyseether.com/>`, with the goal of making Ethereum data easily available to everyone. This library can be used as a backbone for creating block explorers or performing data analysis.
+It is maintained by `Analyse Ether <https://www.analyseether.com/>`_, with the goal of making Ethereum data easily available to everyone. This library can be used as a backbone for creating block explorers or performing data analysis.
 
-Written in Python 2.7, ether_sql uses `ethjsonrpc <https://github.com/analyseether/ethjsonrpc>` for geting data using JSON-RPC calls and uses `SqlAlchemy (http://docs.sqlalchemy.org/en/latest/` to connect to a postgressql database.
+Written in Python 2.7, ether_sql uses `ethjsonrpc <https://github.com/analyseether/ethjsonrpc>`_ for geting data using JSON-RPC calls and uses `SqlAlchemy (http://docs.sqlalchemy.org/en/latest/>`_ to connect to a postgressql database.
 
 Goals
 -----
@@ -16,7 +16,7 @@ Goals
 The main focus is to make Ethereum data easily available to everyone, while serving as a backbone for:
 
 * Open block explorers (coming soon...)
-* `Data analysis platforms <https://www.analyseether.com/>`
+* `Data analysis platforms <https://www.analyseether.com/>`_
 
 Buidl Status
 ------------
