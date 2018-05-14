@@ -25,6 +25,6 @@ LOG_LEVEL = "DEBUG"
 
 # Node settings
 NODE_TYPE = "Infura"  # Available options 'Geth', 'Parity', 'Infura'
-NODE_API_TOKEN = ""  # saved the api key in .netrc file with machine name infura.io
+NODE_API_TOKEN = ""  # your infura api_token
 NODE_HOST = 'mainnet.infura.io'
 NODE_PORT = 8545
