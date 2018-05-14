@@ -8,9 +8,7 @@ from ether_sql.models import base
 class Uncles(base):
 
     """
-    Class defining an uncle in the ethereum blockchain, its properties are more
-    accurately defined in the ethereum yellow paper
-    https://github.com/ethereum/yellowpaper.
+    Class mapping an uncle table in the psql database to an uncle (ommer) in ethereum node.
 
     :param str uncle_hash: The Keccak 256-bit hash of this uncle
     :param int uncle_blocknumber: Number of blocks behind this uncle
@@ -19,9 +17,9 @@ class Uncles(base):
     :param int current_blocknumber: Block number where this uncle was included
     :param int gas_used: Total gas used by the transactions in this uncle
     :param str miner: Address of account where all corresponding uncle rewards are transferred
-    :param int timestamp: Unix time at the at this uncles inception
+    :param datetime timestamp: Unix time at the at this uncles inception
     :param str sha3uncles: Keccak 256-bit hash of the uncles portion of this uncle
-    :param bytes extra_data: Byte array of 32 bytes or less containing extra data of this block
+    :param str extra_data: Byte array of 32 bytes or less containing extra data of this block
     :param int gas_limit: Current maximum gas expenditure per block
 
     """
@@ -66,8 +64,6 @@ class Uncles(base):
         :param dict uncle_data: uncle data received from JSON RPC call
         :param int block_number: block number where this uncle was included
         :param datetime iso_timestamp: timestamp when the block was mined
-
-        :return Uncle: return completed uncle
         """
 
         uncle = cls(uncle_hash=uncle_data['hash'],

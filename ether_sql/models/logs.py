@@ -9,9 +9,20 @@ logger = logging.getLogger(__name__)
 
 class Logs(base):
     """
-    Class defining a log in the ethereum blockchain, its properties are more
-    accurately defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
+    Class mapping a log table in the psql database to a log in ethereum node.
 
+    :param str transaction_hash: Hash of the transaction which created this log
+    :param str address: Address from which this log originated
+    :param str data: Contains one or more 32 Bytes non-indexed arguelents of the log
+    :param int block_number: The block number where this transaction was included
+    :param datetime timestamp: Timestamp when the block was mined
+    :param int transaction_index: Position of the transaction in the block
+    :param int log_index: Position of the log in the block
+    :param int topics_count: Total number of topics in this log
+    :param str topic_1: First topic in the log
+    :param str topic_2: Second topic in the log
+    :param str topic_3: Third topic in the log
+    :param str topic_4: Fourth topic in the log
 
     """
     __tablename__ = 'logs'
@@ -54,6 +65,7 @@ class Logs(base):
         eth_getTransactionReceipt.
 
         :param dict log_data: data received from receipt JSON RPC call
+        :param int block_number: block number of the block containing the log
         :param datetime iso_timestamp: timestamp when the block containing the transaction was mined
 
         """

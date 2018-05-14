@@ -9,6 +9,31 @@ logger = logging.getLogger(__name__)
 
 
 class Traces(base):
+    """
+    Class mapping a traces table in the psql database to a trace in ethereum node.
+
+    :param int block_number: Number of the block containing this trace
+    :param str transaction_hash: The of the transaction containing this trace
+    :param str trace_type: Type of trace available types; 'call', 'create', 'suicide' and 'reward'
+    :param str trace_address: Array of integers specifying the address of the trace in this transaction
+    :param int subtraces: Number of subsequent traces
+    :param int transaction_index: Position of the transaction in this block
+    :param str sender: Address of account which initiated this trace
+    :param str receiver: Address of recepient of this trace, null for trace_type = 'create' or 'suicide'
+    :param int value: Number of wei to be transferred to the receiver of this trace
+    :param int start_gas: Maximum amount of gas to be used while executing this trace
+    :param str input_data: Unlimited size text specifying input data of message call or code of a contract create
+    :param int gas_used: The amount of gas utilized by this step
+    :param str contract_address: Address of created contract if trace_type = 'create' else null
+    :param str output: Output of this trace
+    :param str error: Error message if this step resulted in an error
+
+    .. note::
+
+        This needs proper `documentation <https://ethereum.stackexchange.com/questions/31443/what-do-the-response-values-of-a-parity-trace-transaction-call-actually-repres>`_ from team parity
+
+    """
+
     __tablename__ = 'traces'
     id = Column(Integer, primary_key=True)
     block_number = Column(Numeric, ForeignKey('blocks.block_number'))
@@ -51,6 +76,12 @@ class Traces(base):
     @classmethod
     def add_trace(cls, dict_trace, block_number, timestamp):
         """
+        Creates a new trace object from data received from JSON-RPC call
+        trace_transaction.
+
+        :param dict dict_trace: trace data received from the JSON RPC callable
+        :param int timestamp: timestamp of the block where this trace was included
+        :param int block_number: block number of the block where this trance was included
 
         """
         trace = cls(transaction_hash=dict_trace['transactionHash'],
