@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ether_sql's documentation!
+Documentation
 =====================================
+
+ether_sql is a Python library to push ethereum blockchain data into an sql database.
 
 .. toctree::
    :maxdepth: 1
@@ -13,11 +15,15 @@ Welcome to ether_sql's documentation!
    introduction
    installation
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Fundamentals:
+
+   api/index
 
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
