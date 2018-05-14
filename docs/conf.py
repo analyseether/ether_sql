@@ -14,13 +14,14 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../ether_sql'))
+print os.getcwd()
+sys.path.insert(0, os.path.abspath('../'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = u'ether_sql'
-copyright = u'2018, Ankit CHiplunkar'
+copyright = u'2018, Ankit Chiplunkar'
 author = u'Ankit Chiplunkar'
 
 # The short X.Y version
@@ -42,6 +43,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc'
 ]
+
+autodoc_default_flags = ['members']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
