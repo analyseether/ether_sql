@@ -10,6 +10,8 @@ It is written in Python 2.7, uses [ethjsonrpc](https://github.com/analyseether/e
 This is currently in very alpha stage, and not recommended for production use until it has received sufficient testing. 
 Currently supports Geth, Infura and Parity node, but transaction traces (eg. internal transactions) are currently available only with Parity node.
 
+Documentation available at: http://ether-sql.readthedocs.io/en/latest/
+
 # Installation guide
 
 ## Linux dependencies
