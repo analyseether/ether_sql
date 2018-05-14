@@ -7,8 +7,7 @@ from ether_sql import constants
 
 class Receipts(base):
     """
-    Class defining a receipt in the ethereum blockchain, its properties are more
-    clearly defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
+    Class mapping a log table in the psql database to a log in ethereum node.
 
     :param str transaction_hash: The Keccak 256-bit hash of this transaction
     :param bool status: Success or failure of this transaction, included after the Byzantinium fork
@@ -16,7 +15,7 @@ class Receipts(base):
     :param int cumulative_gas_used: Total amount of gas used after this transaction was included in the block
     :param str contract_address: Contract address create if transaction was a contract create transaction, else null
     :param int block_number: Number of the block containing this transaction
-    :param int timestamp: Unix time at the at this transactions blocks
+    :param datetime timestamp: Unix time at the at this transactions blocks
     :param int transaction_index: Position of this transaction in the transaction list of this block
     """
     __tablename__ = 'receipts'
@@ -53,8 +52,9 @@ class Receipts(base):
         Creates a new receipt object from data received from JSON-RPC call
         eth_getTransactionReceipt.
 
-        :param dict receipt_data: receipt data received from JSON RPC callable
+        :param dict receipt_data: receipt data received from the JSON RPC callable
         :param int timestamp: timestamp of the block where this transaction was included
+        :param int block_number: block number of the block where this transaction was included
         """
         if block_number > constants.FORK_BLOCK_NUMBER['Byzantium']:
             status = bool(utils.parse_int_or_hex(receipt_data['status']))

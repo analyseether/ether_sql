@@ -8,8 +8,7 @@ from ether_sql.models import base
 
 class Blocks(base):
     """
-    Class defining a block in the ethereum blockchain, its properties are more
-    clearly defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
+    Class mapping a block table in the psql database to a block in ethereum node.
 
     :param int block_number: Quantity equal to number of blocks behind the current block
     :param str block_hash: The Keccak 256-bit hash of this block
@@ -17,12 +16,12 @@ class Blocks(base):
     :param int difficulty: Difficulty level of this block
     :param int gas_used: Total gas used by the transactions in this block
     :param str miner: Address to which all block rewards are transferred
-    :param int timestamp: Unix time at the at this blocks inception
+    :param datetime timestamp: Unix time at the at this blocks inception
     :param str sha3uncles: Keccak 256-bit hash of the uncles portion of this block
-    :param bytes extra_data: Byte array of 32 bytes or less containing extra data of this block
+    :param str extra_data: Byte array of 32 bytes or less containing extra data of this block
     :param int gas_limit: Current maximum gas expenditure per block
     :param int uncle_count: Number of uncles in this block
-    :param int transaction_count': Number of transactions in this block
+    :param int transaction_count: Number of transactions in this block
 
     """
     __tablename__ = 'blocks'
@@ -68,7 +67,7 @@ class Blocks(base):
         Creates a new block object from data received from JSON-RPC call
         eth_getBlockByNumber.
 
-        :param dict block_data: data received from JSON RPC call
+        :param dict block_data: data received from the JSON RPC call
         :param datetime iso_timestamp: timestamp when the block was mined
         """
 

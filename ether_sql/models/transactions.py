@@ -9,8 +9,7 @@ logger = logging.getLogger(__name__)
 
 class Transactions(base):
     """
-    Class defining a transaction in the ethereum blockchain, its properties are more
-    accurately defined in the ethereum yellow paper https://github.com/ethereum/yellowpaper.
+    Class mapping a transaction table in the psql database to a transaction in ethereum node.
 
     :param str transaction_hash: The Keccak 256-bit hash of this transaction
     :param int block_number: Number of the block containing this transaction
@@ -19,10 +18,10 @@ class Transactions(base):
     :param int start_gas: Maximum amount of gas to be used while executing this transaction
     :param int value_wei: Number of wei to be transferred to the receiver of this transaction
     :param str receiver: Address of the recepient of this transaction, null if transaction creates a smart-contract
-    :param bytes data: Unlimited size text specifying input data of message call or code of a contract create
+    :param str data: Unlimited size text specifying input data of message call or code of a contract create
     :param int gas_price: Number of wei to pay the miner per unit of gas
     :param int timestamp: Unix time at the at this transactions blocks
-    :param int transaction_index: Position of this transaction in the transaction list of this block
+    :param datetime transaction_index: Position of this transaction in the transaction list of this block
 
     """
     __tablename__ = 'transactions'
@@ -66,6 +65,7 @@ class Transactions(base):
 
         :param dict transaction_data: data received from JSON RPC call
         :param datetime iso_timestamp: timestamp when the block containing the transaction was mined
+        :param int block_number: block number of the block where this transaction was included
         """
         transaction = cls(block_number=block_number,
                           nonce=utils.parse_int_or_hex(transaction_data['nonce']),

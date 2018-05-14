@@ -1,0 +1,150 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ether_sql.models.receipts &#8212; ether_sql 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ether_sql.models.receipts</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">,</span> <span class="n">TIMESTAMP</span><span class="p">,</span> <span class="n">Boolean</span>
+<span class="kn">from</span> <span class="nn">ethereum</span> <span class="k">import</span> <span class="n">utils</span>
+
+<span class="kn">from</span> <span class="nn">ether_sql.models</span> <span class="k">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">ether_sql</span> <span class="k">import</span> <span class="n">constants</span>
+
+
+<div class="viewcode-block" id="Receipts"><a class="viewcode-back" href="../../../api/models.html#ether_sql.models.receipts.Receipts">[docs]</a><span class="k">class</span> <span class="nc">Receipts</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class mapping a log table in the psql database to a log in ethereum node.</span>
+
+<span class="sd">    :param str transaction_hash: The Keccak 256-bit hash of this transaction</span>
+<span class="sd">    :param bool status: Success or failure of this transaction, included after the Byzantinium fork</span>
+<span class="sd">    :param int gas_used: Amount of gas used by this specific transaction alone</span>
+<span class="sd">    :param int cumulative_gas_used: Total amount of gas used after this transaction was included in the block</span>
+<span class="sd">    :param str contract_address: Contract address create if transaction was a contract create transaction, else null</span>
+<span class="sd">    :param int block_number: Number of the block containing this transaction</span>
+<span class="sd">    :param datetime timestamp: Unix time at the at this transactions blocks</span>
+<span class="sd">    :param int transaction_index: Position of this transaction in the transaction list of this block</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;receipts&#39;</span>
+
+    <span class="n">transaction_hash</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">66</span><span class="p">),</span>
+                              <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;transactions.transaction_hash&#39;</span><span class="p">),</span>
+                              <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Boolean</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">gas_used</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">cumulative_gas_used</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">contract_address</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>
+    <span class="n">block_number</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;blocks.block_number&#39;</span><span class="p">))</span>
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">TIMESTAMP</span><span class="p">)</span>
+    <span class="n">transaction_index</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;transaction_hash&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">transaction_hash</span><span class="p">,</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="s1">&#39;gas_used&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas_used</span><span class="p">,</span>
+            <span class="s1">&#39;cumulative_gas_used&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cumulative_gas_used</span><span class="p">,</span>
+            <span class="s1">&#39;contract_address&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">contract_address</span><span class="p">,</span>
+            <span class="s1">&#39;block_number&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">block_number</span><span class="p">,</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="s1">&#39;transaction_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">transaction_index</span>
+            <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Receipt </span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transaction_hash</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Receipts.add_receipt"><a class="viewcode-back" href="../../../api/models.html#ether_sql.models.receipts.Receipts.add_receipt">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_receipt</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">receipt_data</span><span class="p">,</span> <span class="n">block_number</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new receipt object from data received from JSON-RPC call</span>
+<span class="sd">        eth_getTransactionReceipt.</span>
+
+<span class="sd">        :param dict receipt_data: receipt data received from the JSON RPC callable</span>
+<span class="sd">        :param int timestamp: timestamp of the block where this transaction was included</span>
+<span class="sd">        :param int block_number: block number of the block where this transaction was included</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">block_number</span> <span class="o">&gt;</span> <span class="n">constants</span><span class="o">.</span><span class="n">FORK_BLOCK_NUMBER</span><span class="p">[</span><span class="s1">&#39;Byzantium&#39;</span><span class="p">]:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">parse_int_or_hex</span><span class="p">(</span><span class="n">receipt_data</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">receipt</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">transaction_hash</span><span class="o">=</span><span class="n">receipt_data</span><span class="p">[</span><span class="s1">&#39;transactionHash&#39;</span><span class="p">],</span>
+                      <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+                      <span class="n">gas_used</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">parse_int_or_hex</span><span class="p">(</span><span class="n">receipt_data</span><span class="p">[</span><span class="s1">&#39;gasUsed&#39;</span><span class="p">])),</span>
+                      <span class="n">cumulative_gas_used</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">parse_int_or_hex</span><span class="p">(</span><span class="n">receipt_data</span><span class="p">[</span><span class="s1">&#39;cumulativeGasUsed&#39;</span><span class="p">])),</span>
+                      <span class="n">contract_address</span><span class="o">=</span><span class="n">receipt_data</span><span class="p">[</span><span class="s1">&#39;contractAddress&#39;</span><span class="p">],</span>
+                      <span class="n">block_number</span><span class="o">=</span><span class="n">block_number</span><span class="p">,</span>
+                      <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+                      <span class="n">transaction_index</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">parse_int_or_hex</span><span class="p">(</span><span class="n">receipt_data</span><span class="p">[</span><span class="s1">&#39;transactionIndex&#39;</span><span class="p">])))</span>
+
+        <span class="k">return</span> <span class="n">receipt</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Ankit Chiplunkar.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
