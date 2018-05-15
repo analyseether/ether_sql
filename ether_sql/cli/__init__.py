@@ -56,5 +56,6 @@ def scrape_data(sql_block_number, node_block_number):
     if sql_block_number == node_block_number:
         logger.warning('Start block: {}; end block: {}; no data scrapped'
                        .format(sql_block_number, node_block_number))
-    scrape_blocks(sql_block_number=sql_block_number,
+    scrape_blocks(session=db_session,
+                  sql_block_number=sql_block_number,
                   node_block_number=node_block_number)

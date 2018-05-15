@@ -9,11 +9,8 @@ from sqlalchemy.orm import sessionmaker
 
 logger = logging.getLogger(__name__)
 
-DBSession = sessionmaker(bind=db_engine)
-db_session = DBSession()
 
-
-def scrape_blocks(sql_block_number=None, node_block_number=None):
+def scrape_blocks(session, sql_block_number=None, node_block_number=None):
     """
     Main function which starts scrapping data from the node and pushes it into
     the sql database
@@ -27,12 +24,14 @@ def scrape_blocks(sql_block_number=None, node_block_number=None):
 
     for block_number in range(sql_block_number+1, node_block_number+1):
         logger.debug('Adding block: {}'.format(block_number))
-        session = add_block_number(block_number=block_number)
+
+        session = add_block_number(block_number=block_number,
+                                   session=session)
         logger.info("Commiting block: {} to sql".format(block_number))
         session.commit()
 
 
-def add_block_number(block_number, session=db_session):
+def add_block_number(block_number, session):
     """
     Adds the block, transactions, uncles, logs and traces of a given block
     number into the db_session
