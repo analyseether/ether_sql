@@ -2,12 +2,15 @@ from ethereum import utils
 from datetime import datetime
 import logging
 
-from ether_sql import node_session, PUSH_TRACE
+from ether_sql import node_session, PUSH_TRACE, db_engine
 from ether_sql.models import Blocks, Transactions, Uncles, Receipts, Logs
 from ether_sql.models import Traces
-from ether_sql import db_session
+from sqlalchemy.orm import sessionmaker
 
 logger = logging.getLogger(__name__)
+
+DBSession = sessionmaker(bind=db_engine)
+db_session = DBSession()
 
 
 def scrape_blocks(sql_block_number=None, node_block_number=None):
@@ -29,7 +32,7 @@ def scrape_blocks(sql_block_number=None, node_block_number=None):
         session.commit()
 
 
-def add_block_number(block_number):
+def add_block_number(block_number, session=db_session):
     """
     Adds the block, transactions, uncles, logs and traces of a given block
     number into the db_session
@@ -42,7 +45,7 @@ def add_block_number(block_number):
     timestamp = utils.parse_int_or_hex(block_data['timestamp'])
     iso_timestamp = datetime.fromtimestamp(timestamp).isoformat()
     block = Blocks.add_block(block_data=block_data, iso_timestamp=iso_timestamp)
-    db_session.add(block)  # added the block data in the db session
+    session.add(block)  # added the block data in the db session
 
     transaction_list = block_data['transactions']
     # loop to get the transaction, receipts, logs and traces of the block
@@ -50,7 +53,7 @@ def add_block_number(block_number):
         transaction = Transactions.add_transaction(transaction_data,
                                                    block_number=block_number,
                                                    iso_timestamp=iso_timestamp)
-        db_session.add(transaction)  # added the transaction in the db session
+        session.add(transaction)  # added the transaction in the db session
 
         receipt_data = node_session.eth_getTransactionReceipt(
                                     transaction_data['hash'])
@@ -58,13 +61,13 @@ def add_block_number(block_number):
                                        block_number=block_number,
                                        timestamp=iso_timestamp)
 
-        db_session.add(receipt)  # added the receipt in the database
+        session.add(receipt)  # added the receipt in the database
 
         logs_list = receipt_data['logs']
         for dict_log in logs_list:
             log = Logs.add_log(dict_log, block_number=block_number,
                                iso_timestamp=iso_timestamp)
-            db_session.add(log)  # adding the log in db session
+            session.add(log)  # adding the log in db session
 
         if PUSH_TRACE:
             dict_trace_list = node_session.trace_transaction(
@@ -74,7 +77,7 @@ def add_block_number(block_number):
                     trace = Traces.add_trace(dict_trace,
                                              block_number=block_number,
                                              timestamp=iso_timestamp)
-                    db_session.add(trace)  # added the trace in the db session
+                    session.add(trace)  # added the trace in the db session
 
     uncle_list = block_data['uncles']
     for i in range(0, len(uncle_list)):
@@ -84,6 +87,6 @@ def add_block_number(block_number):
         uncle = Uncles.add_uncle(uncle_data=uncle_data,
                                  block_number=block_number,
                                  iso_timestamp=iso_timestamp)
-        db_session.add(uncle)
+        session.add(uncle)
 
-    return db_session
+    return session

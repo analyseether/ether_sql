@@ -1,5 +1,6 @@
 import click
 from ether_sql.cli import sql, ether
+from sqlalchemy.orm import sessionmaker
 import logging
 
 logger = logging.getLogger(__name__)
@@ -31,9 +32,15 @@ def scrape_data(sql_block_number, node_block_number):
     """
     from sqlalchemy import func
 
-    from ether_sql import node_session, db_session
+    from ether_sql import node_session, db_engine
     from ether_sql.scrapper import scrape_blocks
     from ether_sql.models import Blocks
+
+    # A DBSession() instance establishes all conversations with the database
+    # and represents a "staging zone" for all the objects loaded into the
+    # database session object. Any change made against the objects in the
+    DBSession = sessionmaker(bind=db_engine)
+    db_session = DBSession()
 
     if node_block_number is None:
         node_block_number = node_session.eth_blockNumber()
