@@ -20,6 +20,7 @@ ether_sql is a Python library to push ethereum blockchain data into an sql datab
    :caption: Fundamentals:
 
    api/index
+   guides/index
 
 
 Indices and tables
