@@ -1,5 +1,5 @@
 import os
-from netrc import netrc
+
 
 def all_settings():
     """Return list of all settings"""

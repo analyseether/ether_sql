@@ -8,3 +8,7 @@ psycopg2-binary==2.7.4
 
 # CLI
 Click==6.7
+
+# Testing and coverage
+pytest==2.9.1
+pytest-cov==2.2.1

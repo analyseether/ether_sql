@@ -1,3 +1,18 @@
+# removing library installs
 src/*
-.ropeproject/*
+
+# removing python binaries
 *.pyc
+
+# removing atom files
+.ropeproject/*
+
+# removing pytest caches
+*.pytest_cache
+ether_sql/tests/*.cache
+
+# removing doc builds
+docs/_build/*
+
+# nano files
+*.save

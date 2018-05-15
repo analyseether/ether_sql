@@ -1,7 +1,6 @@
 import logging
 import settings
 import sqlalchemy
-from sqlalchemy.orm import sessionmaker
 import sys
 from ethjsonrpc import EthJsonRpc, ParityEthJsonRpc, InfuraEthJsonRpc
 from ether_sql.models import base
@@ -21,7 +20,7 @@ def setup_logging():
     logging.getLogger().setLevel(settings.LOG_LEVEL)
 
 
-def setup_db_session(user, password, db, host='localhost', port=5432):
+def setup_db_engine(user, password, db, host='localhost', port=5432):
     """
     Connects to the psql database given its parameters and returns the
     connection session
@@ -47,15 +46,9 @@ def setup_db_session(user, password, db, host='localhost', port=5432):
     # declaratives can be accessed through a DBSession instance
     base.metadata.bind = engine
 
-    # A DBSession() instance establishes all conversations with the database
-    # and represents a "staging zone" for all the objects loaded into the
-    # database session object. Any change made against the objects in the
-    DBSession = sessionmaker(bind=engine)
-    session = DBSession()
-
     logger.info('Connected to the db {}'.format(db))
 
-    return session, engine
+    return engine
 
 
 def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
@@ -79,14 +72,17 @@ def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
     else:
         raise ValueError('Node {} not supported'.format(node_type))
 
-    logger.info('Connected to {} node'.format(node_type))
+    if node.net_listening():
+        logger.info('Connected to {} node'.format(node_type))
+    else:
+        logger.error('{} node failed connecting to network'.format(node_type))
 
     return node, PUSH_TRACE
 
 
 setup_logging()
 
-db_session, db_engine = setup_db_session(user=settings.SQLALCHEMY_USER,
+db_engine = setup_db_engine(user=settings.SQLALCHEMY_USER,
                                          password=settings.SQLALCHEMY_PASSWORD,
                                          db=settings.SQLALCHEMY_DB)
 
