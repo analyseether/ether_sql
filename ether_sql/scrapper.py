@@ -2,27 +2,26 @@ from ethereum import utils
 from datetime import datetime
 import logging
 
-from ether_sql import node_session, PUSH_TRACE, db_engine
+from ether_sql import node_session, PUSH_TRACE
 from ether_sql.models import Blocks, Transactions, Uncles, Receipts, Logs
 from ether_sql.models import Traces
-from sqlalchemy.orm import sessionmaker
 
 logger = logging.getLogger(__name__)
 
 
-def scrape_blocks(session, sql_block_number=None, node_block_number=None):
+def scrape_blocks(session, start_block_number=None, end_block_number=None):
     """
     Main function which starts scrapping data from the node and pushes it into
     the sql database
 
-    :param int sql_block_number: starting block number of scraping
-    :param int node_block_number: end block number of scraping
+    :param int start_block_number: starting block number of scraping
+    :param int end_block_number: end block number of scraping
     """
 
-    logger.debug("Start block: {}".format(sql_block_number))
-    logger.debug('End block: {}'.format(node_block_number))
+    logger.debug("Start block: {}".format(start_block_number))
+    logger.debug('End block: {}'.format(end_block_number))
 
-    for block_number in range(sql_block_number+1, node_block_number+1):
+    for block_number in range(start_block_number, end_block_number+1):
         logger.debug('Adding block: {}'.format(block_number))
 
         session = add_block_number(block_number=block_number,

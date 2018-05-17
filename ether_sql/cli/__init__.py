@@ -24,11 +24,11 @@ def check_settings():
 
 
 @cli.command()
-@click.option('--sql_block_number', default=None, help='block number in sql')
-@click.option('--node_block_number', default=None, help='block number in node')
-def scrape_data(sql_block_number, node_block_number):
+@click.option('--start_block_number', default=None, help='start block number')
+@click.option('--end_block_number', default=None, help='end block number')
+def scrape_block_range(start_block_number, end_block_number):
     """
-    Pushes the data between sql_block_number and node_block_number in the database
+    Pushes the data between start_block_number and end_block_number in the database
     """
     from sqlalchemy import func
 
@@ -42,20 +42,40 @@ def scrape_data(sql_block_number, node_block_number):
     DBSession = sessionmaker(bind=db_engine)
     db_session = DBSession()
 
-    if node_block_number is None:
-        node_block_number = node_session.eth_blockNumber()
-    if sql_block_number is None:
-        sql_block_number = db_session.query(func.max(Blocks.block_number)).scalar()
-        if sql_block_number is None:
-            sql_block_number = 0
+    if start_block_number is None:
+        end_block_number = node_session.eth_blockNumber()
+    if end_block_number is None:
+        start_block_number = db_session.query(func.max(Blocks.block_number)).scalar()
+        if start_block_number is None:
+            start_block_number = 0
 
     # casting numbers to integers
-    sql_block_number = int(sql_block_number)
-    node_block_number = int(node_block_number)
+    start_block_number = int(start_block_number)
+    end_block_number = int(end_block_number)
 
-    if sql_block_number == node_block_number:
+    if start_block_number == end_block_number:
         logger.warning('Start block: {}; end block: {}; no data scrapped'
-                       .format(sql_block_number, node_block_number))
+                       .format(start_block_number, end_block_number))
     scrape_blocks(session=db_session,
-                  sql_block_number=sql_block_number,
-                  node_block_number=node_block_number)
+                  start_block_number=start_block_number,
+                  end_block_number=end_block_number)
+
+
+@cli.command()
+@click.option('--block_number', default=None, help='block number to add')
+def scrape_block(block_number):
+    """
+    Pushes the data in block_number in the database
+    """
+    from ether_sql import db_engine
+    from ether_sql.scrapper import add_block_number
+
+    DBSession = sessionmaker(bind=db_engine)
+    session = DBSession()
+
+    if block_number is not None:
+        block_number = int(block_number)
+        session = add_block_number(block_number=block_number, session=session)
+        session.commit()
+    else:
+        raise ValueError('Please provide a value of --block_number')
