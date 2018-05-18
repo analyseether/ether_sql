@@ -1,11 +1,12 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, Text, TIMESTAMP
 from sqlalchemy.orm import relationship
-from ethereum import utils
 import logging
+from web3.auto import w3
 
 from ether_sql.models import base
 
 logger = logging.getLogger(__name__)
+
 
 class Transactions(base):
     """
@@ -68,15 +69,15 @@ class Transactions(base):
         :param int block_number: block number of the block where this transaction was included
         """
         transaction = cls(block_number=block_number,
-                          nonce=utils.parse_int_or_hex(transaction_data['nonce']),
+                          nonce=w3.toInt(transaction_data['nonce']),
                           transaction_hash=transaction_data['hash'],
                           sender=transaction_data['from'],
-                          start_gas=utils.parse_int_or_hex(transaction_data['gas']),
-                          value=int(str(utils.parse_int_or_hex(transaction_data['value']))),
+                          start_gas=w3.toInt(transaction_data['gas']),
+                          value=int(str(w3.toInt(transaction_data['value']))),
                           receiver=transaction_data['to'],
                           data=transaction_data['input'],
-                          gas_price=str(utils.parse_int_or_hex(transaction_data['gasPrice'])),
+                          gas_price=str(w3.toInt(transaction_data['gasPrice'])),
                           timestamp=iso_timestamp,
-                          transaction_index=utils.parse_int_or_hex(transaction_data['transactionIndex']))
+                          transaction_index=w3.toInt(transaction_data['transactionIndex']))
 
         return transaction

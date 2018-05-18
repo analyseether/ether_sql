@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, Text, Integer
-from ethereum import utils
 import logging
+from web3.auto import w3
 
 from ether_sql.models import base
 
@@ -106,26 +106,26 @@ class Traces(base):
             # parsing action
             trace.sender = action['from']
             trace.receiver = action['to']
-            trace.start_gas = utils.parse_int_or_hex(action['gas'])
-            trace.value = utils.parse_int_or_hex(action['value'])
+            trace.start_gas = w3.toInt(action['gas'])
+            trace.value = w3.toInt(action['value'])
             trace.input_data = action['input']
             # parsing result
-            if 'result' in dict_trace.keys():
+            if 'result' in list(dict_trace.keys()):
                 result = dict_trace['result']
-                trace.gas_used = utils.parse_int_or_hex(result['gasUsed'])
+                trace.gas_used = w3.toInt(result['gasUsed'])
                 trace.output = result['output']
             else:
                 trace.error = dict_trace['error']
         elif trace.trace_type == 'create':
             logger.debug('Type {}, action {}'.format(dict_trace['type'], action))
             # parsing action
-            trace.start_gas = utils.parse_int_or_hex(action['gas'])
-            trace.value = utils.parse_int_or_hex(action['value'])
+            trace.start_gas = w3.toInt(action['gas'])
+            trace.value = w3.toInt(action['value'])
             trace.input_data = action['init']
             # parsing result
-            if 'result' in dict_trace.keys():
+            if 'result' in list(dict_trace.keys()):
                 result = dict_trace['result']
-                trace.gas_used = utils.parse_int_or_hex(result['gasUsed'])
+                trace.gas_used = w3.toInt(result['gasUsed'])
                 trace.output = result['code']
                 trace.contract_address = result['address']
             else:
@@ -135,7 +135,7 @@ class Traces(base):
             # parsing action
             trace.sender = action['address']
             trace.receiver = action['refundAddress']
-            trace.value = utils.parse_int_or_hex(action['balance'])
+            trace.value = w3.toInt(action['balance'])
             # parsing result
             logger.debug('Type encountered {}'.format(dict_trace['type']))
 

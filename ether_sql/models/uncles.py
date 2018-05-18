@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
 from sqlalchemy import Text
-from ethereum import utils
+from web3.auto import w3
 
 from ether_sql.models import base
 
@@ -67,15 +67,15 @@ class Uncles(base):
         """
 
         uncle = cls(uncle_hash=uncle_data['hash'],
-                    uncle_blocknumber=utils.parse_int_or_hex(uncle_data['number']),  # 'uncle_blocknumber'
+                    uncle_blocknumber=w3.toInt(uncle_data['number']),  # 'uncle_blocknumber'
                     parent_hash=uncle_data['parentHash'],  # parent_hash
-                    difficulty=utils.parse_int_or_hex(uncle_data['difficulty']),  # 'difficulty
+                    difficulty=w3.toInt(uncle_data['difficulty']),  # 'difficulty
                     current_blocknumber=block_number,  # current_blocknumber
-                    gas_used=utils.parse_int_or_hex(uncle_data['gasUsed']),  # gas_used
+                    gas_used=w3.toInt(uncle_data['gasUsed']),  # gas_used
                     miner=uncle_data['miner'],  # miner
                     timestamp=iso_timestamp,
                     sha3uncles=uncle_data['sha3Uncles'],  # SHA3uncles
                     extra_data=uncle_data['extraData'],  # extra_data
-                    gas_limit=utils.parse_int_or_hex(uncle_data['gasLimit']))
+                    gas_limit=w3.toInt(uncle_data['gasLimit']))
 
         return uncle
