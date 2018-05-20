@@ -30,7 +30,7 @@ Documentation available at: http://ether-sql.readthedocs.io/en/latest/
 `$ source envname\bin\activate`
 
 * Install python libraries     
-`$ pip install -r requirements`
+`$ pip install -r requirements.txt`
 
 
 ## Database setup
@@ -44,7 +44,7 @@ This prompts for a user password, use the same password in the settings.py file
 `$ createdb ether_sql`
 
 * Create the tables by executing this command from the repo ether_sql       
-`$ python ether_sql.py create_tables`
+`$ python ether_sql.py sql create_tables`
 
 ## Node settings
 Details of connecting to a node are available in the settings.py. Use the settings below for the three supported nodes.
