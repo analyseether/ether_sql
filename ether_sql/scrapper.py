@@ -1,10 +1,15 @@
-from ethereum import utils
 from datetime import datetime
 import logging
+from web3.utils.encoding import to_int
 
-from ether_sql import node_session, PUSH_TRACE
-from ether_sql.models import Blocks, Transactions, Uncles, Receipts, Logs
-from ether_sql.models import Traces
+from ether_sql import w3, PARSE_TRACE
+from ether_sql.models import (
+    Blocks,
+    Transactions,
+    Uncles,
+    Receipts,
+    Logs,
+    Traces)
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +44,13 @@ def add_block_number(block_number, session):
     """
 
     # getting the block_data from the node
-    block_data = node_session.eth_getBlockByNumber(block_number)
-    timestamp = utils.parse_int_or_hex(block_data['timestamp'])
+    block_data = w3.eth.getBlock(block_number, full_transactions=True)
+    timestamp = to_int(block_data['timestamp'])
     iso_timestamp = datetime.fromtimestamp(timestamp).isoformat()
     block = Blocks.add_block(block_data=block_data, iso_timestamp=iso_timestamp)
     session.add(block)  # added the block data in the db session
 
+    logger.debug('Reached this spot')
     transaction_list = block_data['transactions']
     # loop to get the transaction, receipts, logs and traces of the block
     for transaction_data in transaction_list:
@@ -53,7 +59,7 @@ def add_block_number(block_number, session):
                                                    iso_timestamp=iso_timestamp)
         session.add(transaction)  # added the transaction in the db session
 
-        receipt_data = node_session.eth_getTransactionReceipt(
+        receipt_data = w3.eth.getTransactionReceipt(
                                     transaction_data['hash'])
         receipt = Receipts.add_receipt(receipt_data,
                                        block_number=block_number,
@@ -67,8 +73,8 @@ def add_block_number(block_number, session):
                                iso_timestamp=iso_timestamp)
             session.add(log)  # adding the log in db session
 
-        if PUSH_TRACE:
-            dict_trace_list = node_session.trace_transaction(
+        if PARSE_TRACE:
+            dict_trace_list = w3.traceTransaction(
                                            transaction_data['hash'])
             if dict_trace_list is not None:
                 for dict_trace in dict_trace_list:
@@ -80,7 +86,7 @@ def add_block_number(block_number, session):
     uncle_list = block_data['uncles']
     for i in range(0, len(uncle_list)):
         # Unfortunately there is no command eth_getUncleByHash
-        uncle_data = node_session.eth_getUncleByBlockNumberAndIndex(
+        uncle_data = w3.eth.getUncleFromBlock(
                                   block_number, i)
         uncle = Uncles.add_uncle(uncle_data=uncle_data,
                                  block_number=block_number,

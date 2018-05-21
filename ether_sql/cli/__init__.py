@@ -19,7 +19,7 @@ cli.add_command(ether.cli, "ether")
 def check_settings():
     """Show the settings as ether_sql sees them (useful for debugging)."""
     import settings
-    for name, item in settings.all_settings().iteritems():
+    for name, item in list(settings.all_settings().items()):
         click.echo("{} = {}".format(name, item))
 
 

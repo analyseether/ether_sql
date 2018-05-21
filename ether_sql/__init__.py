@@ -2,7 +2,12 @@ import logging
 import settings
 import sqlalchemy
 import sys
-from ethjsonrpc import EthJsonRpc, ParityEthJsonRpc, InfuraEthJsonRpc
+
+from web3 import (
+    Web3,
+    IPCProvider,
+    HTTPProvider,
+)
 from ether_sql.models import base
 
 logger = logging.getLogger(__name__)
@@ -51,42 +56,51 @@ def setup_db_engine(user, password, db, host='localhost', port=5432):
     return engine
 
 
-def setup_node_session(node_type, host='localhost', port=8545, api_token=''):
+def setup_node_session(node_type, node_url):
     """
     Connects to appropriate node using values specified in settings.py
 
     :param str node_type: Type of node, available options 'Parity', 'Geth' and 'Infura'
-    :param str host: Name of host
-    :param int port: Port number of the connection
-    :param str api_token: Api token if needed
+    :param str node_url: url of connection if an HTTP connection
     """
-    PUSH_TRACE = 0
+    PARSE_TRACE = settings.PARSE_TRACE
     if node_type == 'Parity':
-        node = ParityEthJsonRpc(host=host, port=port)
-        PUSH_TRACE = 1
+        w3 = Web3(IPCProvider())
+
+        # checking if trace tables should be parsed
+        if PARSE_TRACE:
+            try:
+                trace = w3.parity.traceBlock('latest')
+            except ValueError:
+                trace = None
+                raise ValueError('Trace configuration not active')
+            finally:
+                if trace is None:
+                    PARSE_TRACE = False
+                    logger.warning('Tracing not active switching off parsing trace tables')
+                else:
+                    # if trace module is available extend the time of connection
+                    w3 = Web3(IPCProvider(timeout=60))
     elif node_type == 'Geth':
-        node = EthJsonRpc(host=host, port=port)
+        w3 = Web3(IPCProvider())
     elif node_type == 'Infura':
-        network = host.split('.')[0]  # getting the network name
-        node = InfuraEthJsonRpc(network=network, infura_token=api_token)
+        w3 = Web3(HTTPProvider(settings.NODE_URL))
     else:
         raise ValueError('Node {} not supported'.format(node_type))
 
-    if node.net_listening():
+    if w3.isConnected:
         logger.info('Connected to {} node'.format(node_type))
     else:
         logger.error('{} node failed connecting to network'.format(node_type))
 
-    return node, PUSH_TRACE
+    return w3, PARSE_TRACE
 
 
 setup_logging()
 
 db_engine = setup_db_engine(user=settings.SQLALCHEMY_USER,
-                                         password=settings.SQLALCHEMY_PASSWORD,
-                                         db=settings.SQLALCHEMY_DB)
+                            password=settings.SQLALCHEMY_PASSWORD,
+                            db=settings.SQLALCHEMY_DB)
 
-node_session, PUSH_TRACE = setup_node_session(node_type=settings.NODE_TYPE,
-                                              host=settings.NODE_HOST,
-                                              port=settings.NODE_PORT,
-                                              api_token=settings.NODE_API_TOKEN)
+w3, PARSE_TRACE = setup_node_session(node_type=settings.NODE_TYPE,
+                                               node_url=settings.NODE_URL)
