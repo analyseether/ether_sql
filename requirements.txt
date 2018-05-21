@@ -1,5 +1,5 @@
 # modified ethjsonrpc
--e git://github.com/analyseether/ethjsonrpc.git#egg=ethjsonrpc
+-e git://github.com/analyseether/web3.py.git@develop/web3py#egg=web3.py
 
 # SqlAlchemy
 sqlalchemy==1.2.4
@@ -10,5 +10,5 @@ psycopg2-binary==2.7.4
 Click==6.7
 
 # Testing and coverage
-pytest==2.9.1
+pytest==3.0.0
 pytest-cov==2.2.1
