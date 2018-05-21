@@ -9,7 +9,8 @@ src/*
 
 # removing pytest caches
 *.pytest_cache
-ether_sql/tests/*.cache
+tests/*.cache
+*.cache
 
 # removing doc builds
 docs/_build/*
