@@ -1,6 +1,6 @@
-from ether_sql import node_session
+from ether_sql import w3
 
 
 def test_listening_to_node():
-    listening = node_session.net_listening()
+    listening = w3.isConnected()
     assert listening is True

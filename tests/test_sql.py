@@ -31,17 +31,17 @@ class TestEmptyTables():
         # comparing values of blocks
         block_properties_in_sql = test_db_session.query(Blocks).first().to_dict()
         expected_block_properties = {'block_number': Decimal('56160'),
-                               'timestamp': datetime.datetime(2015, 8, 9, 3, 14, 50),
-                               'transaction_count': Decimal('1'),
-                               'block_hash': u'0x685b2226cbf6e1f890211010aa192bf16f0a0cba9534264a033b023d7367b845',
-                               'difficulty': Decimal('1640036045719'),
-                               'uncle_count': Decimal('1'),
-                               'sha3uncles': u'0x8a67da3121c69b45a19f4674a7272ebad677f9775ca6b35d79067974ca687a64',
-                               'miner': u'0x3f98e477a361f777da14611a7e419a75fd238b6b',
-                               'gas_used': Decimal('50290'),
-                               'parent_hash': u'0x071218ca3c6549337289e5e0e78227f59a82d62a972d6d73e6b8e55dcbaa65eb',
-                               'extra_data': u'0x476574682f76312e302e312f6c696e75782f676f312e342e32',
-                               'gas_limit': Decimal('3141592')}
+                                     'timestamp': datetime.datetime(2015, 8, 9, 3, 14, 50),
+                                     'transaction_count': Decimal('1'),
+                                     'block_hash': u'0x685b2226cbf6e1f890211010aa192bf16f0a0cba9534264a033b023d7367b845',
+                                     'difficulty': Decimal('1640036045719'),
+                                     'uncle_count': Decimal('1'),
+                                     'sha3uncles': u'0x8a67da3121c69b45a19f4674a7272ebad677f9775ca6b35d79067974ca687a64',
+                                     'miner': u'0x3F98e477a361F777DA14611a7e419A75Fd238b6b',
+                                     'gas_used': Decimal('50290'),
+                                     'parent_hash': u'0x071218ca3c6549337289e5e0e78227f59a82d62a972d6d73e6b8e55dcbaa65eb',
+                                     'extra_data': u'0x476574682f76312e302e312f6c696e75782f676f312e342e32',
+                                     'gas_limit': Decimal('3141592')}
         assert block_properties_in_sql == expected_block_properties
 
         # comparing values of uncles
@@ -68,9 +68,9 @@ class TestEmptyTables():
                                            'transaction_index': Decimal('0'),
                                            'data': u'0x90b98a110000000000000000000000006463f715d594a1a4ace4bb9c3b288a74decf294d00000000000000000000000000000000000000000000000000000000000003e8',
                                            'gas_price': Decimal('57105088684'),
-                                           'sender': u'0x9b2c46642caf6b936dc0633da521f1e946b7e18f',
+                                           'sender': u'0x9B2c46642CAF6B936dc0633da521f1E946B7e18F',
                                            'value': Decimal('0'),
-                                           'receiver': u'0xdbb576b5b0e7bf0570a981aab3ad39a0c5f19eb1',
+                                           'receiver': u'0xDBB576b5B0e7BF0570A981AAb3AD39A0c5F19EB1',
                                            'start_gas': Decimal('90000')}
         assert transaction_properties_in_sql == expected_transaction_properties
 
@@ -97,7 +97,7 @@ class TestEmptyTables():
                                'topic_3': u'',
                                'topic_2': u'',
                                'topic_1': u'0x16cdf1707799c6655baac6e210f52b94b7cec08adcaf9ede7dfe8649da926146',
-                               'address': u'0xdbb576b5b0e7bf0570a981aab3ad39a0c5f19eb1',
+                               'address': u'0xDBB576b5B0e7BF0570A981AAb3AD39A0c5F19EB1',
                                'transaction_index': Decimal('0'),
                                'data': u'0x0000000000000000000000009b2c46642caf6b936dc0633da521f1e946b7e18f0000000000000000000000006463f715d594a1a4ace4bb9c3b288a74decf294d00000000000000000000000000000000000000000000000000000000000003e8'}
         assert log_properties_in_sql == expected_log_values
