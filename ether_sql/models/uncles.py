@@ -1,8 +1,12 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
 from sqlalchemy import Text
-from web3.auto import w3
+from web3.utils.encoding import to_int
+from web3.utils.formatters import hex_to_integer
+import logging
 
 from ether_sql.models import base
+
+logger = logging.getLogger(__name__)
 
 
 class Uncles(base):
@@ -65,17 +69,17 @@ class Uncles(base):
         :param int block_number: block number where this uncle was included
         :param datetime iso_timestamp: timestamp when the block was mined
         """
-
+        logger.debug('{}'.format(uncle_data['gasUsed']))
         uncle = cls(uncle_hash=uncle_data['hash'],
-                    uncle_blocknumber=w3.toInt(uncle_data['number']),  # 'uncle_blocknumber'
+                    uncle_blocknumber=hex_to_integer(uncle_data['number']),  # 'uncle_blocknumber'
                     parent_hash=uncle_data['parentHash'],  # parent_hash
-                    difficulty=w3.toInt(uncle_data['difficulty']),  # 'difficulty
+                    difficulty=hex_to_integer(uncle_data['difficulty']),  # 'difficulty
                     current_blocknumber=block_number,  # current_blocknumber
-                    gas_used=w3.toInt(uncle_data['gasUsed']),  # gas_used
+                    gas_used=hex_to_integer(uncle_data['gasUsed']),  # gas_used
                     miner=uncle_data['miner'],  # miner
                     timestamp=iso_timestamp,
                     sha3uncles=uncle_data['sha3Uncles'],  # SHA3uncles
                     extra_data=uncle_data['extraData'],  # extra_data
-                    gas_limit=w3.toInt(uncle_data['gasLimit']))
+                    gas_limit=hex_to_integer(uncle_data['gasLimit']))
 
         return uncle

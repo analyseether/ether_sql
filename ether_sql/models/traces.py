@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, Text, Integer
 import logging
-from web3.auto import w3
+from web3.utils.encoding import to_int, to_hex
 
 from ether_sql.models import base
 
@@ -84,7 +84,7 @@ class Traces(base):
         :param int block_number: block number of the block where this trance was included
 
         """
-        trace = cls(transaction_hash=dict_trace['transactionHash'],
+        trace = cls(transaction_hash=to_hex(dict_trace['transactionHash']),
                     block_number=dict_trace['blockNumber'],
                     trace_address=dict_trace['traceAddress'],
                     subtraces=dict_trace['subtraces'],
@@ -106,26 +106,26 @@ class Traces(base):
             # parsing action
             trace.sender = action['from']
             trace.receiver = action['to']
-            trace.start_gas = w3.toInt(action['gas'])
-            trace.value = w3.toInt(action['value'])
+            trace.start_gas = to_int(action['gas'])
+            trace.value = to_int(action['value'])
             trace.input_data = action['input']
             # parsing result
             if 'result' in list(dict_trace.keys()):
                 result = dict_trace['result']
-                trace.gas_used = w3.toInt(result['gasUsed'])
+                trace.gas_used = to_int(result['gasUsed'])
                 trace.output = result['output']
             else:
                 trace.error = dict_trace['error']
         elif trace.trace_type == 'create':
             logger.debug('Type {}, action {}'.format(dict_trace['type'], action))
             # parsing action
-            trace.start_gas = w3.toInt(action['gas'])
-            trace.value = w3.toInt(action['value'])
+            trace.start_gas = to_int(action['gas'])
+            trace.value = to_int(action['value'])
             trace.input_data = action['init']
             # parsing result
             if 'result' in list(dict_trace.keys()):
                 result = dict_trace['result']
-                trace.gas_used = w3.toInt(result['gasUsed'])
+                trace.gas_used = to_int(result['gasUsed'])
                 trace.output = result['code']
                 trace.contract_address = result['address']
             else:
@@ -135,7 +135,7 @@ class Traces(base):
             # parsing action
             trace.sender = action['address']
             trace.receiver = action['refundAddress']
-            trace.value = w3.toInt(action['balance'])
+            trace.value = to_int(action['balance'])
             # parsing result
             logger.debug('Type encountered {}'.format(dict_trace['type']))
 

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Numeric, TIMESTAMP, Text
 from sqlalchemy.orm import relationship
 
-from web3.auto import w3
+from web3.utils.encoding import (to_int, to_hex)
 from ether_sql.models import base
 
 
@@ -70,16 +70,16 @@ class Blocks(base):
         :param datetime iso_timestamp: timestamp when the block was mined
         """
 
-        block = cls(block_hash=block_data['hash'],
-                    parent_hash=block_data['parentHash'],
-                    difficulty=w3.toInt(block_data['difficulty']),
-                    block_number=w3.toInt(block_data['number']),
-                    gas_used=w3.toInt(block_data['gasUsed']),
+        block = cls(block_hash=to_hex(block_data['hash']),
+                    parent_hash=to_hex(block_data['parentHash']),
+                    difficulty=to_int(block_data['difficulty']),
+                    block_number=to_int(block_data['number']),
+                    gas_used=to_int(block_data['gasUsed']),
                     miner=block_data['miner'],
                     timestamp=iso_timestamp,
-                    sha3uncles=block_data['sha3Uncles'],
-                    extra_data=block_data['extraData'],
-                    gas_limit=w3.toInt(block_data['gasLimit']),
+                    sha3uncles=to_hex(block_data['sha3Uncles']),
+                    extra_data=to_hex(block_data['extraData']),
+                    gas_limit=to_int(block_data['gasLimit']),
                     transaction_count=len(block_data['transactions']),
                     uncle_count=len(block_data['uncles']))
 

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP, Boolean
-from web3.auto import w3
+from web3.utils.encoding import to_int, to_hex
 
 from ether_sql.models import base
 from ether_sql import constants
@@ -57,17 +57,17 @@ class Receipts(base):
         :param int block_number: block number of the block where this transaction was included
         """
         if block_number > constants.FORK_BLOCK_NUMBER['Byzantium']:
-            status = bool(w3.toInt(receipt_data['status']))
+            status = bool(to_int(receipt_data['status']))
         else:
             status = None
 
-        receipt = cls(transaction_hash=receipt_data['transactionHash'],
+        receipt = cls(transaction_hash=to_hex(receipt_data['transactionHash']),
                       status=status,
-                      gas_used=int(w3.toInt(receipt_data['gasUsed'])),
-                      cumulative_gas_used=int(w3.toInt(receipt_data['cumulativeGasUsed'])),
+                      gas_used=to_int(receipt_data['gasUsed']),
+                      cumulative_gas_used=to_int(receipt_data['cumulativeGasUsed']),
                       contract_address=receipt_data['contractAddress'],
                       block_number=block_number,
                       timestamp=timestamp,
-                      transaction_index=int(w3.toInt(receipt_data['transactionIndex'])))
+                      transaction_index=to_int(receipt_data['transactionIndex']))
 
         return receipt

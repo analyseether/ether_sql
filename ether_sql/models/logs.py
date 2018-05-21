@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
 from sqlalchemy import Text, Integer
 import logging
 
-from web3.auto import w3
+from web3.utils.encoding import to_int, to_hex
 from ether_sql.models import base
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,6 @@ class Logs(base):
 
         """
         topics_count = len(log_data['topics'])
-        print(topics_count)
         if topics_count == 0:
             log_data['topics'] = []
             log_data['topics'].append('')
@@ -92,11 +91,11 @@ class Logs(base):
         else:
             logger.error('More than 4 topics are not possible')
 
-        log = cls(transaction_hash=log_data['transactionHash'],
-                  transaction_index=w3.toInt(log_data['transactionIndex']),
+        log = cls(transaction_hash=to_hex(log_data['transactionHash']),
+                  transaction_index=to_int(log_data['transactionIndex']),
                   topics_count=topics_count,
                   address=log_data['address'],
-                  log_index=w3.toInt(log_data['logIndex']),
+                  log_index=to_int(log_data['logIndex']),
                   data=log_data['data'],
                   block_number=block_number,
                   timestamp=iso_timestamp,
