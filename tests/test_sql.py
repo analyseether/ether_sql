@@ -31,7 +31,7 @@ class TestEmptyTables():
         # comparing values of blocks
         block_properties_in_sql = test_db_session.query(Blocks).first().to_dict()
         expected_block_properties = {'block_number': Decimal('56160'),
-                                     'timestamp': datetime.datetime(2015, 8, 9, 3, 14, 50),
+                                     'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
                                      'transaction_count': Decimal('1'),
                                      'block_hash': u'0x685b2226cbf6e1f890211010aa192bf16f0a0cba9534264a033b023d7367b845',
                                      'difficulty': Decimal('1640036045719'),
@@ -46,7 +46,7 @@ class TestEmptyTables():
 
         # comparing values of uncles
         uncle_properties_in_sql = test_db_session.query(Uncles).first().to_dict()
-        expected_uncle_properties = {'timestamp': datetime.datetime(2015, 8, 9, 3, 14, 50),
+        expected_uncle_properties = {'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
                                      'current_blocknumber': Decimal('56160'),
                                      'difficulty': u'1640036436734',
                                      'sha3uncles': u'0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347',
@@ -63,7 +63,7 @@ class TestEmptyTables():
         transaction_properties_in_sql = test_db_session.query(Transactions).first().to_dict()
         expected_transaction_properties = {'nonce': Decimal('6'),
                                            'block_number': Decimal('56160'),
-                                           'timestamp': datetime.datetime(2015, 8, 9, 3, 14, 50),
+                                           'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
                                            'transaction_hash': u'0x8696c8669e07ae7e4ceef43945fe9c78252ab76f1a3c16658a04a644b8329736',
                                            'transaction_index': Decimal('0'),
                                            'data': u'0x90b98a110000000000000000000000006463f715d594a1a4ace4bb9c3b288a74decf294d00000000000000000000000000000000000000000000000000000000000003e8',
@@ -80,7 +80,7 @@ class TestEmptyTables():
                                        'block_number': Decimal('56160'),
                                        'contract_address': None,
                                        'transaction_index': Decimal('0'),
-                                       'timestamp': datetime.datetime(2015, 8, 9, 3, 14, 50),
+                                       'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
                                        'cumulative_gas_used': Decimal('50290'),
                                        'transaction_hash': u'0x8696c8669e07ae7e4ceef43945fe9c78252ab76f1a3c16658a04a644b8329736',
                                        'gas_used': Decimal('50290')}
@@ -91,7 +91,7 @@ class TestEmptyTables():
         expected_log_values = {'block_number': Decimal('56160'),
                                'topics_count': Decimal('1'),
                                'log_index': Decimal('0'),
-                               'timestamp': datetime.datetime(2015, 8, 9, 3, 14, 50),
+                               'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
                                'transaction_hash': u'0x8696c8669e07ae7e4ceef43945fe9c78252ab76f1a3c16658a04a644b8329736',
                                'topic_4': u'',
                                'topic_3': u'',

@@ -46,7 +46,7 @@ def add_block_number(block_number, session):
     # getting the block_data from the node
     block_data = w3.eth.getBlock(block_number, full_transactions=True)
     timestamp = to_int(block_data['timestamp'])
-    iso_timestamp = datetime.fromtimestamp(timestamp).isoformat()
+    iso_timestamp = datetime.utcfromtimestamp(timestamp).isoformat()
     block = Blocks.add_block(block_data=block_data, iso_timestamp=iso_timestamp)
     session.add(block)  # added the block data in the db session
 
