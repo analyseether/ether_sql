@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-from web3.utils.encoding import to_int
+from web3.utils.encoding import to_int, to_hex
 
 from ether_sql import w3, PARSE_TRACE
 from ether_sql.models import (
@@ -74,8 +74,8 @@ def add_block_number(block_number, session):
             session.add(log)  # adding the log in db session
 
         if PARSE_TRACE:
-            dict_trace_list = w3.traceTransaction(
-                                           transaction_data['hash'])
+            dict_trace_list = w3.parity.traceTransaction(
+                                           to_hex(transaction_data['hash']))
             if dict_trace_list is not None:
                 for dict_trace in dict_trace_list:
                     trace = Traces.add_trace(dict_trace,

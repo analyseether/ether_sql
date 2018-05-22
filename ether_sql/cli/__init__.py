@@ -32,7 +32,7 @@ def scrape_block_range(start_block_number, end_block_number):
     """
     from sqlalchemy import func
 
-    from ether_sql import node_session, db_engine
+    from ether_sql import w3, db_engine
     from ether_sql.scrapper import scrape_blocks
     from ether_sql.models import Blocks
 
@@ -42,12 +42,16 @@ def scrape_block_range(start_block_number, end_block_number):
     DBSession = sessionmaker(bind=db_engine)
     db_session = DBSession()
 
-    if start_block_number is None:
-        end_block_number = node_session.eth_blockNumber()
     if end_block_number is None:
-        start_block_number = db_session.query(func.max(Blocks.block_number)).scalar()
-        if start_block_number is None:
+        end_block_number = w3.eth.blockNumber
+        logger.debug(end_block_number)
+    if start_block_number is None:
+        sql_block_number = db_session.query(func.max(Blocks.block_number)).scalar()
+        if sql_block_number is None:
             start_block_number = 0
+        else:
+            start_block_number = sql_block_number+1
+    logger.debug(start_block_number)
 
     # casting numbers to integers
     start_block_number = int(start_block_number)
