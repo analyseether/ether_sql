@@ -14,7 +14,7 @@ def parity_settings():
     return infura_settings
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def empty_db_parity_session(parity_settings):
     """
     Parity Fixture containing exmpty database
@@ -23,7 +23,7 @@ def empty_db_parity_session(parity_settings):
     return empty_db_parity_session
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def empty_table_parity_session(empty_db_parity_session):
     """
     Parity Fixture with created but empty tables

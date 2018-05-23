@@ -26,7 +26,7 @@ class TestEmptyTables():
                                    expected_uncle_properties,
                                    expected_transaction_properties,
                                    expected_receipt_properties,
-                                   expected_log_values):
+                                   expected_log_properties):
 
         # first block with a log and an uncle
 
@@ -53,7 +53,7 @@ class TestEmptyTables():
 
         # comparing values of logs
         log_properties_in_sql = empty_table_infura_session.db_session.query(Logs).first().to_dict()
-        assert log_properties_in_sql == expected_log_values
+        assert log_properties_in_sql == expected_log_properties
 
         empty_table_infura_session.db_session.close()
         base.metadata.drop_all(empty_table_infura_session.db_engine)

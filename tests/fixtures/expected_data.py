@@ -66,17 +66,37 @@ def expected_receipt_properties():
 
 
 @pytest.fixture()
-def expected_log_values():
-    expected_log_values = {'block_number': Decimal('56160'),
-                           'topics_count': Decimal('1'),
-                           'log_index': Decimal('0'),
-                           'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
-                           'transaction_hash': u'0x8696c8669e07ae7e4ceef43945fe9c78252ab76f1a3c16658a04a644b8329736',
-                           'topic_4': u'',
-                           'topic_3': u'',
-                           'topic_2': u'',
-                           'topic_1': u'0x16cdf1707799c6655baac6e210f52b94b7cec08adcaf9ede7dfe8649da926146',
-                           'address': u'0xDBB576b5B0e7BF0570A981AAb3AD39A0c5F19EB1',
-                           'transaction_index': Decimal('0'),
-                           'data': u'0x0000000000000000000000009b2c46642caf6b936dc0633da521f1e946b7e18f0000000000000000000000006463f715d594a1a4ace4bb9c3b288a74decf294d00000000000000000000000000000000000000000000000000000000000003e8'}
-    return expected_log_values
+def expected_log_properties():
+    expected_log_properties = {'block_number': Decimal('56160'),
+                               'topics_count': Decimal('1'),
+                               'log_index': Decimal('0'),
+                               'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
+                               'transaction_hash': u'0x8696c8669e07ae7e4ceef43945fe9c78252ab76f1a3c16658a04a644b8329736',
+                               'topic_4': u'',
+                               'topic_3': u'',
+                               'topic_2': u'',
+                               'topic_1': u'0x16cdf1707799c6655baac6e210f52b94b7cec08adcaf9ede7dfe8649da926146',
+                               'address': u'0xDBB576b5B0e7BF0570A981AAb3AD39A0c5F19EB1',
+                               'transaction_index': Decimal('0'),
+                               'data': u'0x0000000000000000000000009b2c46642caf6b936dc0633da521f1e946b7e18f0000000000000000000000006463f715d594a1a4ace4bb9c3b288a74decf294d00000000000000000000000000000000000000000000000000000000000003e8'}
+    return expected_log_properties
+
+
+@pytest.fixture()
+def expected_trace_properties():
+    expected_trace_properties = {'subtraces': Decimal('0'),
+                                 'output': '0x0000000000000000000000000000000000000000000000000000000000000001',
+                                 'gas_used': Decimal('27354'),
+                                 'trace_address': '{}',
+                                 'contract_address': '',
+                                 'error': '',
+                                 'receiver': '0xdbb576b5b0e7bf0570a981aab3ad39a0c5f19eb1',
+                                 'sender': '0x9b2c46642caf6b936dc0633da521f1e946b7e18f',
+                                 'start_gas': Decimal('67064'),
+                                 'value': Decimal('0'),
+                                 'trace_type': 'call',
+                                 'input_data': '0x90b98a110000000000000000000000006463f715d594a1a4ace4bb9c3b288a74decf294d00000000000000000000000000000000000000000000000000000000000003e8',
+                                 'transaction_index': Decimal('0'),
+                                 'transaction_hash': '0x8696c8669e07ae7e4ceef43945fe9c78252ab76f1a3c16658a04a644b8329736',
+                                 'block_number': Decimal('56160')}
+    return expected_trace_properties

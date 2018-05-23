@@ -1,5 +1,4 @@
 import os
-from netrc import netrc
 
 
 class DefaultSettings():
@@ -25,6 +24,17 @@ class DefaultSettings():
     PARSE_TRACE = False
 
 
+class PersonalInfuraSettings(DefaultSettings):
+    NODE_TYPE = "Infura"
+    NODE_API_TOKEN = ""  # your infura api_token
+    NODE_URL = 'https://mainnet.infura.io/{}'.format(NODE_API_TOKEN)
+
+
+class PersonalParitySettings(DefaultSettings):
+    NODE_TYPE = "Parity"
+    PARSE_TRACE = True
+
+
 class TestSettings(DefaultSettings):
     # SQLALCHEMY settings
     SQLALCHEMY_DB = 'ether_sql_tests'
@@ -44,13 +54,8 @@ class ParityTestSettings(TestSettings):
     PARSE_TRACE = True
 
 
-class PersonalInfuraSettings(DefaultSettings):
-    NODE_TYPE = "Infura"
-    NODE_API_TOKEN = netrc().authenticators('infura.io')[2]  # your infura api_token
-    NODE_URL = 'https://mainnet.infura.io/{}'.format(NODE_API_TOKEN)
-
-
 SETTINGS_MAP = {'DefaultSettings': DefaultSettings,
                 'TestSettings': TestSettings,
                 'ParityTestSettings': ParityTestSettings,
-                'PersonalInfuraSettings': PersonalInfuraSettings}
+                'PersonalInfuraSettings': PersonalInfuraSettings,
+                'PersonalParitySettings': PersonalParitySettings,}

@@ -56,7 +56,7 @@ class Traces(base):
     error = Column(String(42))
 
     def to_dict(self):
-        {
+        return {
          'block_number': self.block_number,
          'transaction_hash': self.transaction_hash,
          'trace_type': self.trace_type,
