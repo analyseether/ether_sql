@@ -35,6 +35,10 @@ class PersonalParitySettings(DefaultSettings):
     PARSE_TRACE = True
 
 
+class PersonalGethSettings(DefaultSettings):
+    NODE_TYPE = "Geth"
+
+
 class TestSettings(DefaultSettings):
     # SQLALCHEMY settings
     SQLALCHEMY_DB = 'ether_sql_tests'
@@ -58,4 +62,5 @@ SETTINGS_MAP = {'DefaultSettings': DefaultSettings,
                 'TestSettings': TestSettings,
                 'ParityTestSettings': ParityTestSettings,
                 'PersonalInfuraSettings': PersonalInfuraSettings,
-                'PersonalParitySettings': PersonalParitySettings,}
+                'PersonalParitySettings': PersonalParitySettings,
+                'PersonalGethSettings': PersonalGethSettings}
