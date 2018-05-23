@@ -10,8 +10,8 @@ pytest_plugins = [
 
 @pytest.fixture(scope='function')
 def parity_settings():
-    infura_settings = 'ParityTestSettings'
-    return infura_settings
+    parity_settings = 'ParityTestSettings'
+    return parity_settings
 
 
 @pytest.fixture(scope='function')
