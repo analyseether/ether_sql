@@ -1,5 +1,5 @@
 import pytest
-from ether_sql.setup import Session
+from ether_sql.session import Session
 from ether_sql.models import base
 
 pytest_plugins = [

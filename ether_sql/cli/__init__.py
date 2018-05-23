@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 @click.pass_context
 def cli(ctx, settings):
     """CLI script for ether_sql"""
-    from ether_sql.setup import Session
+    from ether_sql.session import Session
     logger.debug('settings')
     ctx.obj['session'] = Session(settings=settings)
 
