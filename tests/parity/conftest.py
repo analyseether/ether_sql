@@ -12,7 +12,7 @@ def empty_db_infura_session():
     Infura Fixture containing exmpty database
     """
     config = 'TestSettings'
-    empty_db_infura_session = Session(override_settings=config)
+    empty_db_infura_session = Session(settings=config)
     return empty_db_infura_session
 
 
@@ -22,7 +22,7 @@ def empty_db_parity_session():
     Parity Fixture containing exmpty database
     """
     config = 'ParityTestSettings'
-    empty_db_parity_session = Session(override_settings=config)
+    empty_db_parity_session = Session(settings=config)
     return empty_db_parity_session
 
 

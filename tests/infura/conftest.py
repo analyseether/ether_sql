@@ -18,7 +18,7 @@ def empty_db_infura_session(infura_settings):
     """
     Infura Fixture containing exmpty database
     """
-    empty_db_infura_session = Session(override_settings=infura_settings)
+    empty_db_infura_session = Session(settings=infura_settings)
     return empty_db_infura_session
 
 
