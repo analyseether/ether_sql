@@ -1,13 +1,13 @@
 # ether_sql
 A Python library to push ethereum blockchain data into an sql database.
 
-ether_sql was built by [Analyse Ether](https://www.analyseether.com/), with the goal of making Ethereum data easily available to everyone. This library can be used as a backbone for creating block explorers or performing data analysis. 
+ether_sql was built by [Analyse Ether](https://www.analyseether.com/), with the goal of making Ethereum data easily available to everyone. This library can be used as a backbone for creating block explorers or performing data analysis.
 
-It is written in Python 2.7, uses [ethjsonrpc](https://github.com/analyseether/ethjsonrpc) for geting data using JSON-RPC calls and uses [SqlAlchemy](http://docs.sqlalchemy.org/en/latest/) to connect to a postgressql database.
+It is written in Python 3.5+, uses [web3.py](https://github.com/ethereum/web3.py) for geting data using JSON-RPC calls and uses [SqlAlchemy](http://docs.sqlalchemy.org/en/latest/) to connect to a postgressql database.
 
 
 ## Buidl Status
-This is currently in very alpha stage, and not recommended for production use until it has received sufficient testing. 
+This is currently in very alpha stage, and not recommended for production use until it has received sufficient testing.
 Currently supports Geth, Infura and Parity node, but transaction traces (eg. internal transactions) are currently available only with Parity node.
 
 Documentation available at: http://ether-sql.readthedocs.io/en/latest/
@@ -19,9 +19,6 @@ Documentation available at: http://ether-sql.readthedocs.io/en/latest/
 * Install postgresql as database      
 `$ sudo apt-get install postgresql`     
 
-* Install pyethereum dependencies     
-`$ sudo apt-get install libssl-dev build-essential automake pkg-config libtool libffi-dev libgmp-dev libyaml-cpp-dev`
-
 
 ## Python dependencies
 
@@ -30,7 +27,7 @@ Documentation available at: http://ether-sql.readthedocs.io/en/latest/
 `$ source envname\bin\activate`
 
 * Install python libraries     
-`$ pip install -r requirements`
+`$ pip install -r requirements.txt`
 
 
 ## Database setup
@@ -47,35 +44,35 @@ This prompts for a user password, use the same password in the settings.py file
 `$ python ether_sql.py create_tables`
 
 ## Node settings
-Details of connecting to a node are available in the settings.py. Use the settings below for the three supported nodes.
-
-* Infura settings     
+The settings to connect to a node are set in the settings.py file using classes.
+* Infura Settings:
+The class *PersonalInfuraSettings* specifies settings to connect to a normal Infura node. You can fill in the velue of your API token on NODE_API_TOKEN
 ```
-NODE_TYPE = "Infura"  # Available options 'Geth', 'Parity', 'Infura'
-NODE_API_TOKEN = netrc().authenticators('infura.io')[2]  # save the api key in .netrc file with machine name infura.io
-NODE_HOST = 'mainnet.infura.io'
-NODE_PORT = ""  # no need
-```
-
-* Geth settings     
-```
-NODE_TYPE = "Geth"  # Available options 'Geth', 'Parity', 'Infura'
-NODE_API_TOKEN = ""  # no need
-NODE_HOST = 'localhost'
-NODE_PORT = 8545
+class PersonalInfuraSettings(DefaultSettings):
+    NODE_TYPE = "Infura"
+    NODE_API_TOKEN = ""  # your infura api_token
+    NODE_URL = 'https://mainnet.infura.io/{}'.format(NODE_API_TOKEN)
 ```
 
-* Parity settings     
+* Local Node settings
+We use the automatic methods in *web3.py* to connect to a node, if a local node is available then only the **NODE_TYPE** is required. The class *PersonalParitySettings* is used to connect to a local Parity node.
 ```
-NODE_TYPE = "Parity"  # Available options 'Geth', 'Parity', 'Infura'
-NODE_API_TOKEN = ""  # no need
-NODE_HOST = 'localhost'
-NODE_PORT = 8545
+class PersonalParitySettings(DefaultSettings):
+    NODE_TYPE = "Parity"
+    # Use this option to parse traces, needs parity with cli --tracing=on
+    PARSE_TRACE = True
+```
+
+Whereas, the class *PersonalGethSettings* is used to connect to a local Geth node.
+```
+class PersonalGethSettings(DefaultSettings):
+    NODE_TYPE = "Geth"
 ```
 
 # Syncing data
-ether_sql has several built in cli commands to facilitate scraping data. To start the sync just type     
-`$ python ether_sql.py scrape_data `
+ether_sql has several built in cli commands to facilitate scraping data. To start the sync just type.
+`$ python ether_sql.py --settings='SettingsClassName' scrape_data `
 
-To access other helper commands try `$ python ether_sql.py` and explore.
+This will start start pushing the data from ethereum node specified in `SettingsClassName` node to the psql database.
 
+To access other helper commands checkout the [docs](http://ether-sql.readthedocs.io/en/latest/api/cli.html).
