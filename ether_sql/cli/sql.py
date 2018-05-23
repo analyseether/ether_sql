@@ -1,31 +1,33 @@
 import click
 import logging
+from ether_sql.models import base
 
 logger = logging.getLogger(__name__)
 
 
 @click.group()
-def cli():
+@click.pass_context
+def cli(ctx):
     """Manages the sql (create/drop/query tables)."""
 
 
 @cli.command()
-def create_tables():
+@click.pass_context
+def create_tables(ctx):
     """Create the database tables."""
-    from ether_sql.models import base
-    from ether_sql import db_engine
-
-    base.metadata.create_all(db_engine)
+    session = ctx.obj['session']
+    logger.debug("{}".format(session.db_engine.url))
+    base.metadata.create_all(session.db_engine)
     logger.info('Created the tables')
 
 
 @cli.command()
-def drop_tables():
+@click.pass_context
+def drop_tables(ctx):
     """Drop the database tables."""
-    from ether_sql.models import base
-    from ether_sql import db_engine
-
-    base.metadata.drop_all(db_engine)
+    session = ctx.obj['session']
+    logger.debug("{}".format(session.db_engine.url))
+    base.metadata.drop_all(session.db_engine)
     logger.info('Dropped the tables')
 
 
