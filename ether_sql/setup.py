@@ -40,6 +40,8 @@ class Session():
 
         self.w3 = setup_node_session(settings=self.settings)
 
+        setup_logging(settings=self.settings)
+
 
 def setup_logging(settings):
     """
