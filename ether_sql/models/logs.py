@@ -1,7 +1,8 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
 from sqlalchemy import Text, Integer
 import logging
-from ethereum import utils
+
+from web3.utils.encoding import to_int, to_hex
 from ether_sql.models import base
 
 logger = logging.getLogger(__name__)
@@ -70,39 +71,39 @@ class Logs(base):
 
         """
         topics_count = len(log_data['topics'])
-        print topics_count
-        if topics_count == 0:
-            log_data['topics'] = []
-            log_data['topics'].append('')
-            log_data['topics'].append('')
-            log_data['topics'].append('')
-            log_data['topics'].append('')
-        elif topics_count == 1:
-            log_data['topics'].append('')
-            log_data['topics'].append('')
-            log_data['topics'].append('')
-        elif topics_count == 2:
-            log_data['topics'].append('')
-            log_data['topics'].append('')
-        elif topics_count == 3:
-            log_data['topics'].append("")
-        elif topics_count == 4:
-            logger.debug('4 topics found')
-        else:
-            logger.error('More than 4 topics are not possible')
 
-        log = cls(transaction_hash=log_data['transactionHash'],
-                  transaction_index=utils.parse_int_or_hex(log_data['transactionIndex']),
+        log = cls(transaction_hash=to_hex(log_data['transactionHash']),
+                  transaction_index=to_int(log_data['transactionIndex']),
                   topics_count=topics_count,
                   address=log_data['address'],
-                  log_index=utils.parse_int_or_hex(log_data['logIndex']),
+                  log_index=to_int(log_data['logIndex']),
                   data=log_data['data'],
                   block_number=block_number,
                   timestamp=iso_timestamp,
-                  topic_1=log_data['topics'][0],
-                  topic_2=log_data['topics'][1],
-                  topic_3=log_data['topics'][2],
-                  topic_4=log_data['topics'][3])
+                  topic_1='',
+                  topic_2='',
+                  topic_3='',
+                  topic_4='')
+
+        if topics_count == 0:
+            logger.warn('No topics present')
+        elif topics_count == 1:
+            log.topic_1 = to_hex(log_data['topics'][0])
+        elif topics_count == 2:
+            log.topic_1 = to_hex(log_data['topics'][0])
+            log.topic_2 = to_hex(log_data['topics'][1])
+        elif topics_count == 3:
+            log.topic_1 = to_hex(log_data['topics'][0])
+            log.topic_2 = to_hex(log_data['topics'][1])
+            log.topic_3 = to_hex(log_data['topics'][2])
+        elif topics_count == 4:
+            log.topic_1 = to_hex(log_data['topics'][0])
+            log.topic_2 = to_hex(log_data['topics'][1])
+            log.topic_3 = to_hex(log_data['topics'][2])
+            log.topic_4 = to_hex(log_data['topics'][3])
+        else:
+            logger.error('More than 4 topics are not possible')
+
         logger.debug("tx_hash: {}, log_index: {}".format(log.transaction_hash, log.log_index))
 
         return log

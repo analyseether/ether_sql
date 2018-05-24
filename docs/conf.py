@@ -14,20 +14,20 @@
 #
 import os
 import sys
-print os.getcwd()
+print(os.getcwd())
 sys.path.insert(0, os.path.abspath('../'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = u'ether_sql'
-copyright = u'2018, Ankit Chiplunkar'
-author = u'Ankit Chiplunkar'
+project = 'ether_sql'
+copyright = '2018, Ankit Chiplunkar'
+author = 'Ankit Chiplunkar'
 
 # The short X.Y version
-version = u''
+version = ''
 # The full version, including alpha/beta/rc tags
-release = u'0.0.1'
+release = '0.0.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -41,8 +41,12 @@ release = u'0.0.1'
 # ones.
 extensions = [
     'sphinx.ext.viewcode',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinx_click.ext',
 ]
+
+html_favicon = './_static/analyseether.ico'
+
 
 autodoc_default_flags = ['members']
 
@@ -68,7 +72,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -133,8 +137,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'ether_sql.tex', u'ether\\_sql Documentation',
-     u'Ankit CHiplunkar', 'manual'),
+    (master_doc, 'ether_sql.tex', 'ether\\_sql Documentation',
+     'Ankit CHiplunkar', 'manual'),
 ]
 
 
@@ -143,7 +147,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'ether_sql', u'ether_sql Documentation',
+    (master_doc, 'ether_sql', 'ether_sql Documentation',
      [author], 1)
 ]
 
@@ -154,7 +158,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'ether_sql', u'ether_sql Documentation',
+    (master_doc, 'ether_sql', 'ether_sql Documentation',
      author, 'ether_sql', 'One line description of project.',
      'Miscellaneous'),
 ]

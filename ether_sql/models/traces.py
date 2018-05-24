@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, Text, Integer
-from ethereum import utils
 import logging
+from web3.utils.encoding import to_hex
+from web3.utils.formatters import hex_to_integer
 
 from ether_sql.models import base
 
@@ -55,7 +56,7 @@ class Traces(base):
     error = Column(String(42))
 
     def to_dict(self):
-        {
+        return {
          'block_number': self.block_number,
          'transaction_hash': self.transaction_hash,
          'trace_type': self.trace_type,
@@ -84,6 +85,7 @@ class Traces(base):
         :param int block_number: block number of the block where this trance was included
 
         """
+        logger.debug(dict_trace['action'])
         trace = cls(transaction_hash=dict_trace['transactionHash'],
                     block_number=dict_trace['blockNumber'],
                     trace_address=dict_trace['traceAddress'],
@@ -106,26 +108,26 @@ class Traces(base):
             # parsing action
             trace.sender = action['from']
             trace.receiver = action['to']
-            trace.start_gas = utils.parse_int_or_hex(action['gas'])
-            trace.value = utils.parse_int_or_hex(action['value'])
+            trace.start_gas = hex_to_integer(action['gas'])
+            trace.value = hex_to_integer(action['value'])
             trace.input_data = action['input']
             # parsing result
-            if 'result' in dict_trace.keys():
+            if 'result' in list(dict_trace.keys()):
                 result = dict_trace['result']
-                trace.gas_used = utils.parse_int_or_hex(result['gasUsed'])
+                trace.gas_used = hex_to_integer(result['gasUsed'])
                 trace.output = result['output']
             else:
                 trace.error = dict_trace['error']
         elif trace.trace_type == 'create':
             logger.debug('Type {}, action {}'.format(dict_trace['type'], action))
             # parsing action
-            trace.start_gas = utils.parse_int_or_hex(action['gas'])
-            trace.value = utils.parse_int_or_hex(action['value'])
+            trace.start_gas = hex_to_integer(action['gas'])
+            trace.value = hex_to_integer(action['value'])
             trace.input_data = action['init']
             # parsing result
-            if 'result' in dict_trace.keys():
+            if 'result' in list(dict_trace.keys()):
                 result = dict_trace['result']
-                trace.gas_used = utils.parse_int_or_hex(result['gasUsed'])
+                trace.gas_used = hex_to_integer(result['gasUsed'])
                 trace.output = result['code']
                 trace.contract_address = result['address']
             else:
@@ -135,7 +137,7 @@ class Traces(base):
             # parsing action
             trace.sender = action['address']
             trace.receiver = action['refundAddress']
-            trace.value = utils.parse_int_or_hex(action['balance'])
+            trace.value = hex_to_integer(action['balance'])
             # parsing result
             logger.debug('Type encountered {}'.format(dict_trace['type']))
 

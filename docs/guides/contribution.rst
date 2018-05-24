@@ -23,6 +23,21 @@ All our tests can be run using the following command:
   $ python -m pytest ether_sql/tests/
 
 
+Updating the docs
+-----------------
+
+We suggest to create different virtual enviornment for updating the docs.
+
+.. code :: shell
+
+  $ virtualenv venvdocs
+  $ source venvdocs/bin/activate
+  $ pip install -r requirements-docs.txt
+  $ pip install -e . requirements.txt
+
+We use `Sphinx <http://www.sphinx-doc.org/en/master/>`_ to automate the documentation of python modules and `sphinx-click <https://sphinx-click.readthedocs.io/en/latest/>`_ to automate building docs of click commands.
+
+
 Pull Requests
 -------------
 
