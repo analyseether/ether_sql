@@ -1,6 +1,8 @@
 import pytest
+from click.testing import CliRunner
+from ether_sql.cli import cli
 from ether_sql.session import Session
-from ether_sql.models import base
+
 
 pytest_plugins = [
    "tests.fixtures.expected_data",
@@ -9,24 +11,24 @@ pytest_plugins = [
 
 @pytest.fixture(scope='function')
 def infura_settings():
+    """
+    Infura settings with empty tables
+    """
     infura_settings = 'TestSettings'
+    runner = CliRunner()
+
+    # Deleting and creating tables
+    runner.invoke(cli, ['--settings', infura_settings,
+                        'sql', 'drop_tables'])
+    runner.invoke(cli, ['--settings', infura_settings,
+                        'sql', 'create_tables'])
     return infura_settings
 
 
 @pytest.fixture(scope='function')
-def empty_db_infura_session(infura_settings):
+def infura_session(infura_settings):
     """
-    Infura Fixture containing exmpty database
+    Infura session with created but empty tables
     """
-    empty_db_infura_session = Session(settings=infura_settings)
-    return empty_db_infura_session
-
-
-@pytest.fixture(scope='function')
-def empty_table_infura_session(empty_db_infura_session):
-    """
-    Infura Fixture with created but empty tables
-    """
-    empty_table_infura_session = empty_db_infura_session
-    base.metadata.create_all(empty_table_infura_session.db_engine)
-    return empty_table_infura_session
+    infura_session = Session(infura_settings)
+    return infura_session
