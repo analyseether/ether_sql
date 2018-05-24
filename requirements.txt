@@ -12,3 +12,8 @@ Click==6.7
 # Testing and coverage
 pytest==3.0.0
 pytest-cov==2.2.1
+
+# For building docs
+sphinx==1.7.4
+sphinx_rtd_theme==0.3.1
+sphinx_click==1.2.0

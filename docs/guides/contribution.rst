@@ -32,7 +32,6 @@ We suggest to create different virtual enviornment for updating the docs.
 
   $ virtualenv venvdocs
   $ source venvdocs/bin/activate
-  $ pip install -r requirements-docs.txt
   $ pip install -e . requirements.txt
 
 We use `Sphinx <http://www.sphinx-doc.org/en/master/>`_ to automate the documentation of python modules and `sphinx-click <https://sphinx-click.readthedocs.io/en/latest/>`_ to automate building docs of click commands.
