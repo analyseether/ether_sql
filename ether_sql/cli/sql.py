@@ -1,6 +1,8 @@
 import click
 import logging
-from ether_sql.models import base
+from sqlalchemy import func
+
+from ether_sql.models import base, Blocks
 
 logger = logging.getLogger(__name__)
 
@@ -32,15 +34,9 @@ def drop_tables(ctx):
 
 
 @cli.command()
-def sql_blockNumber():
+@click.pass_context
+def blockNumber(ctx):
     """ Gives the current highest block in database"""
-    from ether_sql import db_engine
-    from ether_sql.models import Blocks
-    from sqlalchemy import func
-    from sqlalchemy.orm import sessionmaker
-
-    DBSession = sessionmaker(bind=db_engine)
-    db_session = DBSession()
-
-    max_block_number = db_session.query(func.max(Blocks.block_number)).scalar()
+    session = ctx.obj['session']
+    max_block_number = session.db_session.query(func.max(Blocks.block_number)).scalar()
     click.echo("{}".format(max_block_number))

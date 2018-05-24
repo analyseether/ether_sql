@@ -10,7 +10,7 @@ def cli():
 
 
 @cli.command()
-def eth_blockNumber():
+def blockNumber():
     """
     Gives the most recent block number in the ether node
     """

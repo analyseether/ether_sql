@@ -3,7 +3,7 @@
 
 # SqlAlchemy
 sqlalchemy==1.2.4
-sqlalchemy-migrate==0.11.0
+alembic==0.9.9
 psycopg2-binary==2.7.4
 
 # CLI

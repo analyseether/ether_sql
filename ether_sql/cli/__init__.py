@@ -1,17 +1,24 @@
 import click
 import logging
+from sqlalchemy import func
 
 from ether_sql.cli import sql, ether
+from ether_sql.session import Session
+from ether_sql.scrapper import scrape_blocks, add_block_number
+from ether_sql.models import Blocks
 
 logger = logging.getLogger(__name__)
 
 
 @click.group()
-@click.option('--settings', default='DefaultSettings', help='settings to run ether_sql')
+@click.option('--settings', default='DefaultSettings',
+              help='settings to run ether_sql')
 @click.pass_context
 def cli(ctx, settings):
     """CLI script for ether_sql"""
-    from ether_sql.session import Session
+    if ctx.obj is None:
+        ctx.obj = {}
+
     logger.debug('settings')
     ctx.obj['session'] = Session(settings=settings)
 
@@ -27,11 +34,10 @@ cli.add_command(ether.cli, "ether")
 def scrape_block_range(ctx, start_block_number, end_block_number):
     """
     Pushes the data between start_block_number and end_block_number in the
-    database
+    database. If no values are provided, the start_block_number is the last
+    block_number+1 in sql and end_block_number is the current block_number in
+    node
     """
-    from sqlalchemy import func
-    from ether_sql.scrapper import scrape_blocks
-    from ether_sql.models import Blocks
 
     # A DBSession() instance establishes all conversations with the database
     # and represents a "staging zone" for all the objects loaded into the
@@ -42,7 +48,8 @@ def scrape_block_range(ctx, start_block_number, end_block_number):
         end_block_number = session.w3.eth.blockNumber
         logger.debug(end_block_number)
     if start_block_number is None:
-        sql_block_number = session.db_session.query(func.max(Blocks.block_number)).scalar()
+        sql_block_number = session.db_session.query(
+                                func.max(Blocks.block_number)).scalar()
         if sql_block_number is None:
             start_block_number = 0
         else:
@@ -66,15 +73,15 @@ def scrape_block_range(ctx, start_block_number, end_block_number):
 @click.pass_context
 def scrape_block(ctx, block_number):
     """
-    Pushes the data in block_number in the database
+    Pushes the data at block=block_number in the database
     """
-    from ether_sql.scrapper import add_block_number
 
     session = ctx.obj['session']
     if block_number is not None:
         block_number = int(block_number)
         session = add_block_number(block_number=block_number,
                                    ether_sql_session=session)
+        logger.info("Commiting block: {} to sql".format(block_number))
         session.db_session.commit()
     else:
-        raise ValueError('Please provide a value of --block_number')
+        click.echo(ctx.get_help())

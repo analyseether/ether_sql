@@ -7,7 +7,7 @@ from web3 import (
     HTTPProvider,
 )
 from ether_sql.models import base
-from settings import (
+from ether_sql.settings import (
     DefaultSettings,
     TestSettings,
     ParityTestSettings,
