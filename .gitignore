@@ -17,3 +17,7 @@ docs/_build/*
 
 # nano files
 *.save
+
+# removing eggs
+*.eggs
+*ether_sql.egg-info/
