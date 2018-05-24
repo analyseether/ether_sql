@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
               help='settings to run ether_sql')
 @click.pass_context
 def cli(ctx, settings):
-    """CLI script for ether_sql"""
+    """:code:`ether_sql` is the most basic CLI group with 4 subsequent
+    commands."""
     if ctx.obj is None:
         ctx.obj = {}
 
@@ -23,8 +24,8 @@ def cli(ctx, settings):
     ctx.obj['session'] = Session(settings=settings)
 
 
-cli.add_command(sql.cli, "sql")
-cli.add_command(ether.cli, "ether")
+cli.add_command(sql.sql, "sql")
+cli.add_command(ether.ether, "ether")
 
 
 @cli.command()

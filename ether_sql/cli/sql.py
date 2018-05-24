@@ -9,11 +9,11 @@ logger = logging.getLogger(__name__)
 
 @click.group()
 @click.pass_context
-def cli(ctx):
+def sql(ctx):
     """Manages the sql (create/drop/query tables)."""
 
 
-@cli.command()
+@sql.command()
 @click.pass_context
 def create_tables(ctx):
     """Create the database tables."""
@@ -23,7 +23,7 @@ def create_tables(ctx):
     logger.info('Created the tables')
 
 
-@cli.command()
+@sql.command()
 @click.pass_context
 def drop_tables(ctx):
     """Drop the database tables."""
@@ -33,7 +33,7 @@ def drop_tables(ctx):
     logger.info('Dropped the tables')
 
 
-@cli.command()
+@sql.command()
 @click.pass_context
 def blockNumber(ctx):
     """ Gives the current highest block in database"""

@@ -8,30 +8,30 @@ Install postgresql as database::
 
   $ sudo apt-get install postgresql
 
-Install pyethereum dependencies::
-
-  $ sudo apt-get install libssl-dev build-essential automake pkg-config libtool libffi-dev libgmp-dev libyaml-cpp-dev
-
 
 Python dependencies
 -------------------
+Clone the **ether_sql** library::
+
+  $ git clone https://github.com/analyseether/ether_sql.git
+  $ cd ether_sql
 
 Create and activate a virtual environment::
 
-    $ virtualenv envname
-    $ source envname\bin\activate
+  $ virtualenv envname
+  $ source envname\bin\activate
 
 Install python libraries::
 
-    $ pip install -r requirements
+  $ pip install -e . -r requirements.txt
 
 
 Database setup
 --------------
 
-Create a new psql user and database. This prompts for a user password, use the same password in the variable SQLALCHEMY_PASSWORD of the settings.py file::
+Create a new psql user, this prompts for a user password, use the same password in the variable :code:`SQLALCHEMY_PASSWORD` of the **settings.py** file::
 
-    $ sudo -u postgres createuser -s -P -e $USER
+  $ sudo -u postgres createuser -s -P -e $USER
 
 
 Create the ether_sql database in psql::
@@ -40,32 +40,49 @@ Create the ether_sql database in psql::
 
 Create the tables by executing this command from the repo ether_sql::
 
-    $ python ether_sql.py create_tables`
+    $ ether_sql create_tables
 
 Node settings
 -------------
+The settings to connect to a node are set in the **settings.py** file using classes.
 
-Details of connecting to a node are available in the settings.py. Use the settings below for the three supported nodes.
+Infura Settings:
+^^^^^^^^^^^^^^^^
 
-Infura settings::
+The class **PersonalInfuraSettings** specifies settings to connect to a normal Infura node. You can fill in the value of your API token on **NODE_API_TOKEN**::
 
-    NODE_TYPE = "Infura"  # Available options 'Geth', 'Parity', 'Infura'
-    NODE_API_TOKEN = netrc().authenticators('infura.io')[2]  # save the api key in .netrc file with machine name infura.io
-    NODE_HOST = 'mainnet.infura.io'
-    NODE_PORT = ""  # no need
+  class PersonalInfuraSettings(DefaultSettings):
+      NODE_TYPE = "Infura"
+      NODE_API_TOKEN = ""  # your infura api_token
+      NODE_URL = 'https://mainnet.infura.io/{}'.format(NODE_API_TOKEN)
+
+Local Node settings:
+^^^^^^^^^^^^^^^^^^^^
+
+We use the automatic methods in **web3.py** to connect to a node, if a local node is available then only the **NODE_TYPE** is required. The class **PersonalParitySettings** is used to connect to a local Parity node::
+
+  class PersonalParitySettings(DefaultSettings):
+      NODE_TYPE = "Parity"
+      # Use this option to parse traces, needs parity with cli --tracing=on
+      PARSE_TRACE = True
 
 
-Geth settings::
+Whereas, the class **PersonalGethSettings**  is used to connect to a local Geth node::
 
-  NODE_TYPE = "Geth"  # Available options 'Geth', 'Parity', 'Infura'
-  NODE_API_TOKEN = ""  # no need
-  NODE_HOST = 'localhost'
-  NODE_PORT = 8545
+  class PersonalGethSettings(DefaultSettings):
+      NODE_TYPE = "Geth"
 
 
-Parity settings::
+Syncing data
+------------
 
-  NODE_TYPE = "Parity"  # Available options 'Geth', 'Parity', 'Infura'
-  NODE_API_TOKEN = ""  # no need
-  NODE_HOST = 'localhost'
-  NODE_PORT = 8545
+ether_sql has several built in cli commands to facilitate scraping data. To start the sync just type::
+
+  $ ether_sql scrape_data
+
+This will by default start pushing the data from an Infura node to the psql database. To switch nodes use the settings flag::
+
+  $ ether_sql --settings='PersonalParitySettings' scrape_data
+
+
+To access other Command Line Interfaces (CLI) checkout the `CLI's <./api/cli.html>`_.

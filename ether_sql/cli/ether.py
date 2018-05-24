@@ -6,11 +6,11 @@ logger = logging.getLogger(__name__)
 
 @click.group()
 @click.pass_context
-def cli(ctx):
+def ether(ctx):
     """Manages the ether node (query the node)."""
 
 
-@cli.command()
+@ether.command()
 @click.pass_context
 def blockNumber(ctx):
     """
