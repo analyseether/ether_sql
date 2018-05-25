@@ -78,11 +78,11 @@ Syncing data
 
 ether_sql has several built in cli commands to facilitate scraping data. To start the sync just type::
 
-  $ ether_sql scrape_data
+  $ ether_sql scrape_block_range
 
 This will by default start pushing the data from an Infura node to the psql database. To switch nodes use the settings flag::
 
-  $ ether_sql --settings='PersonalParitySettings' scrape_data
+  $ ether_sql --settings='PersonalParitySettings' scrape_block_range
 
 
 To access other Command Line Interfaces (CLI) checkout the `CLI's <./api/cli.html>`_.

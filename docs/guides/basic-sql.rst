@@ -1,7 +1,7 @@
 SQL Examples
 ============
 
-This is a list of some basic SQL queries written with the synced database. This page is a follow up on the `Quickstart <quickstart>`_ page, perform the basic database sync there to start to write these queries.
+This is a list of some basic SQL queries written with the synced database. This page is a follow up on the `Quickstart <quickstart.html>`_ page, perform the basic database sync there to start to write these queries.
 
 Block with first transaction
 ----------------------------
