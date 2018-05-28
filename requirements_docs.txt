@@ -1,3 +1,0 @@
-sphinx==1.7.4
-sphinx_rtd_theme==0.3.1
-sphinx_click==1.2.0

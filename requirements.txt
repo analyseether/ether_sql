@@ -1,5 +1,5 @@
 # modified ethjsonrpc
--e git://github.com/analyseether/web3.py.git@develop/web3py#egg=web3.py
+-e git://github.com/ethereum/web3.py.git@master#egg=web3.py
 
 # SqlAlchemy
 sqlalchemy==1.2.4
