@@ -1,6 +1,9 @@
 import logging
+import os
 import sqlalchemy
 import sys
+import argparse
+from alembic.config import Config
 from web3 import (
     Web3,
     IPCProvider,
@@ -33,7 +36,7 @@ class Session():
             raise ValueError('Invalid setting, choose one of these {}'
                              .format([key for key in SETTINGS_MAP.keys()]))
 
-        self.db_engine = setup_db_engine(settings=self.settings)
+        self.db_engine, self.url = setup_db_engine(settings=self.settings)
 
         DBSession = sessionmaker(bind=self.db_engine)
         self.db_session = DBSession()
@@ -84,7 +87,7 @@ def setup_db_engine(settings):
     base.metadata.bind = engine
     logger.info('Connected to the db {}'.format(settings.SQLALCHEMY_DB))
 
-    return engine
+    return engine, url
 
 
 def setup_node_session(settings):
@@ -114,3 +117,23 @@ def setup_node_session(settings):
         logger.error('{} node failed connecting to network'.format(settings.NODE_TYPE))
 
     return w3
+
+
+def setup_alembic_config(url):
+    "setting up generic config for alembic migrations"
+    directory = 'ether_sql/migrations'
+    config = Config(os.path.join(directory, 'alembic.ini'))
+    config.set_main_option('script_location', directory)
+    config.cmd_opts = argparse.Namespace()   # arguments stub
+    x_arg = 'url=' + url
+    if not hasattr(config.cmd_opts, 'x'):
+        if x_arg is not None:
+            setattr(config.cmd_opts, 'x', [])
+            if isinstance(x_arg, list) or isinstance(x_arg, tuple):
+                for x in x_arg:
+                    config.cmd_opts.x.append(x)
+            else:
+                config.cmd_opts.x.append(x_arg)
+        else:
+            setattr(config.cmd_opts, 'x', None)
+    return config
