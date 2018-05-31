@@ -17,7 +17,10 @@ Documentation available at: http://ether-sql.readthedocs.io
 ## Linux dependencies
 
 * Install postgresql as database      
-`$ sudo apt-get install postgresql`     
+`$ sudo apt-get install postgresql`
+
+* Install python headers
+`$ sudp apt-get install python3-pip`    
 
 
 ## Python dependencies

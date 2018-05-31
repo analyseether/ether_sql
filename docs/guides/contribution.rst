@@ -23,6 +23,27 @@ All our tests can be run using the following command:
   $ python -m pytest ether_sql/tests/
 
 
+Updating the database tables
+----------------------------
+
+We use `Alembic <http://alembic.zzzcomputing.com/en/latest/tutorial.html>`_ to
+handle database migrations.
+
+You can create new tables by adding a new class in the :code:`ether_sql/models` module. More details on available columns are available at `SQLAlchemy guides <http://docs.sqlalchemy.org/en/latest/orm/tutorial.html>`_
+
+To create SQL commands that can reflect the changes in the database, run the following command.
+
+
+.. code :: shell
+
+  $ ether_sql sql migrate -m "message for changes"
+
+Next upgrade the database using the following command:
+
+.. code :: shell
+
+  $ ether_sql sql upgrade
+
 Updating the docs
 -----------------
 

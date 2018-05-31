@@ -91,7 +91,7 @@ def add_block_number(block_number, ether_sql_session):
     uncle_list = block_data['uncles']
     for i in range(0, len(uncle_list)):
         # Unfortunately there is no command eth_getUncleByHash
-        uncle_data = ether_sql_session.w3.eth.getUncleFromBlock(
+        uncle_data = ether_sql_session.w3.eth.getUncleByBlock(
                                   block_number, i)
         uncle = Uncles.add_uncle(uncle_data=uncle_data,
                                  block_number=block_number,

@@ -8,6 +8,10 @@ Install postgresql as database::
 
   $ sudo apt-get install postgresql
 
+Install python3 headers:
+
+  $ sudo apt-get install python3-pip
+
 
 Python dependencies
 -------------------
