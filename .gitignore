@@ -11,6 +11,7 @@ src/*
 *.pytest_cache
 tests/*.cache
 *.cache
+*.coverage
 
 # removing doc builds
 docs/_build/*
