@@ -17,16 +17,29 @@ Documentation available at: http://ether-sql.readthedocs.io
 Please find the detailed installation guide [here](http://ether-sql.readthedocs.io/en/latest/installation.html)
 
 
-# Syncing data
-ether_sql has several built in cli commands to facilitate scraping data. To start the sync just type.
+# Command line options
+ether_sql has several built in cli commands to facilitate scraping data. 
+
+## Syncing the data
+To start the sync just type.
 
 
 `$ ether_sql scrape_block_range `
 
-This will start start pushing the data from an Infura node to the psql database. To switch nodes use the settings flag:
+This will start start pushing the data from an Infura node to the psql database. 
+
+
+## Switching nodes
+
+To switch nodes use the settings flag:
 
 
 `$ ether_sql --settings='PersonalParitySettings' scrape_block_range `
 
+## Exporting as csv
 
+To export the pushed data as a csv
+
+`$ ether_sql sql export_to_csv`
 To access other Command Line Interfaces (CLI) checkout the [cli docs](http://ether-sql.readthedocs.io/en/latest/api/cli.html).
+
