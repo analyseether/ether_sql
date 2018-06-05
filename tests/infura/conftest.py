@@ -1,9 +1,12 @@
 import pytest
+import logging
 from click.testing import CliRunner
 from ether_sql.cli import cli
 from ether_sql.session import Session
 
+logger = logging.getLogger(__name__)
 
+# This will include all fixtures in fixtures directory
 pytest_plugins = [
    "tests.fixtures.expected_data",
 ]
@@ -16,7 +19,7 @@ def infura_settings():
     """
     infura_settings = 'TestSettings'
     runner = CliRunner()
-
+    logger.debug('Dropping tables')
     # Deleting and creating tables
     runner.invoke(cli, ['--settings', infura_settings,
                         'sql', 'drop_tables'])
