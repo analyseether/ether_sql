@@ -25,23 +25,26 @@ class TestEmptyDB():
         assert result.exit_code == 0
         assert result.output == 'None\n'
 
+
+class TestOneBlockDb():
+
     def test_export_to_csv(self,
                            infura_settings,
-                           infura_session,
-                           infura_session_block_56160):
+                           infura_session):
         directory = 'test_export'
         call(["rm", "-rf", directory])
-
         runner = CliRunner()
+        runner.invoke(cli, ['--settings', infura_settings,
+                            'scrape_block', '--block_number', 56160])
         result = runner.invoke(cli, ['--settings', infura_settings,
                                      'sql', 'export_to_csv',
                                      '--directory', directory])
-
         assert result.exit_code == 0
         # match the names of exported tables
         metadata = MetaData(infura_session.db_engine)
         metadata.reflect()
         tables_in_sql = list(metadata.tables)
+        metadata.drop_all()
         files_in_directory = os.listdir(directory)
         for sql_table in tables_in_sql:
             assert sql_table+'.csv' in files_in_directory

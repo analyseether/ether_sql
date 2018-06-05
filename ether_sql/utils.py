@@ -1,5 +1,8 @@
 import os
+import logging
 from sqlalchemy import MetaData
+
+logger = logging.getLogger(__name__)
 
 
 def export_to_csv(ether_sql_session, directory):
@@ -23,5 +26,6 @@ def export_to_csv(ether_sql_session, directory):
         copy_sql = 'COPY {} TO STDOUT WITH CSV HEADER'.format(_table_name)
 
         cursor.copy_expert(copy_sql, dbcopy_to)
+        logger.debug('exported table {}'.format(_table_name))
 
     conn.close()

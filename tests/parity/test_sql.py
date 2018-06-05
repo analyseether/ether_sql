@@ -25,13 +25,17 @@ class TestEmptyDB():
         assert result.exit_code == 0
         assert result.output == 'None\n'
 
+
+class TestOneBlockDb():
+
     def test_export_to_csv(self,
                            parity_settings,
-                           parity_session,
-                           parity_session_block_56160):
+                           parity_session):
         directory = 'test_export'
         call(["rm", "-rf", directory])
         runner = CliRunner()
+        runner.invoke(cli, ['--settings', parity_settings,
+                            'scrape_block', '--block_number', 56160])
         result = runner.invoke(cli, ['--settings', parity_settings,
                                      'sql', 'export_to_csv',
                                      '--directory', directory])
@@ -40,6 +44,7 @@ class TestEmptyDB():
         metadata = MetaData(parity_session.db_engine)
         metadata.reflect()
         tables_in_sql = list(metadata.tables)
+        metadata.drop_all()
         files_in_directory = os.listdir(directory)
         for sql_table in tables_in_sql:
             assert sql_table+'.csv' in files_in_directory
