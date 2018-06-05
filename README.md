@@ -41,5 +41,7 @@ To switch nodes use the settings flag:
 To export the pushed data as a csv
 
 `$ ether_sql sql export_to_csv`
+
+
 To access other Command Line Interfaces (CLI) checkout the [cli docs](http://ether-sql.readthedocs.io/en/latest/api/cli.html).
 
