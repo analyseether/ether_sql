@@ -67,3 +67,17 @@ def upgrade(ctx):
     """
     command.upgrade(setup_alembic_config(url=ctx.obj['session'].url),
                     revision='head', sql=False, tag=None)
+
+
+@sql.command()
+@click.pass_context
+@click.option('--directory', default='.',
+              help='Directory where the csv should be exported')
+def export_to_csv(ctx, directory):
+    """
+    Export the data pushed into sql as csv
+    """
+    from ether_sql.utils import export_to_csv
+    session = ctx.obj['session']
+    export_to_csv(ether_sql_session=session, directory=directory)
+    click.echo("Exported all csv's")
