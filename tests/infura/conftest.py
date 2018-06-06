@@ -1,37 +1,20 @@
 import pytest
-import logging
-from click.testing import CliRunner
-from ether_sql.cli import cli
-from ether_sql.session import Session
-
-logger = logging.getLogger(__name__)
-
-# This will include all fixtures in fixtures directory
-pytest_plugins = [
-   "tests.fixtures.expected_data",
-]
+from tests.fixtures.common import (
+    session_settings,
+    session_block_56160,
+)
 
 
-@pytest.fixture(scope='function')
+@pytest.yield_fixture(scope="module")
 def infura_settings():
-    """
-    Infura settings with empty tables
-    """
-    infura_settings = 'TestSettings'
-    runner = CliRunner()
-    logger.debug('Dropping tables')
-    # Deleting and creating tables
-    runner.invoke(cli, ['--settings', infura_settings,
-                        'sql', 'drop_tables'])
-    runner.invoke(cli, ['--settings', infura_settings,
-                        'sql', 'create_tables'])
-    return infura_settings
+    infura_settings = session_settings(settings_name="TestSettings")
+    yield infura_settings
 
 
-@pytest.fixture(scope='function')
-def infura_session(infura_settings):
-    """
-    Infura session with created but empty tables
-    """
-    infura_session = Session(infura_settings)
-    return infura_session
+@pytest.yield_fixture(scope="module")
+def infura_session_block_56160():
+    infura_session_block_56160 = session_block_56160(settings_name=
+                                                     "TestSettings")
+    yield infura_session_block_56160
+
+    infura_session_block_56160.db_session.close()

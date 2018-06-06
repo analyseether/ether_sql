@@ -1,17 +1,14 @@
-from click.testing import CliRunner
-from ether_sql.cli import cli
+from tests.common_tests.ether import (
+    listening_to_node,
+    ether_block_number
+)
 
 
-class TestEtherCli():
+def test_parity_listening_to_node(parity_settings):
+    listening_to_node(parity_settings)
+    pass
 
-    def test_listening_to_infura_node(self, parity_session):
-        listening = parity_session.w3.isConnected()
-        assert listening is True
 
-    def test_ether_block_number(self,
-                                parity_settings,
-                                parity_session):
-        runner = CliRunner()
-        result = runner.invoke(cli, ['--settings', parity_settings,
-                               'ether', 'blocknumber'])
-        assert result.exit_code == 0
+def test_parity_ether_block_number(parity_settings):
+    ether_block_number(parity_settings)
+    pass
