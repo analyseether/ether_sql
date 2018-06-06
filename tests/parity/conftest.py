@@ -1,36 +1,20 @@
 import pytest
-import logging
-from click.testing import CliRunner
-from ether_sql.cli import cli
-from ether_sql.session import Session
-
-logger = logging.getLogger(__name__)
-
-pytest_plugins = [
-   "tests.fixtures.expected_data",
-]
+from tests.fixtures.common import (
+    session_settings,
+    session_block_56160,
+)
 
 
-@pytest.fixture(scope='function')
+@pytest.yield_fixture(scope="module")
 def parity_settings():
-    """
-    Parity test settings with empty tables
-    """
-    infura_settings = 'ParityTestSettings'
-    runner = CliRunner()
-    logger.debug('Dropping tables')
-    # Deleting and creating tables
-    runner.invoke(cli, ['--settings', infura_settings,
-                        'sql', 'drop_tables'])
-    runner.invoke(cli, ['--settings', infura_settings,
-                        'sql', 'create_tables'])
-    return infura_settings
+    parity_settings = session_settings(settings_name="ParityTestSettings")
+    yield parity_settings
 
 
-@pytest.fixture(scope='function')
-def parity_session(parity_settings):
-    """
-    Parity test session with created but empty tables
-    """
-    parity_session = Session(parity_settings)
-    return parity_session
+@pytest.yield_fixture(scope="module")
+def parity_session_block_56160():
+    parity_session_block_56160 = session_block_56160(settings_name=
+                                                     "ParityTestSettings")
+    yield parity_session_block_56160
+
+    parity_session_block_56160.db_session.close()

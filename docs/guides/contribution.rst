@@ -20,7 +20,7 @@ All our tests can be run using the following command:
 
 .. code :: shell
 
-  $ python -m pytest ether_sql/tests/
+  $ python -m pytest tests/
 
 
 Updating the database tables
