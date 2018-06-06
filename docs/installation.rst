@@ -42,9 +42,9 @@ Create the ether_sql database in psql::
 
     $ createdb ether_sql
 
-Create the tables by executing this command from the repo ether_sql::
+We use Alembic to manage tables, you can create the tables by using this command::
 
-    $ ether_sql create_tables
+    $ ether_sql sql upgrade_tables
 
 Node settings
 -------------

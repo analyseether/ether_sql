@@ -2,7 +2,7 @@ import click
 import logging
 from sqlalchemy import func
 from alembic import command
-from ether_sql.models import base, Blocks
+from ether_sql.models import Blocks
 from ether_sql.session import setup_alembic_config
 
 
@@ -18,21 +18,20 @@ def sql(ctx):
 @sql.command()
 @click.pass_context
 def create_tables(ctx):
-    """Create the database tables."""
-    session = ctx.obj['session']
-    logger.debug("{}".format(session.db_engine.url))
-    base.metadata.create_all(session.db_engine)
-    logger.info('Created the tables')
+    """
+    This is a depreceated function. Alias for `ether_sql sql upgrade_tables`
+    """
+    ctx.invoke(upgrade_tables)
 
 
 @sql.command()
 @click.pass_context
 def drop_tables(ctx):
-    """Drop the database tables."""
-    session = ctx.obj['session']
-    logger.debug("{}".format(session.db_engine.url))
-    base.metadata.drop_all(session.db_engine)
-    logger.info('Dropped the tables')
+    """ Alias for 'alembic downgrade base'.
+    Downgrade to no database tables
+    """
+    command.downgrade(setup_alembic_config(url=ctx.obj['session'].url),
+                      revision='base', sql=False, tag=None)
 
 
 @sql.command()
@@ -61,7 +60,7 @@ def migrate(ctx, m):
 
 @sql.command()
 @click.pass_context
-def upgrade(ctx):
+def upgrade_tables(ctx):
     """ Alias for 'alembic upgrade head'.
     Upgrade to latest model version
     """
