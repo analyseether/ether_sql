@@ -10,15 +10,8 @@ from web3 import (
     HTTPProvider,
 )
 from ether_sql.models import base
-from ether_sql.settings import (
-    DefaultSettings,
-    TestSettings,
-    ParityTestSettings,
-    PersonalInfuraSettings,
-    SETTINGS_MAP,
-)
+from ether_sql.settings import SETTINGS_MAP
 from sqlalchemy.orm import sessionmaker
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,6 +28,8 @@ class Session():
         except KeyError:
             raise ValueError('Invalid setting, choose one of these {}'
                              .format([key for key in SETTINGS_MAP.keys()]))
+        setup_logging(settings=self.settings)
+        logger.debug(self.settings.LOG_LEVEL)
 
         self.db_engine, self.url = setup_db_engine(settings=self.settings)
 
@@ -42,8 +37,6 @@ class Session():
         self.db_session = DBSession()
 
         self.w3 = setup_node_session(settings=self.settings)
-
-        setup_logging(settings=self.settings)
 
 
 def setup_logging(settings):

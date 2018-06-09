@@ -1,11 +1,14 @@
 import os
-import logging
+from celery.utils.log import get_task_logger
 from sqlalchemy import MetaData
+from ether_sql.globals import get_current_session
+from ether_sql.tasks.worker import celery
 
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
-def export_to_csv(ether_sql_session, directory):
+@celery.task()
+def export_to_csv(directory='.'):
     """
     Export the data in the psql to a csv
 
@@ -13,13 +16,14 @@ def export_to_csv(ether_sql_session, directory):
     :param str directory: Directory where the data should be exported
     """
 
+    current_session = get_current_session()
     # create the directory is it does not exist
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    metadata = MetaData(ether_sql_session.db_engine)
+    metadata = MetaData(current_session.db_engine)
     metadata.reflect()
-    conn = ether_sql_session.db_engine.raw_connection()
+    conn = current_session.db_engine.raw_connection()
     cursor = conn.cursor()
     for _table_name in metadata.tables:
         dbcopy_to = open('{}/{}.csv'.format(directory, _table_name), 'wb')

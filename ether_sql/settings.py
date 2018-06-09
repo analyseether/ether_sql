@@ -1,5 +1,14 @@
 import os
 
+# Task queue settings
+REDIS_URL = "redis://localhost:6379/0"
+CELERY_BROKER = REDIS_URL
+CELERY_BACKEND = CELERY_BROKER
+CELERYD_TASK_SOFT_TIME_LIMIT = 60
+CELERYD_TASK_TIME_LIMIT = 120
+CELERYD_LOG_FORMAT = '[%(asctime)s][PID:%(process)d][%(levelname)s][%(processName)s] %(message)s'
+CELERYD_TASK_LOG_FORMAT = '[%(asctime)s][PID:%(process)d][%(levelname)s][%(processName)s] task_name=%(task_name)s taks_id=%(task_id)s %(message)s'
+
 
 class DefaultSettings():
     # SQLALCHEMY settings

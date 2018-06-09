@@ -12,6 +12,9 @@ Install python3 headers::
 
   $ sudo apt-get install python3-pip
 
+Install redis server::
+
+  $ sudo apt-get install redis-server
 
 Python dependencies
 -------------------
