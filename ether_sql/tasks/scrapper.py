@@ -15,7 +15,7 @@ from ether_sql.models import (
 logger = get_task_logger(__name__)
 
 
-def scrape_blocks(start_block_number, end_block_number):
+def scrape_blocks(start_block_number, end_block_number, mode):
     """
     Main function which starts scrapping data from the node and pushes it into
     the sql database
@@ -29,7 +29,12 @@ def scrape_blocks(start_block_number, end_block_number):
 
     for block_number in range(start_block_number, end_block_number+1):
         logger.debug('Adding block: {}'.format(block_number))
-        add_block_number.delay(block_number)
+        if mode == 'parallel':
+            add_block_number.delay(block_number)
+        elif mode == 'single':
+            add_block_number(block_number)
+        else:
+            raise ValueError('Mode {} is unavailable'.format(mode))
 
 
 @celery.task()
@@ -41,6 +46,8 @@ def add_block_number(block_number):
     :param int block_number: The block number to add to the database
     """
     current_session = get_current_session()
+    current_session.setup_db_session()
+
     # getting the block_data from the node
     block_data = current_session.w3.eth.getBlock(
                             block_identifier=block_number,
@@ -96,4 +103,4 @@ def add_block_number(block_number):
         current_session.db_session.add(uncle)
 
     logger.info("Commiting block: {} to sql".format(block_number))
-    current_session.db_session.commit()
+    current_session.db_session_safe_commit()

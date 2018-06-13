@@ -7,7 +7,7 @@ from ether_sql.session import Session
 from ether_sql.tasks.scrapper import scrape_blocks, add_block_number
 from ether_sql.models import Blocks
 from ether_sql.globals import push_session, get_current_session
-
+from ether_sql.tasks.worker import celery_is_running, redis_is_running
 logger = logging.getLogger(__name__)
 
 
@@ -46,6 +46,7 @@ def scrape_block_range(ctx, start_block_number, end_block_number):
     # and represents a "staging zone" for all the objects loaded into the
     # database session object. Any change made against the objects in the
     current_session = get_current_session()
+    current_session.setup_db_session()
 
     if end_block_number is None:
         end_block_number = current_session.w3.eth.blockNumber
@@ -66,8 +67,16 @@ def scrape_block_range(ctx, start_block_number, end_block_number):
     if start_block_number == end_block_number:
         logger.warning('Start block: {}; end block: {}; no data scrapped'
                        .format(start_block_number, end_block_number))
-    scrape_blocks(start_block_number=start_block_number,
-                  end_block_number=end_block_number)
+    if celery_is_running() and redis_is_running():
+        logger.info('Celery and Redis are running, using multiple threads')
+        scrape_blocks(start_block_number=start_block_number,
+                      end_block_number=end_block_number,
+                      mode='parallel')
+    else:
+        logger.info('Celery or Redis is not running, using single thread')
+        scrape_blocks(start_block_number=start_block_number,
+                      end_block_number=end_block_number,
+                      mode='single')
 
 
 @cli.command()

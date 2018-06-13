@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class Session():
+
     def __init__(self, settings=None):
 
         if settings is None:
@@ -33,10 +34,19 @@ class Session():
 
         self.db_engine, self.url = setup_db_engine(settings=self.settings)
 
+        self.w3 = setup_node_session(settings=self.settings)
+
+    def setup_db_session(self):
         DBSession = sessionmaker(bind=self.db_engine)
         self.db_session = DBSession()
 
-        self.w3 = setup_node_session(settings=self.settings)
+    def db_session_safe_commit(self):
+        try:
+            self.db_session.commit()
+        except:
+            self.db_session.rollback()
+        finally:
+            pass
 
 
 def setup_logging(settings):

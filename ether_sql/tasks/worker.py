@@ -1,24 +1,55 @@
 import os
 import logging
 from celery import Celery
+import celery.bin.base
+import celery.bin.celery
+import celery.platforms
 from celery.signals import (
     worker_process_init,
     worker_process_shutdown,
 )
+import socket
+import redis
+from urllib.parse import urlparse
 from ether_sql import settings
 from ether_sql.globals import get_current_session, push_session
 
 
 logger = logging.getLogger(__name__)
 
-celery = Celery('ether_sql',
-                broker=settings.CELERY_BROKER,
-                include='ether_sql.tasks')
+app = Celery('ether_sql',
+             broker=settings.CELERY_BROKER,
+             include='ether_sql.tasks')
 
-celery.conf.update(CELERY_RESULT_BACKEND=settings.CELERY_BACKEND,
-                   CELERY_TIMEZONE='UTC',
-                   CELERYD_LOG_FORMAT=settings.CELERYD_LOG_FORMAT,
-                   CELERYD_TASK_LOG_FORMAT=settings.CELERYD_TASK_LOG_FORMAT)
+app.conf.update(CELERY_RESULT_BACKEND=settings.CELERY_BACKEND,
+                CELERY_TIMEZONE='UTC',
+                CELERYD_LOG_FORMAT=settings.CELERYD_LOG_FORMAT,
+                CELERYD_TASK_LOG_FORMAT=settings.CELERYD_TASK_LOG_FORMAT)
+
+
+def celery_is_running():
+    status = celery.bin.celery.CeleryCommand.commands['status']()
+    status.app = status.get_app()
+    try:
+        status.run()
+        return True
+    except celery.bin.base.Error as e:
+        if e.status == celery.platforms.EX_UNAVAILABLE:
+            return False
+        raise e
+
+
+def redis_is_running():
+    connection_settings = urlparse(settings.REDIS_URL)
+    r = redis.StrictRedis(host=connection_settings.netloc.split(':')[0],
+                          port=connection_settings.netloc.split(':')[1],
+                          db=connection_settings.path.split('/')[1])
+    try:
+        r.get(None)
+        return True
+    except socket.gaierror:
+        logger.info('Redis is not running, using single thread')
+        return False
 
 
 @worker_process_init.connect
@@ -34,4 +65,9 @@ def init_celery_session(**kwargs):
 @worker_process_shutdown.connect
 def close_celery_session(**kwargs):
     current_session = get_current_session()
-    current_session.db_session.close
+    try:
+        current_session.db_session.close
+    except AttributeError:
+        logger.debug('db_session attribute does not exist')
+    finally:
+        pass

@@ -13,9 +13,13 @@ def celery(ctx):
 
 @celery.command()
 @click.pass_context
-def start(ctx):
+@click.option('-l', '--loglevel', default='info',
+              help='Specifies the log level for the celery workers')
+@click.option('-c', '--concurrency', default=4,
+              help='Number of parallel workers')
+def start(ctx, loglevel, concurrency):
     """
     Starts the celery workers
     """
-    from ether_sql.tasks.worker import celery
-    celery.start(argv=['celery', 'worker', '-l', 'info', '-c2'])
+    from ether_sql.tasks.worker import app
+    app.start(argv=['celery', 'worker', '-l', loglevel, '-c{}'.format(concurrency)])
