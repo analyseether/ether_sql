@@ -25,6 +25,13 @@ SubGroup: ether_sql sql
   :prog: ether_sql sql
   :show-nested:
 
+SubGroup: ether_sql celery
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. click:: ether_sql.cli.celery:celery
+  :prog: ether_sql celery
+  :show-nested:
+
 Command: ether_sql scrape_block_range
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

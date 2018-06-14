@@ -14,13 +14,17 @@ Use the following command to create a new database:
 
   $ createdb ether_sql_tests
 
-
-All our tests can be run using the following command:
-
+If you are testing using Infura node use the command:
 
 .. code :: shell
 
-  $ python -m pytest tests/
+  $ python -m pytest tests/infura
+
+If you are using a local parity node use the command:
+
+.. code :: shell
+
+  $ python -m pytest tests/parity
 
 
 Updating the database tables
