@@ -1,6 +1,7 @@
 from decimal import Decimal
 import datetime
 
+EXPECTED_META_INFO = {'last_pushed_block': Decimal('56160')}
 
 EXPECTED_BLOCK_PROPERTIES = {'block_number': Decimal('56160'),
                              'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),

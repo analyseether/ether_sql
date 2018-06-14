@@ -11,3 +11,4 @@ from ether_sql.models.uncles import Uncles
 from ether_sql.models.receipts import Receipts
 from ether_sql.models.logs import Logs
 from ether_sql.models.traces import Traces
+from ether_sql.models.meta_info import MetaInfo

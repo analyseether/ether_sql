@@ -13,12 +13,18 @@ class CeleryWorkerThread(threading.Thread):
         self.app = app
         self.settings = settings
         self.workers = []
+        self.ready = threading.Event()
 
     def on_worker_init(self, sender=None, **kwargs):
         self.workers.append(sender)
 
+    def on_worker_ready(self, sender=None, **kwargs):
+        if not self.ready.is_set():
+            self.ready.set()
+
     def run(self):
         signals.worker_init.connect(self.on_worker_init)
+        signals.worker_ready.connect(self.on_worker_ready)
 
         session = Session(self.settings)
         push_session(session)
@@ -30,3 +36,4 @@ class CeleryWorkerThread(threading.Thread):
             w.terminate()
 
         signals.worker_init.disconnect(self.on_worker_init)
+        signals.worker_ready.disconnect(self.on_worker_ready)
