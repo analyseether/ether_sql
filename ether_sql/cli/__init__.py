@@ -2,11 +2,12 @@ import click
 import logging
 from sqlalchemy import func
 
-from ether_sql.cli import sql, ether
+from ether_sql.cli import sql, ether, celery
 from ether_sql.session import Session
-from ether_sql.scrapper import scrape_blocks, add_block_number
+from ether_sql.tasks.scrapper import scrape_blocks, add_block_number
 from ether_sql.models import Blocks
-
+from ether_sql.globals import push_session, get_current_session
+from ether_sql.tasks.worker import celery_is_running, redis_is_running
 logger = logging.getLogger(__name__)
 
 
@@ -17,15 +18,13 @@ logger = logging.getLogger(__name__)
 def cli(ctx, settings):
     """:code:`ether_sql` is the most basic CLI group with 4 subsequent
     commands."""
-    if ctx.obj is None:
-        ctx.obj = {}
-
-    logger.debug('settings')
-    ctx.obj['session'] = Session(settings=settings)
+    current_session = Session(settings=settings)
+    push_session(current_session)
 
 
 cli.add_command(sql.sql, "sql")
 cli.add_command(ether.ether, "ether")
+cli.add_command(celery.celery, "celery")
 
 
 @cli.command()
@@ -38,18 +37,22 @@ def scrape_block_range(ctx, start_block_number, end_block_number):
     database. If no values are provided, the start_block_number is the last
     block_number+1 in sql and end_block_number is the current block_number in
     node
+
+    :param int start_block_number: starting block number of scraping
+    :param int end_block_number: end block number of scraping
     """
 
     # A DBSession() instance establishes all conversations with the database
     # and represents a "staging zone" for all the objects loaded into the
     # database session object. Any change made against the objects in the
-    session = ctx.obj['session']
+    current_session = get_current_session()
+    current_session.setup_db_session()
 
     if end_block_number is None:
-        end_block_number = session.w3.eth.blockNumber
+        end_block_number = current_session.w3.eth.blockNumber
         logger.debug(end_block_number)
     if start_block_number is None:
-        sql_block_number = session.db_session.query(
+        sql_block_number = current_session.db_session.query(
                                 func.max(Blocks.block_number)).scalar()
         if sql_block_number is None:
             start_block_number = 0
@@ -64,9 +67,16 @@ def scrape_block_range(ctx, start_block_number, end_block_number):
     if start_block_number == end_block_number:
         logger.warning('Start block: {}; end block: {}; no data scrapped'
                        .format(start_block_number, end_block_number))
-    scrape_blocks(ether_sql_session=session,
-                  start_block_number=start_block_number,
-                  end_block_number=end_block_number)
+    if celery_is_running() and redis_is_running():
+        logger.info('Celery and Redis are running, using multiple threads')
+        scrape_blocks(start_block_number=start_block_number,
+                      end_block_number=end_block_number,
+                      mode='parallel')
+    else:
+        logger.info('Celery or Redis is not running, using single thread')
+        scrape_blocks(start_block_number=start_block_number,
+                      end_block_number=end_block_number,
+                      mode='single')
 
 
 @cli.command()
@@ -77,12 +87,8 @@ def scrape_block(ctx, block_number):
     Pushes the data at block=block_number in the database
     """
 
-    session = ctx.obj['session']
     if block_number is not None:
         block_number = int(block_number)
-        session = add_block_number(block_number=block_number,
-                                   ether_sql_session=session)
-        logger.info("Commiting block: {} to sql".format(block_number))
-        session.db_session.commit()
+        add_block_number(block_number=block_number)
     else:
         click.echo(ctx.get_help())

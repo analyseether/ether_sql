@@ -25,4 +25,3 @@ def block_number(settings):
                            'sql', 'blocknumber'])
     logger.debug('{}'.format(result))
     assert result.exit_code == 0
-    assert result.output == 'None\n'

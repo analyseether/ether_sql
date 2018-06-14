@@ -1,5 +1,6 @@
 import click
 import logging
+from ether_sql.globals import get_current_session
 
 logger = logging.getLogger(__name__)
 
@@ -16,5 +17,5 @@ def blockNumber(ctx):
     """
     Gives the most recent block number in the ether node
     """
-    session = ctx.obj['session']
-    click.echo(session.w3.eth.blockNumber)
+    current_session = get_current_session()
+    click.echo(current_session.w3.eth.blockNumber)

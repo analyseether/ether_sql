@@ -4,7 +4,7 @@ from sqlalchemy import func
 from alembic import command
 from ether_sql.models import Blocks
 from ether_sql.session import setup_alembic_config
-
+from ether_sql.globals import get_current_session
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,8 @@ def drop_tables(ctx):
     """ Alias for 'alembic downgrade base'.
     Downgrade to no database tables
     """
-    command.downgrade(setup_alembic_config(url=ctx.obj['session'].url),
+    current_session = get_current_session()
+    command.downgrade(setup_alembic_config(url=current_session.url),
                       revision='base', sql=False, tag=None)
 
 
@@ -38,24 +39,28 @@ def drop_tables(ctx):
 @click.pass_context
 def blockNumber(ctx):
     """ Gives the current highest block in database"""
-    session = ctx.obj['session']
-    max_block_number = session.db_session.query(func.max(Blocks.block_number)).scalar()
+    current_session = get_current_session()
+    current_session.setup_db_session()
+
+    max_block_number = current_session.db_session.query(
+                        func.max(Blocks.block_number)).scalar()
     click.echo("{}".format(max_block_number))
 
 
 @sql.command()
-@click.option('-m', default=None,
+@click.option('-m', '--message', default=None,
               help='Write a message specifying what changed')
 @click.pass_context
-def migrate(ctx, m):
+def migrate(ctx, message):
     """ Alias for 'alembic revision --autogenerate'
     Run this command after changing sql tables
     """
-    if m is None:
+    current_session = get_current_session()
+    if message is None:
         click.echo(ctx.get_help())
     else:
-        command.revision(setup_alembic_config(url=ctx.obj['session'].url),
-                         message=m, autogenerate=True, sql=None)
+        command.revision(setup_alembic_config(url=current_session.url),
+                         message=message, autogenerate=True, sql=None)
 
 
 @sql.command()
@@ -64,7 +69,8 @@ def upgrade_tables(ctx):
     """ Alias for 'alembic upgrade head'.
     Upgrade to latest model version
     """
-    command.upgrade(setup_alembic_config(url=ctx.obj['session'].url),
+    current_session = get_current_session()
+    command.upgrade(setup_alembic_config(url=current_session.url),
                     revision='head', sql=False, tag=None)
 
 
@@ -76,7 +82,12 @@ def export_to_csv(ctx, directory):
     """
     Export the data pushed into sql as csv
     """
-    from ether_sql.utils import export_to_csv
-    session = ctx.obj['session']
-    export_to_csv(ether_sql_session=session, directory=directory)
+    from ether_sql.tasks.export import export_to_csv
+    from ether_sql.tasks.worker import celery_is_running, redis_is_running
+    if celery_is_running() and redis_is_running():
+        logger.info('Celery and Redis are running, using multiple threads')
+        export_to_csv.delay(directory=directory)
+    else:
+        logger.info('Celery or Redis is not running, using single thread')
+        export_to_csv(directory=directory)
     click.echo("Exported all csv's")

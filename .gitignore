@@ -22,3 +22,10 @@ docs/_build/*
 # removing eggs
 *.eggs
 *ether_sql.egg-info/
+*venv
+
+# removing exported files
+*.csv
+
+# removing redis connection files
+dump.rdb
