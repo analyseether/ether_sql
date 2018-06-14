@@ -10,6 +10,7 @@ from ether_sql.models import (
     Uncles,
     Logs,
     Traces,
+    MetaInfo,
 )
 from tests.common_tests.expected_data import (
     EXPECTED_BLOCK_PROPERTIES,
@@ -18,6 +19,7 @@ from tests.common_tests.expected_data import (
     EXPECTED_RECEIPT_PROPERTIES,
     EXPECTED_LOG_PROPERTIES,
     EXPECTED_TRACE_PROPERTIES,
+    EXPECTED_META_INFO,
 )
 
 
@@ -41,6 +43,16 @@ def export_to_csv_single_thread(node_session_block_56160):
 def verify_block_contents(node_session_block_56160):
     # comparing values of blocks
     node_session_block_56160.setup_db_session()
+
+    number_of_rows_in_meta_info = node_session_block_56160.db_session.\
+        query(MetaInfo).count()
+    meta_info_properties_in_sql = node_session_block_56160.db_session.\
+        query(MetaInfo).first().to_dict()
+    assert number_of_rows_in_meta_info == 1
+    print(meta_info_properties_in_sql)
+    assert meta_info_properties_in_sql == EXPECTED_META_INFO
+
+
     block_properties_in_sql = node_session_block_56160.db_session.\
         query(Blocks).filter_by(block_number=56160).first().to_dict()
     assert block_properties_in_sql == EXPECTED_BLOCK_PROPERTIES
@@ -79,4 +91,5 @@ def push_block_range_single_thread(settings_name):
                                  'scrape_block_range',
                                  '--start_block_number', 0,
                                  '--end_block_number', 10])
+    print(result.exc_info)
     assert result.exit_code == 0

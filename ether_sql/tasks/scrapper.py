@@ -10,6 +10,7 @@ from ether_sql.models import (
     Receipts,
     Logs,
     Traces,
+    MetaInfo,
 )
 
 logger = get_task_logger(__name__)
@@ -27,14 +28,16 @@ def scrape_blocks(start_block_number, end_block_number, mode):
     logger.debug("Start block: {}".format(start_block_number))
     logger.debug('End block: {}'.format(end_block_number))
 
+    r = None
     for block_number in range(start_block_number, end_block_number+1):
         logger.debug('Adding block: {}'.format(block_number))
         if mode == 'parallel':
-            add_block_number.delay(block_number)
+            r = add_block_number.delay(block_number)
         elif mode == 'single':
             add_block_number(block_number)
         else:
             raise ValueError('Mode {} is unavailable'.format(mode))
+    return r
 
 
 @celery.task()
@@ -101,6 +104,15 @@ def add_block_number(block_number):
                                  block_number=block_number,
                                  iso_timestamp=iso_timestamp)
         current_session.db_session.add(uncle)
+
+    meta_info = current_session.db_session.query(MetaInfo).first()
+    if meta_info is None:
+        # No rows have been inserted yet
+        meta_info = MetaInfo(last_pushed_block=block_number)
+    else:
+        meta_info.last_pushed_block = block_number
+    current_session.db_session.add(meta_info)
+    logger.debug('{}'.format(meta_info.to_dict()))
 
     logger.info("Commiting block: {} to sql".format(block_number))
     current_session.db_session_safe_commit()

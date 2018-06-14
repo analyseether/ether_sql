@@ -1,8 +1,7 @@
 import click
 import logging
-from sqlalchemy import func
 from alembic import command
-from ether_sql.models import Blocks
+from ether_sql.models import MetaInfo
 from ether_sql.session import setup_alembic_config
 from ether_sql.globals import get_current_session
 
@@ -42,9 +41,13 @@ def blockNumber(ctx):
     current_session = get_current_session()
     current_session.setup_db_session()
 
-    max_block_number = current_session.db_session.query(
-                        func.max(Blocks.block_number)).scalar()
-    click.echo("{}".format(max_block_number))
+    meta_info = current_session.db_session.query(MetaInfo).first()
+    current_session.db_session.close()
+
+    if meta_info is None:
+        click.echo(None)
+    else:
+        click.echo("{}".format(meta_info.last_pushed_block))
 
 
 @sql.command()
@@ -78,16 +81,23 @@ def upgrade_tables(ctx):
 @click.pass_context
 @click.option('--directory', default='.',
               help='Directory where the csv should be exported')
-def export_to_csv(ctx, directory):
+@click.option('--mode', default='single',
+              help='Choose single is using same thread or parallel if \
+              using multiple threads')
+def export_to_csv(ctx, directory, mode):
     """
     Export the data pushed into sql as csv
     """
     from ether_sql.tasks.export import export_to_csv
     from ether_sql.tasks.worker import celery_is_running, redis_is_running
-    if celery_is_running() and redis_is_running():
-        logger.info('Celery and Redis are running, using multiple threads')
-        export_to_csv.delay(directory=directory)
-    else:
-        logger.info('Celery or Redis is not running, using single thread')
+    if mode == 'parallel':
+        if celery_is_running() and redis_is_running():
+            logger.info('Celery and Redis are running, using multiple threads')
+            export_to_csv.delay(directory=directory)
+        else:
+            raise AttributeError('Switch on celery and redis to use parallel mode')
+    elif mode == 'single':
         export_to_csv(directory=directory)
+    else:
+        raise ValueError('The mode: {} is not recognized'.format(mode))
     click.echo("Exported all csv's")

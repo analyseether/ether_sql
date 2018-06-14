@@ -3,16 +3,19 @@ from tests.fixtures.common import (
     session_settings,
     session_block_56160,
     celery_worker_thread,
+    drop_session_tables,
 )
 import logging
 
 logger = logging.getLogger(__name__)
+PARITY_SETTINGS = "ParityTestSettings"
 
 
 @pytest.yield_fixture(scope="module")
 def parity_settings():
-    parity_settings = session_settings(settings_name="ParityTestSettings")
+    parity_settings = session_settings(settings_name=PARITY_SETTINGS)
     yield parity_settings
+    drop_session_tables(PARITY_SETTINGS)
 
 
 @pytest.yield_fixture(scope="module")
@@ -20,7 +23,6 @@ def parity_session_block_56160():
     parity_session_block_56160 = session_block_56160(settings_name=
                                                      "ParityTestSettings")
     yield parity_session_block_56160
-
     try:
         parity_session_block_56160.db_session.close()
     except AttributeError:

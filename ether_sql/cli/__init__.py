@@ -30,8 +30,11 @@ cli.add_command(celery.celery, "celery")
 @cli.command()
 @click.option('--start_block_number', default=None, help='start block number')
 @click.option('--end_block_number', default=None, help='end block number')
+@click.option('--mode', default='single',
+              help='Choose single is using same thread or parallel if \
+              using multiple threads')
 @click.pass_context
-def scrape_block_range(ctx, start_block_number, end_block_number):
+def scrape_block_range(ctx, start_block_number, end_block_number, mode):
     """
     Pushes the data between start_block_number and end_block_number in the
     database. If no values are provided, the start_block_number is the last
@@ -67,16 +70,20 @@ def scrape_block_range(ctx, start_block_number, end_block_number):
     if start_block_number == end_block_number:
         logger.warning('Start block: {}; end block: {}; no data scrapped'
                        .format(start_block_number, end_block_number))
-    if celery_is_running() and redis_is_running():
-        logger.info('Celery and Redis are running, using multiple threads')
+    if mode == 'parallel':
+        if celery_is_running() and redis_is_running():
+            logger.info('Celery and Redis are running, using multiple threads')
+            scrape_blocks(start_block_number=start_block_number,
+                          end_block_number=end_block_number,
+                          mode=mode)
+        else:
+            raise AttributeError('Switch on celery and redis to use paralel mode')
+    elif mode == 'single':
         scrape_blocks(start_block_number=start_block_number,
                       end_block_number=end_block_number,
-                      mode='parallel')
+                      mode=mode)
     else:
-        logger.info('Celery or Redis is not running, using single thread')
-        scrape_blocks(start_block_number=start_block_number,
-                      end_block_number=end_block_number,
-                      mode='single')
+        raise ValueError('The mode: {} is not recognized'.format(mode))
 
 
 @cli.command()
