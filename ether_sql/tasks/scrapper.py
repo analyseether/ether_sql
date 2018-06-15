@@ -11,6 +11,8 @@ from ether_sql.models import (
     Logs,
     Traces,
     MetaInfo,
+    StateDiff,
+    StorageDiff,
 )
 
 logger = get_task_logger(__name__)
@@ -61,10 +63,19 @@ def add_block_number(block_number):
                              iso_timestamp=iso_timestamp)
     current_session.db_session.add(block)  # added the block data in the db session
 
-    logger.debug('Reached this spot')
+    if current_session.settings.PARSE_TRACE:
+        block_trace_list = current_session.w3.parity.\
+            traceReplayBlockTransactions(block_number,
+                                         mode=['trace'])
+
+    if current_session.settings.PARSE_STATE_DIFF:
+        block_state_list = current_session.w3.parity.\
+            traceReplayBlockTransactions(block_number,
+                                         mode=['stateDiff'])
+
     transaction_list = block_data['transactions']
     # loop to get the transaction, receipts, logs and traces of the block
-    for transaction_data in transaction_list:
+    for index, transaction_data in enumerate(transaction_list):
         transaction = Transactions.add_transaction(transaction_data,
                                                    block_number=block_number,
                                                    iso_timestamp=iso_timestamp)
@@ -76,24 +87,34 @@ def add_block_number(block_number):
         receipt = Receipts.add_receipt(receipt_data,
                                        block_number=block_number,
                                        timestamp=iso_timestamp)
+        current_session.db_session.add(receipt)
 
-        current_session.db_session.add(receipt)  # added the receipt in the database
-
-        logs_list = receipt_data['logs']
-        for dict_log in logs_list:
-            log = Logs.add_log(dict_log, block_number=block_number,
-                               iso_timestamp=iso_timestamp)
-            current_session.db_session.add(log)  # adding the log in db session
+        log_list = receipt_data['logs']
+        Logs.add_log_list(current_session=current_session,
+                          log_list=log_list,
+                          block_number=block_number,
+                          timestamp=transaction.timestamp)
 
         if current_session.settings.PARSE_TRACE:
-            dict_trace_list = current_session.w3.parity.traceTransaction(
-                                           to_hex(transaction_data['hash']))
-            if dict_trace_list is not None:
-                for dict_trace in dict_trace_list:
-                    trace = Traces.add_trace(dict_trace,
-                                             block_number=block_number,
-                                             timestamp=iso_timestamp)
-                    current_session.db_session.add(trace)  # added the trace in the db session
+            trace_list = block_trace_list[index]['trace']
+            Traces.add_trace_list(
+                    current_session=current_session,
+                    trace_list=trace_list,
+                    transaction_hash=transaction.transaction_hash,
+                    transaction_index=transaction.transaction_index,
+                    block_number=transaction.block_number,
+                    timestamp=transaction.timestamp)
+
+        if current_session.settings.PARSE_STATE_DIFF:
+            state_diff_dict = block_state_list[index]['state_diff']
+            if state_diff_dict is not None:
+                StateDiff.add_state_diff_dict(
+                    current_session=current_session,
+                    state_diff_dict=state_diff_dict,
+                    transaction_hash=transaction.transaction_hash,
+                    transaction_index=transaction.transaction_index,
+                    block_number=transaction.block_number,
+                    timestamp=transaction.timestamp)
 
     uncle_list = block_data['uncles']
     for i in range(0, len(uncle_list)):
