@@ -40,6 +40,7 @@ class Blocks(base):
     uncles = relationship('Uncles', backref='blocks')
     logs = relationship('Logs', backref='blocks')
     traces = relationship('Traces', backref='blocks')
+    state_diff = relationship('StateDiff', backref='blocks')
 
     def to_dict(self):
         return {

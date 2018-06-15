@@ -104,8 +104,8 @@ class StateDiff(base):
         nonce_from, nonce_to, nonce_diff = cls._parseStateDiff(
                                            state_diff_row['nonce'],
                                            'nonce')
-        code_from, code_to = cls._parseStateDiff(
-                                    state_diff_row['code'], 'code')
+        code_from, code_to, code_diff = cls._parseStateDiff(
+                                        state_diff_row['code'], 'code')
 
         state_diff = cls(block_number=block_number,
                          timestamp=timestamp,

@@ -106,7 +106,7 @@ def add_block_number(block_number):
                     timestamp=transaction.timestamp)
 
         if current_session.settings.PARSE_STATE_DIFF:
-            state_diff_dict = block_state_list[index]['state_diff']
+            state_diff_dict = block_state_list[index]['stateDiff']
             if state_diff_dict is not None:
                 StateDiff.add_state_diff_dict(
                     current_session=current_session,

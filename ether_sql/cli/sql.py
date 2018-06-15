@@ -1,7 +1,7 @@
 import click
 import logging
 from alembic import command
-from ether_sql.models import MetaInfo
+from sqlalchemy import func
 from ether_sql.session import setup_alembic_config
 from ether_sql.globals import get_current_session
 
@@ -41,13 +41,11 @@ def blockNumber(ctx):
     current_session = get_current_session()
     current_session.setup_db_session()
 
-    meta_info = current_session.db_session.query(MetaInfo).first()
+    max_block_number = current_session.db_session.query(
+        func.max(Blocks.block_number)).scalar()
     current_session.db_session.close()
 
-    if meta_info is None:
-        click.echo(None)
-    else:
-        click.echo("{}".format(meta_info.last_pushed_block))
+    click.echo(max_block_number)
 
 
 @sql.command()

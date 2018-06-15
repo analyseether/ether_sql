@@ -40,6 +40,7 @@ class Transactions(base):
     receipt = relationship('Receipts', backref='transactions')
     logs = relationship('Logs', backref='transactions')
     traces = relationship('Traces', backref='transactions')
+    state_diff = relationship('StateDiff', backref='transactions')
 
     def to_dict(self):
         return {
