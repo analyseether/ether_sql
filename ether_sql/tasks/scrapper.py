@@ -1,6 +1,6 @@
 from datetime import datetime
 from celery.utils.log import get_task_logger
-from web3.utils.encoding import to_int, to_hex
+from web3.utils.encoding import to_int
 from ether_sql.globals import get_current_session
 from ether_sql.tasks.worker import celery
 from ether_sql.models import (
@@ -12,7 +12,6 @@ from ether_sql.models import (
     Traces,
     MetaInfo,
     StateDiff,
-    StorageDiff,
 )
 
 logger = get_task_logger(__name__)
@@ -61,17 +60,27 @@ def add_block_number(block_number):
     iso_timestamp = datetime.utcfromtimestamp(timestamp).isoformat()
     block = Blocks.add_block(block_data=block_data,
                              iso_timestamp=iso_timestamp)
-    current_session.db_session.add(block)  # added the block data in the db session
+    # added the block data in the db session
+    current_session.db_session.add(block)
 
-    if current_session.settings.PARSE_TRACE:
+    if current_session.settings.PARSE_TRACE and block_number != 0:
         block_trace_list = current_session.w3.parity.\
             traceReplayBlockTransactions(block_number,
                                          mode=['trace'])
 
-    if current_session.settings.PARSE_STATE_DIFF:
+    if current_session.settings.PARSE_STATE_DIFF and block_number != 0:
         block_state_list = current_session.w3.parity.\
             traceReplayBlockTransactions(block_number,
                                          mode=['stateDiff'])
+    uncle_list = block_data['uncles']
+    for i in range(0, len(uncle_list)):
+        # Unfortunately there is no command eth_getUncleByHash
+        uncle_data = current_session.w3.eth.getUncleByBlock(
+                                  block_number, i)
+        uncle = Uncles.add_uncle(uncle_data=uncle_data,
+                                 block_number=block_number,
+                                 iso_timestamp=iso_timestamp)
+        current_session.db_session.add(uncle)
 
     transaction_list = block_data['transactions']
     # loop to get the transaction, receipts, logs and traces of the block
@@ -115,17 +124,11 @@ def add_block_number(block_number):
                     transaction_index=transaction.transaction_index,
                     block_number=transaction.block_number,
                     timestamp=transaction.timestamp)
+            state_diff_miner = StateDiff.add_mining_rewards(
+                current_session=current_session,
+                block_number=block_number)
 
-    uncle_list = block_data['uncles']
-    for i in range(0, len(uncle_list)):
-        # Unfortunately there is no command eth_getUncleByHash
-        uncle_data = current_session.w3.eth.getUncleByBlock(
-                                  block_number, i)
-        uncle = Uncles.add_uncle(uncle_data=uncle_data,
-                                 block_number=block_number,
-                                 iso_timestamp=iso_timestamp)
-        current_session.db_session.add(uncle)
-
+    # updating the meta info table
     meta_info = current_session.db_session.query(MetaInfo).first()
     if meta_info is None:
         # No rows have been inserted yet
@@ -136,4 +139,5 @@ def add_block_number(block_number):
     logger.debug('{}'.format(meta_info.to_dict()))
 
     logger.info("Commiting block: {} to sql".format(block_number))
-    current_session.db_session_safe_commit()
+    # current_session.db_session_safe_commit()
+    return current_session

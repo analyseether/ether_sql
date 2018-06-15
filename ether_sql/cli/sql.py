@@ -4,6 +4,7 @@ from alembic import command
 from sqlalchemy import func
 from ether_sql.session import setup_alembic_config
 from ether_sql.globals import get_current_session
+from ether_sql.models import Blocks
 
 logger = logging.getLogger(__name__)
 

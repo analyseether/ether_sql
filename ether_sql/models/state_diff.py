@@ -12,6 +12,13 @@ import logging
 from web3.utils.formatters import hex_to_integer
 from ether_sql.models import base
 from ether_sql.models.storage_diff import StorageDiff
+from ether_sql.models.transactions import Transactions
+from ether_sql.models.blocks import Blocks
+from ether_sql.constants import (
+    FORK_BLOCK_NUMBER,
+    PRE_BYZANTINIUM_REWARD,
+    POST_BYZANTINIUM_REWARD,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -96,16 +103,15 @@ class StateDiff(base):
         return state_from, state_to, state_diff
 
     @classmethod
-    def add_state_diff(cls, state_diff_row, address, transaction_hash,
-                       transaction_index, block_number, timestamp):
-        balance_from, balance_to, balance_diff = cls._parseStateDiff(
-                                                state_diff_row['balance'],
-                                                'balance')
-        nonce_from, nonce_to, nonce_diff = cls._parseStateDiff(
-                                           state_diff_row['nonce'],
-                                           'nonce')
-        code_from, code_to, code_diff = cls._parseStateDiff(
-                                        state_diff_row['code'], 'code')
+    def add_state_diff(cls, balance_diff, nonce_diff, code_from, code_to,
+                       address, transaction_hash, transaction_index,
+                       block_number, timestamp, miner=None, fees=None,
+                       state_diff_type=None):
+
+        if nonce_diff is not None:
+            state_diff_type = 'sender'
+        elif address == miner and balance_diff == fees:
+            state_diff_type = 'fees'
 
         state_diff = cls(block_number=block_number,
                          timestamp=timestamp,
@@ -115,22 +121,39 @@ class StateDiff(base):
                          balance_diff=balance_diff,
                          nonce_diff=nonce_diff,
                          code_from=code_from,
-                         code_to=code_to)
+                         code_to=code_to,
+                         state_diff_type=state_diff_type)
         return state_diff
 
     @classmethod
     def add_state_diff_dict(cls, current_session, state_diff_dict,
                             transaction_hash, transaction_index, block_number,
                             timestamp):
+        transaction = current_session.db_session.query(Transactions).\
+            filter_by(transaction_hash=transaction_hash).first()
+        miner = transaction.blocks.miner
+        fees = transaction.gas_price*transaction.receipt[0].gas_used
 
         for address in state_diff_dict:
+            balance_from, balance_to, balance_diff = cls._parseStateDiff(
+                state_diff_dict[address]['balance'], 'balance')
+            nonce_from, nonce_to, nonce_diff = cls._parseStateDiff(
+                state_diff_dict[address]['nonce'], 'nonce')
+            code_from, code_to, code_diff = cls._parseStateDiff(
+                state_diff_dict[address]['code'], 'code')
+
             state_diff = cls.add_state_diff(
-                            state_diff_row=state_diff_dict[address],
+                            balance_diff=balance_diff,
+                            nonce_diff=nonce_diff,
+                            code_from=code_from,
+                            code_to=code_to,
                             address=address,
                             transaction_hash=transaction_hash,
                             transaction_index=transaction_index,
                             block_number=block_number,
-                            timestamp=timestamp)
+                            timestamp=timestamp,
+                            miner=miner,
+                            fees=fees)
             current_session.db_session.add(state_diff)
 
             if state_diff_dict[address]['storage'] is not {}:
@@ -144,3 +167,43 @@ class StateDiff(base):
                         transaction_index=transaction_index,
                         block_number=block_number,
                         timestamp=timestamp)
+
+    @classmethod
+    def add_mining_rewards(cls, current_session, block_number):
+        block = current_session.db_session.query(Blocks).\
+            filter_by(block_number=block_number).first()
+
+        miner_reward = PRE_BYZANTINIUM_REWARD
+        if block.block_number > FORK_BLOCK_NUMBER['Byzantium']:
+            miner_reward = POST_BYZANTINIUM_REWARD
+        # adding the miner reward
+        state_diff = StateDiff.add_state_diff(
+            balance_diff=miner_reward,
+            nonce_diff=None,
+            code_from=None,
+            code_to=None,
+            address=block.miner,
+            transaction_hash=None,
+            transaction_index=None,
+            block_number=block_number,
+            timestamp=block.timestamp,
+            state_diff_type='miner'
+            )
+        current_session.db_session.add(state_diff)
+        # adding the uncles
+        for uncle in block.uncles:
+            factor = (uncle.uncle_blocknumber + 8 - uncle.current_blocknumber)/8.0
+            uncle_reward = factor*miner_reward
+            state_diff = StateDiff.add_state_diff(
+                balance_diff=uncle_reward,
+                nonce_diff=None,
+                code_from=None,
+                code_to=None,
+                address=uncle.miner,
+                transaction_hash=None,
+                transaction_index=None,
+                block_number=block_number,
+                timestamp=block.timestamp,
+                state_diff_type='uncle'
+                )
+            current_session.db_session.add(state_diff)
