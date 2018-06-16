@@ -127,10 +127,10 @@ def add_block_number(block_number):
                     timestamp=transaction.timestamp,
                     miner=block.miner,
                     fees=fees)
-            StateDiff.add_mining_rewards(
-                current_session=current_session,
-                block=block)
 
+    if current_session.settings.PARSE_STATE_DIFF:
+        StateDiff.add_mining_rewards(current_session=current_session,
+                                     block=block)
     # updating the meta info table
     meta_info = current_session.db_session.query(MetaInfo).first()
     if meta_info is None:

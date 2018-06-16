@@ -102,13 +102,3 @@ def verify_block_contents(node_session_block_56160):
         for i in range(0, len(storage_diff_property_in_sql)):
             assert storage_diff_property_in_sql[i].to_dict() == \
                     EXPECTED_STORAGE_DIFF_PROPERTIES[i]
-
-
-def push_block_range_single_thread(settings_name):
-    runner = CliRunner()
-    result = runner.invoke(cli, ['--settings', settings_name,
-                                 'scrape_block_range',
-                                 '--start_block_number', 0,
-                                 '--end_block_number', 10])
-    print(result.exc_info)
-    assert result.exit_code == 0

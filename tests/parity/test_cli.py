@@ -1,13 +1,7 @@
 from tests.common_tests.cli import (
     export_to_csv_single_thread,
     verify_block_contents,
-    push_block_range_single_thread,
 )
-
-
-def test_parity_push_block_range(parity_settings):
-    push_block_range_single_thread(parity_settings)
-    pass
 
 
 class TestParityBlock56160():
