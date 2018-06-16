@@ -97,6 +97,7 @@ def add_block_number(block_number):
                                        block_number=block_number,
                                        timestamp=iso_timestamp)
         current_session.db_session.add(receipt)
+        fees = int(transaction.gas_price)*int(receipt.gas_used)
 
         log_list = receipt_data['logs']
         Logs.add_log_list(current_session=current_session,
@@ -123,10 +124,12 @@ def add_block_number(block_number):
                     transaction_hash=transaction.transaction_hash,
                     transaction_index=transaction.transaction_index,
                     block_number=transaction.block_number,
-                    timestamp=transaction.timestamp)
-            state_diff_miner = StateDiff.add_mining_rewards(
+                    timestamp=transaction.timestamp,
+                    miner=block.miner,
+                    fees=fees)
+            StateDiff.add_mining_rewards(
                 current_session=current_session,
-                block_number=block_number)
+                block=block)
 
     # updating the meta info table
     meta_info = current_session.db_session.query(MetaInfo).first()
@@ -139,5 +142,4 @@ def add_block_number(block_number):
     logger.debug('{}'.format(meta_info.to_dict()))
 
     logger.info("Commiting block: {} to sql".format(block_number))
-    # current_session.db_session_safe_commit()
-    return current_session
+    current_session.db_session_safe_commit()

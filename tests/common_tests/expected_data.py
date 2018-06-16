@@ -90,7 +90,8 @@ EXPECTED_STATE_DIFF_PROPERTIES.append({
     'nonce_diff': None,
     'code_from': None,
     'code_to': None,
-    'state_diff_type': None})
+    'state_diff_type': 'fees'}
+)
 EXPECTED_STATE_DIFF_PROPERTIES.append({
     'block_number': Decimal('56160'),
     'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
@@ -101,7 +102,7 @@ EXPECTED_STATE_DIFF_PROPERTIES.append({
     'nonce_diff': 1,
     'code_from': None,
     'code_to': None,
-    'state_diff_type': None})
+    'state_diff_type': 'sender'})
 EXPECTED_STATE_DIFF_PROPERTIES.append({
     'block_number': Decimal('56160'),
     'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
@@ -113,7 +114,28 @@ EXPECTED_STATE_DIFF_PROPERTIES.append({
     'code_from': None,
     'code_to': None,
     'state_diff_type': None})
-
+EXPECTED_STATE_DIFF_PROPERTIES.append({
+    'block_number': Decimal('56160'),
+    'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
+    'transaction_hash': None,
+    'transaction_index': None,
+    'address': '0x3F98e477a361F777DA14611a7e419A75Fd238b6b',
+    'balance_diff': Decimal('5000000000000000000'),
+    'nonce_diff': None,
+    'code_from': None,
+    'code_to': None,
+    'state_diff_type': 'miner'})
+EXPECTED_STATE_DIFF_PROPERTIES.append({
+    'block_number': Decimal('56160'),
+    'timestamp': datetime.datetime(2015, 8, 9, 1, 14, 50),
+    'transaction_hash': None,
+    'transaction_index': None,
+    'address': '0xbe4532e1b1db5c913cf553be76180c1777055403',
+    'balance_diff': Decimal('3750000000000000000.00'),
+    'nonce_diff': None,
+    'code_from': None,
+    'code_to': None,
+    'state_diff_type': 'uncle'})
 
 EXPECTED_STORAGE_DIFF_PROPERTIES = []
 EXPECTED_STORAGE_DIFF_PROPERTIES.append({
