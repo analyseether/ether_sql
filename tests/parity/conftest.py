@@ -20,9 +20,9 @@ def parity_settings():
 
 
 @pytest.yield_fixture(scope="module")
-def parity_session_block_56160():
+def parity_session_block_56160(parity_settings):
     parity_session_block_56160 = session_block_56160(settings_name=
-                                                     "ParityTestSettings")
+                                                     parity_settings)
     yield parity_session_block_56160
     try:
         parity_session_block_56160.db_session.close()
