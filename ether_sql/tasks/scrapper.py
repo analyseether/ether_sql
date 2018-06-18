@@ -1,6 +1,6 @@
 from datetime import datetime
 from celery.utils.log import get_task_logger
-from web3.utils.encoding import to_int, to_hex
+from web3.utils.encoding import to_int
 from ether_sql.globals import get_current_session
 from ether_sql.tasks.worker import celery
 from ether_sql.models import (
@@ -11,6 +11,7 @@ from ether_sql.models import (
     Logs,
     Traces,
     MetaInfo,
+    StateDiff,
 )
 
 logger = get_task_logger(__name__)
@@ -59,12 +60,31 @@ def add_block_number(block_number):
     iso_timestamp = datetime.utcfromtimestamp(timestamp).isoformat()
     block = Blocks.add_block(block_data=block_data,
                              iso_timestamp=iso_timestamp)
-    current_session.db_session.add(block)  # added the block data in the db session
+    # added the block data in the db session
+    current_session.db_session.add(block)
 
-    logger.debug('Reached this spot')
+    if current_session.settings.PARSE_TRACE and block_number != 0:
+        block_trace_list = current_session.w3.parity.\
+            traceReplayBlockTransactions(block_number,
+                                         mode=['trace'])
+
+    if current_session.settings.PARSE_STATE_DIFF and block_number != 0:
+        block_state_list = current_session.w3.parity.\
+            traceReplayBlockTransactions(block_number,
+                                         mode=['stateDiff'])
+    uncle_list = block_data['uncles']
+    for i in range(0, len(uncle_list)):
+        # Unfortunately there is no command eth_getUncleByHash
+        uncle_data = current_session.w3.eth.getUncleByBlock(
+                                  block_number, i)
+        uncle = Uncles.add_uncle(uncle_data=uncle_data,
+                                 block_number=block_number,
+                                 iso_timestamp=iso_timestamp)
+        current_session.db_session.add(uncle)
+
     transaction_list = block_data['transactions']
     # loop to get the transaction, receipts, logs and traces of the block
-    for transaction_data in transaction_list:
+    for index, transaction_data in enumerate(transaction_list):
         transaction = Transactions.add_transaction(transaction_data,
                                                    block_number=block_number,
                                                    iso_timestamp=iso_timestamp)
@@ -76,35 +96,42 @@ def add_block_number(block_number):
         receipt = Receipts.add_receipt(receipt_data,
                                        block_number=block_number,
                                        timestamp=iso_timestamp)
+        current_session.db_session.add(receipt)
+        fees = int(transaction.gas_price)*int(receipt.gas_used)
 
-        current_session.db_session.add(receipt)  # added the receipt in the database
-
-        logs_list = receipt_data['logs']
-        for dict_log in logs_list:
-            log = Logs.add_log(dict_log, block_number=block_number,
-                               iso_timestamp=iso_timestamp)
-            current_session.db_session.add(log)  # adding the log in db session
+        log_list = receipt_data['logs']
+        Logs.add_log_list(current_session=current_session,
+                          log_list=log_list,
+                          block_number=block_number,
+                          timestamp=transaction.timestamp)
 
         if current_session.settings.PARSE_TRACE:
-            dict_trace_list = current_session.w3.parity.traceTransaction(
-                                           to_hex(transaction_data['hash']))
-            if dict_trace_list is not None:
-                for dict_trace in dict_trace_list:
-                    trace = Traces.add_trace(dict_trace,
-                                             block_number=block_number,
-                                             timestamp=iso_timestamp)
-                    current_session.db_session.add(trace)  # added the trace in the db session
+            trace_list = block_trace_list[index]['trace']
+            Traces.add_trace_list(
+                    current_session=current_session,
+                    trace_list=trace_list,
+                    transaction_hash=transaction.transaction_hash,
+                    transaction_index=transaction.transaction_index,
+                    block_number=transaction.block_number,
+                    timestamp=transaction.timestamp)
 
-    uncle_list = block_data['uncles']
-    for i in range(0, len(uncle_list)):
-        # Unfortunately there is no command eth_getUncleByHash
-        uncle_data = current_session.w3.eth.getUncleByBlock(
-                                  block_number, i)
-        uncle = Uncles.add_uncle(uncle_data=uncle_data,
-                                 block_number=block_number,
-                                 iso_timestamp=iso_timestamp)
-        current_session.db_session.add(uncle)
+        if current_session.settings.PARSE_STATE_DIFF:
+            state_diff_dict = block_state_list[index]['stateDiff']
+            if state_diff_dict is not None:
+                StateDiff.add_state_diff_dict(
+                    current_session=current_session,
+                    state_diff_dict=state_diff_dict,
+                    transaction_hash=transaction.transaction_hash,
+                    transaction_index=transaction.transaction_index,
+                    block_number=transaction.block_number,
+                    timestamp=transaction.timestamp,
+                    miner=block.miner,
+                    fees=fees)
 
+    if current_session.settings.PARSE_STATE_DIFF:
+        StateDiff.add_mining_rewards(current_session=current_session,
+                                     block=block)
+    # updating the meta info table
     meta_info = current_session.db_session.query(MetaInfo).first()
     if meta_info is None:
         # No rows have been inserted yet

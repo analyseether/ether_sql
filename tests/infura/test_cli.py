@@ -1,13 +1,7 @@
 from tests.common_tests.cli import (
     export_to_csv_single_thread,
     verify_block_contents,
-    push_block_range_single_thread,
 )
-
-
-def test_infura_push_block_range(infura_settings):
-    push_block_range_single_thread(infura_settings)
-    pass
 
 
 class TestInfuraBlock56160():

@@ -75,7 +75,8 @@ class Traces(base):
         }
 
     @classmethod
-    def add_trace(cls, dict_trace, block_number, timestamp):
+    def add_trace(cls, dict_trace, transaction_hash, transaction_index,
+                  block_number, timestamp):
         """
         Creates a new trace object from data received from JSON-RPC call
         trace_transaction.
@@ -86,11 +87,11 @@ class Traces(base):
 
         """
         logger.debug(dict_trace['action'])
-        trace = cls(transaction_hash=dict_trace['transactionHash'],
-                    block_number=dict_trace['blockNumber'],
+        trace = cls(transaction_hash=transaction_hash,
+                    block_number=block_number,
                     trace_address=dict_trace['traceAddress'],
                     subtraces=dict_trace['subtraces'],
-                    transaction_index=dict_trace['transactionPosition'],
+                    transaction_index=transaction_index,
                     trace_type=dict_trace['type'],
                     sender='',
                     receiver='',
@@ -142,3 +143,18 @@ class Traces(base):
             logger.debug('Type encountered {}'.format(dict_trace['type']))
 
         return trace
+
+    @classmethod
+    def add_trace_list(cls, current_session, trace_list, transaction_hash,
+                       transaction_index, block_number, timestamp):
+        """
+        Adds a list of traces in the sql session
+        """
+        for dict_trace in trace_list:
+            trace = cls.add_trace(dict_trace,
+                                  transaction_hash=transaction_hash,
+                                  transaction_index=transaction_index,
+                                  block_number=block_number,
+                                  timestamp=timestamp)
+        # added the trace in the db session
+        current_session.db_session.add(trace)

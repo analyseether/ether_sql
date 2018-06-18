@@ -4,6 +4,7 @@ from tests.fixtures.common import (
     session_block_56160,
     celery_worker_thread,
     drop_session_tables,
+    session_block_range_56160_56170,
 )
 import logging
 
@@ -19,12 +20,24 @@ def parity_settings():
 
 
 @pytest.yield_fixture(scope="module")
-def parity_session_block_56160():
+def parity_session_block_56160(parity_settings):
     parity_session_block_56160 = session_block_56160(settings_name=
-                                                     "ParityTestSettings")
+                                                     parity_settings)
     yield parity_session_block_56160
     try:
         parity_session_block_56160.db_session.close()
+    except AttributeError:
+        logger.debug('db_session attribute does not exist')
+
+
+@pytest.yield_fixture(scope="module")
+def parity_session_block_range_56160_56170(parity_settings):
+    parity_session_block_range_56160_56170 = session_block_range_56160_56170(
+        settings_name=parity_settings)
+    parity_session_block_range_56160_56170.setup_db_session()
+    yield parity_session_block_range_56160_56170
+    try:
+        parity_session_block_range_56160_56170.db_session.close()
     except AttributeError:
         logger.debug('db_session attribute does not exist')
 

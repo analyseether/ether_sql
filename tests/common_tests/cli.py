@@ -11,6 +11,8 @@ from ether_sql.models import (
     Logs,
     Traces,
     MetaInfo,
+    StateDiff,
+    StorageDiff,
 )
 from tests.common_tests.expected_data import (
     EXPECTED_BLOCK_PROPERTIES,
@@ -20,6 +22,8 @@ from tests.common_tests.expected_data import (
     EXPECTED_LOG_PROPERTIES,
     EXPECTED_TRACE_PROPERTIES,
     EXPECTED_META_INFO,
+    EXPECTED_STATE_DIFF_PROPERTIES,
+    EXPECTED_STORAGE_DIFF_PROPERTIES,
 )
 
 
@@ -52,7 +56,6 @@ def verify_block_contents(node_session_block_56160):
     print(meta_info_properties_in_sql)
     assert meta_info_properties_in_sql == EXPECTED_META_INFO
 
-
     block_properties_in_sql = node_session_block_56160.db_session.\
         query(Blocks).filter_by(block_number=56160).first().to_dict()
     assert block_properties_in_sql == EXPECTED_BLOCK_PROPERTIES
@@ -84,12 +87,18 @@ def verify_block_contents(node_session_block_56160):
             to_dict()
         assert trace_properties_in_sql == EXPECTED_TRACE_PROPERTIES
 
+    # comparing values of states
+    if node_session_block_56160.settings.PARSE_STATE_DIFF:
+        # comparing values if state diffs
+        state_diff_property_in_sql = node_session_block_56160.\
+            db_session.query(StateDiff).filter_by(block_number=56160).all()
+        for i in range(0, len(state_diff_property_in_sql)):
+            assert state_diff_property_in_sql[i].to_dict() == \
+                    EXPECTED_STATE_DIFF_PROPERTIES[i]
 
-def push_block_range_single_thread(settings_name):
-    runner = CliRunner()
-    result = runner.invoke(cli, ['--settings', settings_name,
-                                 'scrape_block_range',
-                                 '--start_block_number', 0,
-                                 '--end_block_number', 10])
-    print(result.exc_info)
-    assert result.exit_code == 0
+        # comparing values of storage_diffs
+        storage_diff_property_in_sql = node_session_block_56160.\
+            db_session.query(StorageDiff).filter_by(block_number=56160).all()
+        for i in range(0, len(storage_diff_property_in_sql)):
+            assert storage_diff_property_in_sql[i].to_dict() == \
+                    EXPECTED_STORAGE_DIFF_PROPERTIES[i]
