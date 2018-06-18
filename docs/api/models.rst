@@ -43,3 +43,17 @@ Traces
 The trace module is for getting a deeper insight into transaction processing, can be used to debugging transactions and also access the internal transactions which are not included in a block.
 
 .. autoclass:: ether_sql.models.traces.Traces
+
+StateDiff
+---------
+
+The state diff table contains information about the change in state after each transaction or block
+
+.. autoclass:: ether_sql.models.state_diff.StateDiff
+
+StorageDiff
+-----------
+
+The storage diff table contains information about the change in storage after each contract execution
+
+.. autoclass:: ether_sql.models.storage_diff.StorageDiff

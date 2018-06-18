@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 class StateDiff(base):
     """
     Class mapping a state_diff table in psql to a difference in state after transactions
+
     :param int block_number: Number of the block containing this StateDiff
     :param timestamp timestamp: Unix time at the mining of this block
     :param str transaction_hash: The transaction hash if this was created by a transaction
@@ -108,6 +109,9 @@ class StateDiff(base):
                        address, transaction_hash, transaction_index,
                        block_number, timestamp, miner=None, fees=None,
                        state_diff_type=None):
+        """
+        Creates a new state_diff object
+        """
 
         if nonce_diff == +1:
             state_diff_type = 'sender'
@@ -131,7 +135,10 @@ class StateDiff(base):
     def add_state_diff_dict(cls, current_session, state_diff_dict,
                             transaction_hash, transaction_index, block_number,
                             timestamp, miner, fees):
-
+        """
+        Creates a bunch of state_diff objects upon receiving them as a
+        dictionary and adds them to the current db_session
+        """
         for address in state_diff_dict:
             balance_from, balance_to, balance_diff = cls._parseStateDiff(
                 state_diff_dict[address]['balance'], 'balance')
@@ -168,7 +175,9 @@ class StateDiff(base):
 
     @classmethod
     def add_mining_rewards(cls, current_session, block):
-
+        """
+        Adds the mining and uncle rewards to the state_diff table
+        """
         miner_reward = PRE_BYZANTINIUM_REWARD
         if block.block_number > FORK_BLOCK_NUMBER['Byzantium']:
             miner_reward = POST_BYZANTINIUM_REWARD

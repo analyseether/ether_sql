@@ -28,7 +28,8 @@ The above command will start 4 workers using the settings :code:`YourSettings`
 Then start the sync, which will automatically use the setting used to start workers.
 
 .. code :: shell
-  `$ ether_sql scrape_block_range `
+
+  $ ether_sql scrape_block_range
 
 Here is a demo of the process: https://www.youtube.com/watch?v=rnkfyAgGJwI&feature=youtu.be
 

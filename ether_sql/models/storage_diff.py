@@ -15,6 +15,16 @@ logger = logging.getLogger(__name__)
 class StorageDiff(base):
     """
     Class mapping the storage_diff table in psql to difference in storage due to transactions
+
+    :param int block_number: Number of the block containing this StorageDiff
+    :param timestamp timestamp: Unix time at the mining of this block
+    :param str transaction_hash: The transaction hash if this was created by a transaction
+    :param int transaction_index: Position of this transaction in the transaction list of the block
+    :param int state_diff_id: Id in state_diff table which caused this change in storage
+    :param str address: Contract address where the change occoured
+    :param str position: Position in the contract address where this change occoured
+    :param str storage_from: Initial value of the storage
+    :param str storage_to: Final value of the storage
     """
     __tablename__ = 'storage_diff'
     id = Column(Integer, primary_key=True)
@@ -47,7 +57,9 @@ class StorageDiff(base):
     def add_storage_diff(cls, storage_diff_row, position, address,
                          transaction_hash, transaction_index, block_number,
                          timestamp, state_diff_id):
-
+        """
+        Creates a new storage_diff object
+        """
         assert isinstance(storage_diff_row, dict)
         key = list(storage_diff_row)
         if key[0] == '*':
@@ -77,6 +89,10 @@ class StorageDiff(base):
     def add_storage_diff_dict(cls, current_session, storage_diff_dict, address,
                               transaction_hash, transaction_index, block_number,
                               timestamp, state_diff_id):
+        """
+        Creates a bunch of storage_diff objects upon receiving them as a
+        dictionary and adds them to the current db_session
+        """
         assert isinstance(storage_diff_dict, dict)
         for position in storage_diff_dict:
             storage_diff = cls.add_storage_diff(storage_diff_row=storage_diff_dict[position],
