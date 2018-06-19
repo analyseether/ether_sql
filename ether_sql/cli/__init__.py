@@ -8,6 +8,7 @@ from ether_sql.tasks.scrapper import scrape_blocks, add_block_number
 from ether_sql.models import Blocks
 from ether_sql.globals import push_session, get_current_session
 from ether_sql.tasks.worker import celery_is_running, redis_is_running
+from ether_sql.utils.blocks import get_max_block_number
 logger = logging.getLogger(__name__)
 
 
@@ -49,14 +50,13 @@ def scrape_block_range(ctx, start_block_number, end_block_number, mode):
     # and represents a "staging zone" for all the objects loaded into the
     # database session object. Any change made against the objects in the
     current_session = get_current_session()
-    current_session.setup_db_session()
 
     if end_block_number is None:
         end_block_number = current_session.w3.eth.blockNumber
         logger.debug(end_block_number)
     if start_block_number is None:
-        sql_block_number = current_session.db_session.query(
-                                func.max(Blocks.block_number)).scalar()
+        with current_session.db_session_scope():
+            sql_block_number = get_max_block_number()
         if sql_block_number is None:
             start_block_number = 0
         else:

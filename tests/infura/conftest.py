@@ -19,27 +19,18 @@ def infura_settings():
     drop_session_tables(settings_name=INFURA_SETTING)
 
 
-@pytest.yield_fixture(scope="module")
+@pytest.fixture(scope="module")
 def infura_session_block_56160(infura_settings):
     infura_session_block_56160 = session_block_56160(settings_name=
                                                      infura_settings)
-    yield infura_session_block_56160
-    try:
-        infura_session_block_56160.db_session.close()
-    except AttributeError:
-        logger.debug('db_session attribute does not exist')
+    return infura_session_block_56160
 
 
-@pytest.yield_fixture(scope="module")
+@pytest.fixture(scope="module")
 def infura_session_block_range_56160_56170(infura_settings):
     infura_session_block_range_56160_56170 = session_block_range_56160_56170(
         settings_name=infura_settings)
-    infura_session_block_range_56160_56170.setup_db_session()
-    yield infura_session_block_range_56160_56170
-    try:
-        infura_session_block_range_56160_56170.db_session.close()
-    except AttributeError:
-        logger.debug('db_session attribute does not exist')
+    return infura_session_block_range_56160_56170
 
 
 @pytest.yield_fixture(scope="module")

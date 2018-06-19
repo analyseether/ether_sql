@@ -5,6 +5,7 @@ from sqlalchemy import func
 from ether_sql.session import setup_alembic_config
 from ether_sql.globals import get_current_session
 from ether_sql.models import Blocks
+from ether_sql.utils.blocks import get_max_block_number
 
 logger = logging.getLogger(__name__)
 
@@ -39,14 +40,7 @@ def drop_tables(ctx):
 @click.pass_context
 def blockNumber(ctx):
     """ Gives the current highest block in database"""
-    current_session = get_current_session()
-    current_session.setup_db_session()
-
-    max_block_number = current_session.db_session.query(
-        func.max(Blocks.block_number)).scalar()
-    current_session.db_session.close()
-
-    click.echo(max_block_number)
+    click.echo(get_max_block_number())
 
 
 @sql.command()
