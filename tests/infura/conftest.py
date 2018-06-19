@@ -5,6 +5,8 @@ from tests.fixtures.common import (
     celery_worker_thread,
     drop_session_tables,
     session_block_range_56160_56170,
+    session_missing_blocks,
+    session_first_block,
 )
 import logging
 
@@ -31,6 +33,16 @@ def infura_session_block_range_56160_56170(infura_settings):
     infura_session_block_range_56160_56170 = session_block_range_56160_56170(
         settings_name=infura_settings)
     return infura_session_block_range_56160_56170
+
+
+@pytest.fixture(scope="module")
+def infura_session_missing_blocks(infura_settings):
+    session_missing_blocks(settings_name=infura_settings)
+
+
+@pytest.fixture(scope="module")
+def infura_session_first_block(infura_settings):
+    session_first_block(settings_name=infura_settings)
 
 
 @pytest.yield_fixture(scope="module")

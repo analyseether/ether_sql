@@ -14,3 +14,5 @@ from ether_sql.models.traces import Traces
 from ether_sql.models.meta_info import MetaInfo
 from ether_sql.models.state_diff import StateDiff
 from ether_sql.models.storage_diff import StorageDiff
+from ether_sql.models.state import State
+from ether_sql.models.storage import Storage

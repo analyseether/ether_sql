@@ -18,8 +18,10 @@ class MetaInfo(base):
     __tablename__ = 'meta_info'
     id = Column(Integer, primary_key=True)
     last_pushed_block = Column(Numeric, ForeignKey('blocks.block_number'))
+    current_state_block = Column(Numeric)
 
     def to_dict(self):
         return {
             'last_pushed_block': self.last_pushed_block,
+            'current_state_block': self.current_state_block,
         }

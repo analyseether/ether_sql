@@ -17,20 +17,17 @@ from ether_sql.models import (
 logger = get_task_logger(__name__)
 
 
-def scrape_blocks(start_block_number, end_block_number, mode):
+def scrape_blocks(list_block_numbers, mode):
     """
-    Main function which starts scrapping data from the node and pushes it into
+    Function which starts scrapping data from the node and pushes it into
     the sql database
 
-    :param int start_block_number: starting block number of scraping
-    :param int end_block_number: end block number of scraping
+    :param list list_block_numbers: List of block numbers to push in the database
+    :param str mode: Mode to be used weather parallel or single
     """
 
-    logger.debug("Start block: {}".format(start_block_number))
-    logger.debug('End block: {}'.format(end_block_number))
-
     r = None
-    for block_number in range(start_block_number, end_block_number+1):
+    for block_number in list_block_numbers:
         logger.debug('Adding block: {}'.format(block_number))
         if mode == 'parallel':
             r = add_block_number.delay(block_number)
@@ -128,9 +125,12 @@ def add_block_number(block_number):
                         timestamp=transaction.timestamp,
                         miner=block.miner,
                         fees=fees)
-
-        StateDiff.add_mining_rewards(current_session=current_session,
-                                     block=block)
+        if block_number == 0:
+            StateDiff.parse_genesis_rewards(current_session=current_session,
+                                            block=block)
+        else:
+            StateDiff.add_mining_rewards(current_session=current_session,
+                                         block=block)
         # updating the meta info table
         meta_info = current_session.db_session.query(MetaInfo).first()
         if meta_info is None:

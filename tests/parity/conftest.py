@@ -5,6 +5,8 @@ from tests.fixtures.common import (
     celery_worker_thread,
     drop_session_tables,
     session_block_range_56160_56170,
+    session_missing_blocks,
+    session_first_block,
 )
 import logging
 
@@ -31,6 +33,16 @@ def parity_session_block_range_56160_56170(parity_settings):
     parity_session_block_range_56160_56170 = session_block_range_56160_56170(
         settings_name=parity_settings)
     return parity_session_block_range_56160_56170
+
+
+@pytest.fixture(scope="module")
+def parity_session_missing_blocks(parity_settings):
+    session_missing_blocks(settings_name=parity_settings)
+
+
+@pytest.fixture(scope="module")
+def parity_session_first_block(parity_settings):
+    session_first_block(settings_name=parity_settings)
 
 
 @pytest.yield_fixture(scope="function")

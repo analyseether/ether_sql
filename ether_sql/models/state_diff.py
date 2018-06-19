@@ -10,12 +10,13 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 import logging
 import decimal
+import csv
 from web3.utils.formatters import hex_to_integer
 from ether_sql.models import base
 from ether_sql.models.storage_diff import StorageDiff
 from ether_sql.models.transactions import Transactions
 from ether_sql.models.blocks import Blocks
-from ether_sql.constants import (
+from ether_sql.constants.mainnet import (
     FORK_BLOCK_NUMBER,
     PRE_BYZANTINIUM_REWARD,
     POST_BYZANTINIUM_REWARD,
@@ -214,3 +215,23 @@ class StateDiff(base):
                 state_diff_type='uncle'
                 )
             current_session.db_session.add(state_diff)
+
+    @classmethod
+    def parse_genesis_rewards(cls, current_session, block):
+        with open('ether_sql/constants/genesis_rewards.csv',
+                  'r', encoding='utf-8') as genesis_rewards:
+            reader = csv.reader(genesis_rewards)
+            for row in reader:
+                state_diff = StateDiff.add_state_diff(
+                                balance_diff=row[1],
+                                nonce_diff=None,
+                                code_from=None,
+                                code_to=None,
+                                address=row[0],
+                                transaction_hash=None,
+                                transaction_index=None,
+                                block_number=block.block_number,
+                                timestamp=block.timestamp,
+                                state_diff_type='genesis')
+
+                current_session.db_session.add(state_diff)

@@ -4,6 +4,7 @@ from click.testing import CliRunner
 from ether_sql.cli import cli
 from ether_sql.session import Session
 from ether_sql.tasks.worker import app
+from ether_sql.globals import push_session
 from .celery_worker_thread import CeleryWorkerThread
 
 
@@ -50,7 +51,8 @@ def session_block_range_56160_56170(settings_name):
     runner.invoke(cli, ['--settings', settings_name,
                         'scrape_block_range',
                         '--start_block_number', 56160,
-                        '--end_block_number', 56170])
+                        '--end_block_number', 56170,
+                        '--no-fill_gaps'])
     session_block_range_56160_56170 = Session(settings_name)
     return session_block_range_56160_56170
 
@@ -65,3 +67,46 @@ def celery_worker_thread(settings_name):
     celery_worker_thread.ready.wait()
     time.sleep(1)
     return celery_worker_thread
+
+
+def session_missing_blocks(settings_name):
+    """
+    Common fixture which creates missing blocks in the database
+    """
+    runner = CliRunner()
+    runner.invoke(cli, ['--settings', settings_name,
+                        'scrape_block', '--block_number', 0])
+    runner.invoke(cli, ['--settings', settings_name,
+                        'scrape_block', '--block_number', 2])
+    runner.invoke(cli, ['--settings', settings_name,
+                        'scrape_block', '--block_number', 4])
+    runner.invoke(cli, ['--settings', settings_name,
+                        'scrape_block_range',
+                        '--end_block_number', 10,
+                        '--no-fill_gaps'])
+    session = Session(settings_name)
+    push_session(session=session)
+
+
+def session_first_block(settings_name):
+    """
+    Common fixture which creates missing blocks in the database
+    """
+    runner = CliRunner()
+    runner.invoke(cli, ['--settings', settings_name,
+                        'scrape_block',
+                        '--block_number', 0])
+    session = Session(settings_name)
+    push_session(session=session)
+
+
+def session_first_100_blocks(settings_name):
+    """
+    Common fixture which creates missing blocks in the database
+    """
+    runner = CliRunner()
+    runner.invoke(cli, ['--settings', settings_name,
+                        'scrape_block_range',
+                        '--end_block_number', 100])
+    session = Session(settings_name)
+    push_session(session=session)
