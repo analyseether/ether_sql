@@ -19,27 +19,18 @@ def parity_settings():
     drop_session_tables(PARITY_SETTINGS)
 
 
-@pytest.yield_fixture(scope="module")
+@pytest.fixture(scope="module")
 def parity_session_block_56160(parity_settings):
     parity_session_block_56160 = session_block_56160(settings_name=
                                                      parity_settings)
-    yield parity_session_block_56160
-    try:
-        parity_session_block_56160.db_session.close()
-    except AttributeError:
-        logger.debug('db_session attribute does not exist')
+    return parity_session_block_56160
 
 
-@pytest.yield_fixture(scope="module")
+@pytest.fixture(scope="module")
 def parity_session_block_range_56160_56170(parity_settings):
     parity_session_block_range_56160_56170 = session_block_range_56160_56170(
         settings_name=parity_settings)
-    parity_session_block_range_56160_56170.setup_db_session()
-    yield parity_session_block_range_56160_56170
-    try:
-        parity_session_block_range_56160_56170.db_session.close()
-    except AttributeError:
-        logger.debug('db_session attribute does not exist')
+    return parity_session_block_range_56160_56170
 
 
 @pytest.yield_fixture(scope="function")

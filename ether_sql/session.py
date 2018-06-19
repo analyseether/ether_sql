@@ -9,6 +9,7 @@ from web3 import (
     IPCProvider,
     HTTPProvider,
 )
+from contextlib import contextmanager
 from ether_sql.models import base
 from ether_sql.settings import SETTINGS_MAP
 from sqlalchemy.orm import sessionmaker
@@ -36,17 +37,19 @@ class Session():
 
         self.w3 = setup_node_session(settings=self.settings)
 
-    def setup_db_session(self):
+    @contextmanager
+    def db_session_scope(self):
         DBSession = sessionmaker(bind=self.db_engine)
         self.db_session = DBSession()
 
-    def db_session_safe_commit(self):
         try:
+            yield self.db_session
             self.db_session.commit()
-        except:
+        except Exception as e:
             self.db_session.rollback()
+            raise e
         finally:
-            pass
+            self.db_session.close()
 
 
 def setup_logging(settings):

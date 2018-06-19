@@ -6,7 +6,6 @@ from tests.common_tests.block_range import (
 
 def test_verify_block_range_single_thread(
         parity_session_block_range_56160_56170):
-    parity_session_block_range_56160_56170.setup_db_session()
     verify_block_range_single_thread(
         parity_session_block_range_56160_56170)
     pass
