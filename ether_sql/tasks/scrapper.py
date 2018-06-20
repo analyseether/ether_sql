@@ -70,8 +70,9 @@ def add_block_number(block_number):
     with current_session.db_session_scope():
         current_session.db_session.add(block)
 
-        uncle_list = block_data['uncles']
-        for i in range(0, len(uncle_list)):
+        uncle_hashes = block_data['uncles']
+        uncle_list = []
+        for i in range(0, len(uncle_hashes)):
             # Unfortunately there is no command eth_getUncleByHash
             uncle_data = current_session.w3.eth.getUncleByBlock(
                                 block_number, i)
@@ -79,6 +80,7 @@ def add_block_number(block_number):
                                      block_number=block_number,
                                      iso_timestamp=iso_timestamp)
             current_session.db_session.add(uncle)
+            uncle_list.append(uncle)
 
         transaction_list = block_data['transactions']
         # loop to get the transaction, receipts, logs and traces of the block
@@ -130,7 +132,8 @@ def add_block_number(block_number):
                                             block=block)
         else:
             StateDiff.add_mining_rewards(current_session=current_session,
-                                         block=block)
+                                         block=block,
+                                         uncle_list=uncle_list)
         # updating the meta info table
         meta_info = current_session.db_session.query(MetaInfo).first()
         if meta_info is None:

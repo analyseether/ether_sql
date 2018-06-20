@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP
 from sqlalchemy import Text, Integer
 import logging
-
+from eth_utils import to_checksum_address
 from web3.utils.encoding import to_int, to_hex
 from ether_sql.models import base
 
@@ -31,7 +31,7 @@ class Logs(base):
     transaction_hash = Column(String(66),
                               ForeignKey('transactions.transaction_hash'),
                               index=True)
-    address = Column(String(42))
+    address = Column(String(42), nullable=False)
     data = Column(Text)
     block_number = Column(Numeric, ForeignKey('blocks.block_number'))
     timestamp = Column(TIMESTAMP)
@@ -75,7 +75,7 @@ class Logs(base):
         log = cls(transaction_hash=to_hex(log_data['transactionHash']),
                   transaction_index=to_int(log_data['transactionIndex']),
                   topics_count=topics_count,
-                  address=log_data['address'],
+                  address=to_checksum_address(log_data['address']),
                   log_index=to_int(log_data['logIndex']),
                   data=log_data['data'],
                   block_number=block_number,

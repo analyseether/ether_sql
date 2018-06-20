@@ -5,16 +5,20 @@ from sqlalchemy import (
     Text,
     Integer,
 )
+import logging
 from sqlalchemy.orm import relationship
 from sqlalchemy import func
 from ether_sql.models import base
 from ether_sql.globals import get_current_session
-from ether_sql.models.blocks import Blocks
-from ether_sql.models.state_diff import StateDiff
+from ether_sql.models import (
+    Blocks,
+    StateDiff,
+    MetaInfo,
+)
 from ether_sql.exceptions import MissingBlocksError
-from ether_sql.globals import get_current_session
-# TODO make a method to update the metainfo table with the current staticmethod
-# TODO make a method to calculate the current state with state_diff and storage_diff tables
+from eth_utils import to_checksum_address
+
+logger = logging.getLogger(__name__)
 
 
 class State(base):
@@ -43,13 +47,20 @@ class State(base):
 
     @classmethod
     def add_state(cls, address, balance, nonce, code=None):
-        state = cls(address=address, balance=balance, nonce=nonce, code=code)
+        state = cls(
+                    address=to_checksum_address(address),
+                    balance=balance,
+                    nonce=nonce,
+                    code=code)
         return state
 
     @classmethod
     def get_state_at_block(cls, block_number=None):
         """
-        Gets the state at the given block number
+        Updates the state with either specified `block_number` or the maximum
+        ``block_number`` in the database. Also, checks if there are any missing
+        blocks in the database, if yes then stops the calculation of state
+        prematurely.
 
         : param int block_number: Block number of desired state, if none then
         constructs the state for the highest available state_diff
@@ -63,17 +74,33 @@ class State(base):
             raise MissingBlocksError('Cannot construct state at block {}, \
                     {} blocks are missing'.format(block_number,
                                                   len(missing_block_numbers)))
-        # TODO Remove the contents of state if meta_info.current_state_block != block_number
-        # TODO use query option to get the state at this blocks
-        # TODO fill the state table with that query results
-        # TODO update the meta_info.current_state_block
+
+        if MetaInfo.get_current_state_block == block_number:
+            logger.info('State is already at block {}'.format(block_number))
+            return
+
         current_session = get_current_session()
         with current_session.db_session_scope():
+            # Removing the contents of state if meta_info.current_state_block != block_number
             current_session.db_session.query(cls).delete()
+            # query to get the state at block_number
             query = current_session.db_session.query(
                         StateDiff.address,
                         func.sum(StateDiff.balance_diff).label('balance'),
-                        func.sum(StateDiff.nonce_diff).label('nonce')).group_by(StateDiff.address)
+                        func.sum(StateDiff.nonce_diff).label('nonce')).\
+                filter(StateDiff.block_number <= block_number).\
+                group_by(StateDiff.address)
+            # updating the state table with query results
             for row in query:
-                state = cls(address=row.address, balance=row.balance, nonce=row.nonce, code=None)
+                if row.nonce is None:
+                    nonce = 0
+                else:
+                    nonce = row.nonce
+                state = cls(
+                    address=row.address,
+                    balance=row.balance,
+                    nonce=nonce,
+                    code=None)
                 current_session.db_session.add(state)
+        # update the meta_info.current_state_block
+        MetaInfo.set_current_state_block(block_number)

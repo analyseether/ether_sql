@@ -3,6 +3,7 @@ from sqlalchemy import Column, String, Numeric, TIMESTAMP, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy import func
 from web3.utils.encoding import (to_int, to_hex)
+from eth_utils import to_checksum_address
 from ether_sql.models import base
 from ether_sql.globals import get_current_session
 logger = logging.getLogger(__name__)
@@ -73,13 +74,12 @@ class Blocks(base):
         :param dict block_data: data received from the JSON RPC call
         :param datetime iso_timestamp: timestamp when the block was mined
         """
-
         block = cls(block_hash=to_hex(block_data['hash']),
                     parent_hash=to_hex(block_data['parentHash']),
                     difficulty=to_int(block_data['difficulty']),
                     block_number=to_int(block_data['number']),
                     gas_used=to_int(block_data['gasUsed']),
-                    miner=block_data['miner'],
+                    miner=to_checksum_address(block_data['miner']),
                     timestamp=iso_timestamp,
                     sha3uncles=to_hex(block_data['sha3Uncles']),
                     extra_data=to_hex(block_data['extraData']),

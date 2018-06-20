@@ -3,6 +3,7 @@ import logging
 import json
 import pytest
 from web3.utils.formatters import hex_to_integer
+from eth_utils import to_checksum_address
 from ether_sql.models import Blocks
 from ether_sql.exceptions import MissingBlocksError
 from ether_sql.models.state import State
@@ -47,18 +48,25 @@ def fill_missing_blocks(setting_name):
 def match_state_dump_to_state_table(block_number):
     current_session = get_current_session()
     logger.debug(os.getcwd())
-    with open('tests/common_tests/balance/balance_{}.json'.format(int(block_number/10))) as data_file:
+    with open('tests/common_tests/balance/balance_{}.json'.format(int(block_number/100))) as data_file:
         data = json.loads(data_file.read())
         state = data['state']
         with current_session.db_session_scope():
             for address in state:
                 state_table_row = current_session.db_session.query(State).\
-                    filter_by(address=address).first()
+                    filter_by(address=to_checksum_address(address)).first()
                 try:
                     assert state_table_row.balance == hex_to_integer(state[address]['balance'])
-                except AttributeError:
-                    logger.debug(address)
-                # assert state_table_row.nonce == hex_to_integer(state[address]['nonce'])
+                    assert state_table_row.nonce == hex_to_integer(state[address]['nonce'])
+                except (AttributeError, AssertionError):
+                    if state_table_row is None:
+                        logger.debug('(table, csv); address:{}, balance (_, {})'\
+                                     .format(address, hex_to_integer(state[address]['balance'])))
+                    else:
+                        logger.debug('(table, csv); address: {}, balance: ({}, {})'\
+                                     .format(address, state_table_row.balance,
+                                             hex_to_integer(state[address]['balance'])))
+                #
 
 
 def check_state_at_block_0():

@@ -21,7 +21,7 @@ from ether_sql.constants.mainnet import (
     PRE_BYZANTINIUM_REWARD,
     POST_BYZANTINIUM_REWARD,
 )
-
+from eth_utils import to_checksum_address
 logger = logging.getLogger(__name__)
 
 
@@ -50,7 +50,7 @@ class StateDiff(base):
                               nullable=True,
                               index=True)
     transaction_index = Column(Numeric, nullable=True)
-    address = Column(String(42), index=True)
+    address = Column(String(42), index=True, nullable=False)
     balance_diff = Column(Numeric, nullable=True)
     nonce_diff = Column(Integer, nullable=True)
     code_from = Column(Text, nullable=True)
@@ -113,11 +113,12 @@ class StateDiff(base):
         """
         Creates a new state_diff object
         """
+        address = to_checksum_address(address)
 
         if nonce_diff == +1:
             state_diff_type = 'sender'
         if miner is not None:
-            if address == miner.lower() and balance_diff == fees:
+            if address == miner and balance_diff == fees:
                 state_diff_type = 'fees'
 
         state_diff = cls(block_number=block_number,
@@ -175,16 +176,17 @@ class StateDiff(base):
                         timestamp=timestamp)
 
     @classmethod
-    def add_mining_rewards(cls, current_session, block):
+    def add_mining_rewards(cls, current_session, block, uncle_list):
         """
         Adds the mining and uncle rewards to the state_diff table
         """
         miner_reward = PRE_BYZANTINIUM_REWARD
         if block.block_number > FORK_BLOCK_NUMBER['Byzantium']:
             miner_reward = POST_BYZANTINIUM_REWARD
+        uncle_inclusion_reward = int(len(uncle_list)*miner_reward/32.0)
         # adding the miner reward
         state_diff = StateDiff.add_state_diff(
-            balance_diff=miner_reward,
+            balance_diff=miner_reward+uncle_inclusion_reward,
             nonce_diff=None,
             code_from=None,
             code_to=None,
@@ -197,11 +199,9 @@ class StateDiff(base):
             )
         current_session.db_session.add(state_diff)
         # adding the uncles
-        for uncle in block.uncles:
-            factor = decimal.Decimal(uncle.uncle_blocknumber + 8 -
-                                     uncle.current_blocknumber
-                                     )/decimal.Decimal(8.0)
-            uncle_reward = factor*miner_reward
+        for uncle in uncle_list:
+            factor = (uncle.uncle_blocknumber + 8 - uncle.current_blocknumber)/8.0
+            uncle_reward = int(factor*miner_reward)
             state_diff = StateDiff.add_state_diff(
                 balance_diff=uncle_reward,
                 nonce_diff=None,
