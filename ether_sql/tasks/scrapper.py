@@ -135,12 +135,5 @@ def add_block_number(block_number):
                                          block=block,
                                          uncle_list=uncle_list)
         # updating the meta info table
-        meta_info = current_session.db_session.query(MetaInfo).first()
-        if meta_info is None:
-            # No rows have been inserted yet
-            meta_info = MetaInfo(last_pushed_block=block_number)
-        else:
-            meta_info.last_pushed_block = block_number
-        current_session.db_session.add(meta_info)
-        logger.debug('{}'.format(meta_info.to_dict()))
+        MetaInfo.set_last_pushed_block(current_session, block_number)
     logger.info("Commiting block: {} to sql".format(block_number))

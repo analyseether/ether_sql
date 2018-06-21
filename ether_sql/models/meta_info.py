@@ -1,5 +1,6 @@
 import logging
 from sqlalchemy import Column, Numeric, ForeignKey, Integer
+from sqlalchemy.event import listens_for
 from ether_sql.models import base
 from ether_sql.globals import get_current_session
 
@@ -41,17 +42,19 @@ class MetaInfo(base):
                         current_state_block
 
     @classmethod
-    def set_last_pushed_block(cls, block_number):
-        current_session = get_current_session()
-        with current_session.db_session_scope():
-            meta_info = current_session.db_session.query(cls).first()
+    def set_last_pushed_block(cls, current_session, block_number):
+        meta_info = current_session.db_session.query(cls).filter(cls.id == 1).first()
+        if meta_info is None:
+            meta_info = cls(last_pushed_block=block_number)
+        else:
             meta_info.last_pushed_block = block_number
-            current_session.db_session.add(meta_info)
+        current_session.db_session.add(meta_info)
 
     @classmethod
-    def set_current_state_block(cls, block_number):
-        current_session = get_current_session()
-        with current_session.db_session_scope():
-            meta_info = current_session.db_session.query(cls).first()
+    def set_current_state_block(cls, current_session, block_number):
+        meta_info = current_session.db_session.query(cls).filter(cls.id == 1).first()
+        if meta_info is None:
+            meta_info = cls(current_state_block=block_number)
+        else:
             meta_info.current_state_block = block_number
-            current_session.db_session.add(meta_info)
+        current_session.db_session.add(meta_info)

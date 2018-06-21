@@ -28,7 +28,7 @@ def export_to_csv_multiple_threads(node_session_block_56160):
     call(["rm", "-rf", directory])
 
 
-def push_block_range_multiple_threads(settings_name):
+def push_block_range_multiple_threads(setting_name):
     from ether_sql.tasks.scrapper import scrape_blocks
     result = scrape_blocks(0, 10, 'parallel')
     logger.debug('pushed tasks in the queue')

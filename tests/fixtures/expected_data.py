@@ -1,7 +1,7 @@
 from decimal import Decimal
 import datetime
 
-EXPECTED_META_INFO = {'last_pushed_block': Decimal('56160'),
+EXPECTED_META_INFO = {'last_pushed_block': Decimal('56170'),
                       'current_state_block': None}
 
 
@@ -161,4 +161,3 @@ EXPECTED_STORAGE_DIFF_PROPERTIES.append({
     'storage_from': '0x0000000000000000000000000000000000000000000000000000000000002710',
     'storage_to': '0x0000000000000000000000000000000000000000000000000000000000002328'
     })
-
