@@ -7,7 +7,7 @@ from sqlalchemy import (
 )
 import logging
 from sqlalchemy.orm import relationship
-from sqlalchemy import func
+from sqlalchemy import func, desc, or_
 from ether_sql.models import base
 from ether_sql.globals import get_current_session
 from ether_sql.models import (
@@ -15,6 +15,7 @@ from ether_sql.models import (
     StateDiff,
     MetaInfo,
 )
+from ether_sql.models.storage import Storage
 from ether_sql.exceptions import MissingBlocksError
 from eth_utils import to_checksum_address
 
@@ -46,11 +47,15 @@ class State(base):
         }
 
     @classmethod
-    def add_state(cls, address, balance, nonce, code=None):
+    def add_state(cls, address, balance, nonce, code):
+        if nonce is None:
+            _nonce = 0
+        else:
+            _nonce = nonce
         state = cls(
                     address=to_checksum_address(address),
                     balance=balance,
-                    nonce=nonce,
+                    nonce=_nonce,
                     code=code)
         return state
 
@@ -81,26 +86,48 @@ class State(base):
 
         current_session = get_current_session()
         with current_session.db_session_scope():
-            # Removing the contents of state if meta_info.current_state_block != block_number
+            current_session.db_session.query(Storage).delete()
             current_session.db_session.query(cls).delete()
-            # query to get the state at block_number
-            query = current_session.db_session.query(
-                        StateDiff.address,
-                        func.sum(StateDiff.balance_diff).label('balance'),
-                        func.sum(StateDiff.nonce_diff).label('nonce')).\
+            # query to get the balance
+            query_balance = current_session.db_session.query(
+                            StateDiff.address,
+                            func.sum(StateDiff.balance_diff).label('balance'),
+                            func.sum(StateDiff.nonce_diff).label('nonce')).\
                 filter(StateDiff.block_number <= block_number).\
                 group_by(StateDiff.address)
+            subquery_balance = query_balance.subquery()
+            # query to get the code
+            row_number_column = func.row_number().over(
+                partition_by=StateDiff.address,
+                order_by=desc(StateDiff.block_number)).label('row_number')
+            query_code = current_session.db_session.query(
+                StateDiff.address.label('address'),
+                StateDiff.code_to.label('code'))
+            query_code = query_code.add_column(row_number_column)
+            query_code = query_code.filter(
+                or_(StateDiff.code_from != None, StateDiff.code_to != None))
+            query_code = query_code.filter(StateDiff.block_number <= block_number)
+            query_code = query_code.from_self().filter(row_number_column == 1)
+            query_code = query_code.filter(StateDiff.code_to != '0x')
+            subquery_code = query_code.subquery()
+            # joining the two queries
+            query_state = current_session.db_session.query(
+                subquery_balance.c.address,
+                subquery_balance.c.balance,
+                subquery_balance.c.nonce,
+                subquery_code.c.code)
+            query_state = query_state.outerjoin(subquery_code, subquery_balance.c.address == subquery_code.c.address)
+
             # updating the state table with query results
-            for row in query:
-                if row.nonce is None:
-                    nonce = 0
-                else:
-                    nonce = row.nonce
-                state = cls(
+            for row in query_state:
+                state = cls.add_state(
                     address=row.address,
                     balance=row.balance,
-                    nonce=nonce,
-                    code=None)
+                    nonce=row.nonce,
+                    code=row.code)
                 current_session.db_session.add(state)
+        # update the storage table
+        Storage.get_storage_at_block(current_session, block_number)
         # update the meta_info.current_state_block
         MetaInfo.set_current_state_block(block_number)
+

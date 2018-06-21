@@ -67,6 +67,7 @@ class ParityTestSettings(TestSettings):
     # Tables to parse
     # Use this option to parse traces, needs parity with cli --tracing=on
     PARSE_TRACE = True
+    PARSE_STATE_DIFF = True
 
 
 SETTINGS_MAP = {'DefaultSettings': DefaultSettings,

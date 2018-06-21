@@ -47,7 +47,6 @@ def fill_missing_blocks(setting_name):
 
 def match_state_dump_to_state_table(block_number):
     current_session = get_current_session()
-    logger.debug(os.getcwd())
     with open('tests/common_tests/balance/balance_{}.json'.format(int(block_number/100))) as data_file:
         data = json.loads(data_file.read())
         state = data['state']
@@ -58,7 +57,15 @@ def match_state_dump_to_state_table(block_number):
                 try:
                     assert state_table_row.balance == hex_to_integer(state[address]['balance'])
                     assert state_table_row.nonce == hex_to_integer(state[address]['nonce'])
-                except (AttributeError, AssertionError):
+                    if 'code' in state[address].keys():
+                        assert state_table_row.code == "0x"+state[address]['code']
+                        if state_table_row.storage is not None:
+                            for storage in state_table_row.storage:
+                                try:
+                                    storage.storage = state[address]['storage'][storage.position]
+                                except:
+                                    logger.debug('{}, pos: {}, code: {}'.format(address, storage.position, state_table_row.code))
+                except (AttributeError, AssertionError) as a:
                     if state_table_row is None:
                         logger.debug('(table, csv); address:{}, balance (_, {})'\
                                      .format(address, hex_to_integer(state[address]['balance'])))
@@ -66,7 +73,11 @@ def match_state_dump_to_state_table(block_number):
                         logger.debug('(table, csv); address: {}, balance: ({}, {})'\
                                      .format(address, state_table_row.balance,
                                              hex_to_integer(state[address]['balance'])))
-                #
+                    raise a
+                except KeyError as k:
+                    logger.debug('(table, csv); address {}, code: ({},_) '\
+                                     .format(address, state_table_row.code))
+                    raise k
 
 
 def check_state_at_block_0():
