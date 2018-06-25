@@ -99,7 +99,9 @@ class State(base):
             # query to get the code
             row_number_column = func.row_number().over(
                 partition_by=StateDiff.address,
-                order_by=desc(StateDiff.block_number)).label('row_number')
+                order_by=[StateDiff.block_number.desc(),
+                          StateDiff.transaction_index.desc()])\
+                .label('row_number')
             query_code = current_session.db_session.query(
                 StateDiff.address.label('address'),
                 StateDiff.code_to.label('code'))

@@ -40,10 +40,7 @@ def celery_is_running():
 
 
 def redis_is_running():
-    connection_settings = urlparse(settings.REDIS_URL)
-    r = redis.StrictRedis(host=connection_settings.netloc.split(':')[0],
-                          port=connection_settings.netloc.split(':')[1],
-                          db=connection_settings.path.split('/')[1])
+    r = redis.from_url(settings.REDIS_URL)
     try:
         r.get(None)
         return True

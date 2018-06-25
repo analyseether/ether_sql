@@ -49,7 +49,11 @@ class Storage(base):
         :param int block_number: Block number of desired storage, always
         required since it is called from method `State.get_state_at_block`
         """
-        row_number_column = func.row_number().over(partition_by=[StorageDiff.address, StorageDiff.position], order_by=desc(StorageDiff.block_number)).label('row_number')
+        row_number_column = func.row_number().over(
+            partition_by=[StorageDiff.address, StorageDiff.position],
+            order_by=[StorageDiff.block_number.desc(),
+                      StorageDiff.transaction_index.desc()])\
+            .label('row_number')
         query = current_session.db_session.query(StorageDiff.address, StorageDiff.position, StorageDiff.storage_to.label('storage'))
         query = query.add_column(row_number_column)
         query = query.filter(StorageDiff.block_number <= block_number)
@@ -62,4 +66,3 @@ class Storage(base):
                 # not adding storage positions where value is 0, since parity discards these positions during export
                 logger.debug('address: {}, position {}, storage: {} is null'.format(row.address, row.position, row.storage))
             current_session.db_session.add(storage)
-
