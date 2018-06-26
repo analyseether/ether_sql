@@ -60,9 +60,12 @@ class Storage(base):
         query = query.from_self().filter(row_number_column == 1)
 
         for row in query:
-            if hex_to_integer(row.storage) != 0:
-                storage = cls.add_storage(address=row.address, position=row.position, storage=row.storage)
+            if row.storage is not None:
+                if hex_to_integer(row.storage) != 0:
+                    storage = cls.add_storage(address=row.address, position=row.position, storage=row.storage)
+                else:
+                    # not adding storage positions where value is 0, since parity discards these positions during export
+                    logger.debug('address: {}, position {}, storage: {} is zero'.format(row.address, row.position, row.storage))
+                current_session.db_session.add(storage)
             else:
-                # not adding storage positions where value is 0, since parity discards these positions during export
-                logger.debug('address: {}, position {}, storage: {} is null'.format(row.address, row.position, row.storage))
-            current_session.db_session.add(storage)
+                logger.debug('address: {}, position {}, storage: {} is none'.format(row.address, row.position, row.storage))

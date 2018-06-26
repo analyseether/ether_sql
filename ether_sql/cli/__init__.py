@@ -48,13 +48,12 @@ def scrape_block_range(ctx, start_block_number, end_block_number, mode, fill_gap
     """
 
     current_session = get_current_session()
-
+    with current_session.db_session_scope():
+        sql_block_number = Blocks.get_max_block_number()
     if end_block_number is None:
         end_block_number = current_session.w3.eth.blockNumber
         logger.debug(end_block_number)
     if start_block_number is None:
-        with current_session.db_session_scope():
-            sql_block_number = Blocks.get_max_block_number()
         if sql_block_number is None:
             start_block_number = 0
         elif sql_block_number == end_block_number:
@@ -83,7 +82,7 @@ def scrape_block_range(ctx, start_block_number, end_block_number, mode, fill_gap
     if len(list_block_numbers) == 0:
         logger.warning('No blocks pushed in database')
     if mode == 'parallel':
-        if celery_is_running() and redis_is_running():
+        if redis_is_running():
             logger.info('Celery and Redis are running, using multiple threads')
             scrape_blocks(list_block_numbers=list_block_numbers,
                           mode=mode)

@@ -128,7 +128,9 @@ class State(base):
                     nonce=row.nonce,
                     code=row.code)
                 current_session.db_session.add(state)
-            # update the storage table
-            Storage.get_storage_at_block(current_session, block_number)
             # update the meta_info.current_state_block
             MetaInfo.set_current_state_block(current_session, block_number)
+
+        with current_session.db_session_scope():
+            # update the storage table
+            Storage.get_storage_at_block(current_session, block_number)
