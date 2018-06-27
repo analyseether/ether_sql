@@ -56,15 +56,23 @@ def add_block_number(block_number):
     iso_timestamp = datetime.utcfromtimestamp(timestamp).isoformat()
     block = Blocks.add_block(block_data=block_data,
                              iso_timestamp=iso_timestamp)
-    if current_session.settings.PARSE_TRACE and block_number != 0:
+
+    if current_session.settings.PARSE_TRACE and \
+       current_session.settings.PARSE_STATE_DIFF and \
+       block_number != 0:
         block_trace_list = current_session.w3.parity.\
             traceReplayBlockTransactions(block_number,
-                                         mode=['trace'])
+                                         mode=['trace', 'stateDiff'])
+    elif block_number != 0:
+        if current_session.settings.PARSE_TRACE:
+            block_trace_list = current_session.w3.parity.\
+                traceReplayBlockTransactions(block_number,
+                                             mode=['trace'])
 
-    if current_session.settings.PARSE_STATE_DIFF and block_number != 0:
-        block_state_list = current_session.w3.parity.\
-            traceReplayBlockTransactions(block_number,
-                                         mode=['stateDiff'])
+        if current_session.settings.PARSE_STATE_DIFF:
+            block_trace_list = current_session.w3.parity.\
+                traceReplayBlockTransactions(block_number,
+                                             mode=['stateDiff'])
 
     # added the block data in the db session
     with current_session.db_session_scope():
@@ -116,7 +124,7 @@ def add_block_number(block_number):
                         timestamp=transaction.timestamp)
 
             if current_session.settings.PARSE_STATE_DIFF:
-                state_diff_dict = block_state_list[index]['stateDiff']
+                state_diff_dict = block_trace_list[index]['stateDiff']
                 if state_diff_dict is not None:
                     StateDiff.add_state_diff_dict(
                         current_session=current_session,

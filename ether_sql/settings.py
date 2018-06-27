@@ -28,6 +28,7 @@ class DefaultSettings():
     # Available options 'Geth', 'Parity', 'Infura'
     NODE_TYPE = "Infura"
     NODE_URL = 'https://mainnet.infura.io/'
+    TIMEOUT = 10
     # Tables to parse
     # Use this option to parse traces, needs parity with cli --tracing=on
     PARSE_TRACE = False
@@ -44,6 +45,7 @@ class PersonalParitySettings(DefaultSettings):
     NODE_TYPE = "Parity"
     PARSE_TRACE = True
     PARSE_STATE_DIFF = True
+    TIMEOUT = 60
 
 
 class PersonalGethSettings(DefaultSettings):
@@ -68,6 +70,7 @@ class ParityTestSettings(TestSettings):
     # Use this option to parse traces, needs parity with cli --tracing=on
     PARSE_TRACE = True
     PARSE_STATE_DIFF = True
+    TIMEOUT = 60
 
 
 SETTINGS_MAP = {'DefaultSettings': DefaultSettings,
