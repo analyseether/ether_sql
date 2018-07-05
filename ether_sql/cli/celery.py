@@ -22,4 +22,4 @@ def start(ctx, loglevel, concurrency):
     Starts the celery workers
     """
     from ether_sql.tasks.worker import app
-    app.start(argv=['celery', 'worker', '-l', loglevel, '-c{}'.format(concurrency)])
+    app.start(argv=['celery', 'worker', '-l', loglevel, '-c{}'.format(concurrency), '-Ofair'])
