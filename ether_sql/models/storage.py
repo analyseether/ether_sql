@@ -10,7 +10,7 @@ from web3.utils.formatters import hex_to_integer
 from ether_sql.models import base
 from ether_sql.globals import get_current_session
 from ether_sql.models import StorageDiff
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, and_
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,10 @@ class Storage(base):
             .label('row_number')
         query = current_session.db_session.query(StorageDiff.address, StorageDiff.position, StorageDiff.storage_to.label('storage'))
         query = query.add_column(row_number_column)
-        query = query.filter(StorageDiff.block_number <= block_number)
+        query = query.filter(
+            and_(
+                StorageDiff.block_number <= block_number,
+                StorageDiff.storage_to != '0x0000000000000000000000000000000000000000000000000000000000000000'))
         query = query.from_self().filter(row_number_column == 1)
 
         for row in query:
