@@ -1,13 +1,11 @@
 import click
 import logging
 from sqlalchemy import func
-
 from ether_sql.cli import sql, ether, celery
 from ether_sql.session import Session
 from ether_sql.tasks.scrapper import scrape_blocks, add_block_number
 from ether_sql.models import Blocks
 from ether_sql.globals import push_session, get_current_session
-from ether_sql.tasks.worker import celery_is_running, redis_is_running
 from ether_sql.utils.blocks import get_max_block_number
 logger = logging.getLogger(__name__)
 
@@ -71,13 +69,9 @@ def scrape_block_range(ctx, start_block_number, end_block_number, mode):
         logger.warning('Start block: {}; end block: {}; no data scrapped'
                        .format(start_block_number, end_block_number))
     if mode == 'parallel':
-        if celery_is_running() and redis_is_running():
-            logger.info('Celery and Redis are running, using multiple threads')
-            scrape_blocks(start_block_number=start_block_number,
-                          end_block_number=end_block_number,
-                          mode=mode)
-        else:
-            raise AttributeError('Switch on celery and redis to use paralel mode')
+        scrape_blocks(start_block_number=start_block_number,
+                      end_block_number=end_block_number,
+                      mode=mode)
     elif mode == 'single':
         scrape_blocks(start_block_number=start_block_number,
                       end_block_number=end_block_number,
