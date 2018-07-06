@@ -1,5 +1,6 @@
 from datetime import datetime
 from celery.utils.log import get_task_logger
+from celery import group
 from web3.utils.encoding import to_int
 from ether_sql.globals import get_current_session
 from ether_sql.tasks.worker import celery
@@ -29,16 +30,17 @@ def scrape_blocks(start_block_number, end_block_number, mode):
     logger.debug("Start block: {}".format(start_block_number))
     logger.debug('End block: {}'.format(end_block_number))
 
-    r = None
+    task_list = []
     for block_number in range(start_block_number, end_block_number+1):
         logger.debug('Adding block: {}'.format(block_number))
         if mode == 'parallel':
             r = add_block_number.delay(block_number)
+            task_list.append(r)
         elif mode == 'single':
             add_block_number(block_number)
         else:
             raise ValueError('Mode {} is unavailable'.format(mode))
-    return r
+    return task_list
 
 
 @celery.task()

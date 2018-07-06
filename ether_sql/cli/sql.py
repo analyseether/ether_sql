@@ -82,13 +82,8 @@ def export_to_csv(ctx, directory, mode):
     Export the data pushed into sql as csv
     """
     from ether_sql.tasks.export import export_to_csv
-    from ether_sql.tasks.worker import celery_is_running, redis_is_running
     if mode == 'parallel':
-        if celery_is_running() and redis_is_running():
-            logger.info('Celery and Redis are running, using multiple threads')
-            export_to_csv.delay(directory=directory)
-        else:
-            raise AttributeError('Switch on celery and redis to use parallel mode')
+        export_to_csv.delay(directory=directory)
     elif mode == 'single':
         export_to_csv(directory=directory)
     else:

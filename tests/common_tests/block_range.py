@@ -23,7 +23,7 @@ def push_block_range_single_thread(settings_name):
     assert result.exit_code == 0
 
 
-def verify_block_range_single_thread(session):
+def verify_block_range(session):
     with session.db_session_scope():
 
         assert session.db_session.query(Blocks).count() == 11
