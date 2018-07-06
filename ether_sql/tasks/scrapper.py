@@ -2,7 +2,7 @@ from datetime import datetime
 from celery.utils.log import get_task_logger
 from web3.utils.encoding import to_int
 from ether_sql.globals import get_current_session
-from ether_sql.tasks.worker import celery
+from ether_sql.tasks.worker import app
 from ether_sql.models import (
     Blocks,
     Transactions,
@@ -26,19 +26,21 @@ def scrape_blocks(list_block_numbers, mode):
     :param str mode: Mode to be used weather parallel or single
     """
 
-    r = None
+    task_list = []
+
     for block_number in list_block_numbers:
         logger.debug('Adding block: {}'.format(block_number))
         if mode == 'parallel':
             r = add_block_number.delay(block_number)
+            task_list.append(r)
         elif mode == 'single':
             add_block_number(block_number)
         else:
             raise ValueError('Mode {} is unavailable'.format(mode))
-    return r
+    return task_list
 
 
-@celery.task()
+@app.task()
 def add_block_number(block_number):
     """
     Adds the block, transactions, uncles, logs and traces of a given block

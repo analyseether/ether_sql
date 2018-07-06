@@ -8,7 +8,6 @@ from tests.common_tests.blocks import (
     verify_state_at_block,
     verify_block_56160_contents
 )
-from tests.common_tests.utils import add_block
 
 
 class TestParityMissingBlocks():

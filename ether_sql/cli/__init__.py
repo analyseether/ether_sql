@@ -5,7 +5,6 @@ from ether_sql.session import Session
 from ether_sql.tasks.scrapper import scrape_blocks, add_block_number
 from ether_sql.models import Blocks
 from ether_sql.globals import push_session, get_current_session
-from ether_sql.tasks.worker import celery_is_running, redis_is_running
 logger = logging.getLogger(__name__)
 
 
@@ -82,12 +81,9 @@ def scrape_block_range(ctx, start_block_number, end_block_number, mode, fill_gap
     if len(list_block_numbers) == 0:
         logger.warning('No blocks pushed in database')
     if mode == 'parallel':
-        if redis_is_running():
-            logger.info('Celery and Redis are running, using multiple threads')
-            scrape_blocks(list_block_numbers=list_block_numbers,
-                          mode=mode)
-        else:
-            raise AttributeError('Switch on celery and redis to use paralel mode')
+        scrape_blocks(start_block_number=start_block_number,
+                      end_block_number=end_block_number,
+                      mode=mode)
     elif mode == 'single':
         scrape_blocks(list_block_numbers=list_block_numbers,
                       mode=mode)

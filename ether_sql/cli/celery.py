@@ -22,4 +22,16 @@ def start(ctx, loglevel, concurrency):
     Starts the celery workers
     """
     from ether_sql.tasks.worker import app
-    app.start(argv=['celery', 'worker', '-l', loglevel, '-c{}'.format(concurrency), '-Ofair'])
+    app.start(argv=['celery', 'worker', '-l',
+              loglevel, '-c{}'.format(concurrency),
+              '-Ofair'])
+
+
+@celery.command()
+@click.pass_context
+def shutdown(ctx):
+    """
+    Stops the celery workers
+    """
+    from ether_sql.tasks.worker import app
+    app.start(argv=['celery', 'control', 'shutdown'])

@@ -1,11 +1,10 @@
 import logging
 import time
+import subprocess
 from click.testing import CliRunner
 from ether_sql.cli import cli
 from ether_sql.session import Session
-from ether_sql.tasks.worker import app
 from ether_sql.globals import push_session
-from .celery_worker_thread import CeleryWorkerThread
 from tests.common_tests.utils import add_block
 
 
@@ -56,16 +55,27 @@ def session_block_range_56160_56170(setting_name):
     push_session(session=session)
 
 
-def celery_worker_thread(setting_name):
+def celery_worker(settings_name):
+    """py.test fixture to shoot up Celery worker process to process test tasks."""
+
+    cmdline = "ether_sql --settings={} celery start -c1".format(settings_name)
+
+    # logger.info("Running celery worker: %s", cmdline)
+
+    worker = subprocess.Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    time.sleep(4.0)
+    worker.poll()
+
+    return worker
+
+
+def celery_shutdown(settings_name):
     """
-    Common fixture which starts celery workers in seperate threads
+    Teardown function to shutdown running celery workers
     """
-    celery_worker_thread = CeleryWorkerThread(app, settings=setting_name)
-    celery_worker_thread.setDaemon(True)
-    celery_worker_thread.start()
-    celery_worker_thread.ready.wait()
-    time.sleep(1)
-    return celery_worker_thread
+    runner = CliRunner()
+    runner.invoke(cli, ['--settings', settings_name,
+                        'celery', 'shutdown'])
 
 
 def session_missing_blocks(setting_name):

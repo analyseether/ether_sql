@@ -16,6 +16,10 @@ Install redis server::
 
   $ sudo apt-get install redis-server
 
+Install Rabbit-MQ server::
+
+  $ sudo apt-get install rabbitmq-server
+
 Python dependencies
 -------------------
 Clone the **ether_sql** library::
@@ -48,6 +52,22 @@ Create the ether_sql database in psql::
 We use Alembic to manage tables, you can create the tables by using this command::
 
     $ ether_sql sql upgrade_tables
+
+
+Setting up RabbitMQ
+-------------------
+To use Celery we need to create a RabbitMQ user, a virtual host and allow that user access to that virtual host::
+
+    $ sudo rabbitmqctl add_user myuser mypassword
+
+    $ sudo rabbitmqctl add_vhost myvhost
+
+    $ sudo rabbitmqctl set_user_tags myuser mytag
+
+    $ sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
+
+Substitute in appropriate values for myuser, mypassword and myvhost above and in the settings file.
+
 
 Node settings
 -------------

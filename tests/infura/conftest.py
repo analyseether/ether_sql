@@ -2,11 +2,12 @@ import pytest
 from tests.fixtures.common import (
     session_settings,
     session_block_56160,
-    celery_worker_thread,
     drop_session_tables,
     session_block_range_56160_56170,
     session_missing_blocks,
     session_first_10_blocks,
+    celery_worker,
+    celery_shutdown,
 )
 import logging
 
@@ -41,8 +42,8 @@ def infura_session_first_10_blocks(infura_settings):
     session_first_10_blocks(setting_name=infura_settings)
 
 
-@pytest.yield_fixture(scope="module")
-def infura_start_celery():
-    celery_worker = celery_worker_thread(setting_name=INFURA_SETTING)
-    yield
-    celery_worker.stop()
+@pytest.yield_fixture(scope="class")
+def infura_celery_worker(infura_settings):
+    infura_celery_worker = celery_worker(settings_name=infura_settings)
+    yield infura_celery_worker
+    celery_shutdown(settings_name=infura_settings)
