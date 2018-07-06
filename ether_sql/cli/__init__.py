@@ -81,8 +81,7 @@ def scrape_block_range(ctx, start_block_number, end_block_number, mode, fill_gap
     if len(list_block_numbers) == 0:
         logger.warning('No blocks pushed in database')
     if mode == 'parallel':
-        scrape_blocks(start_block_number=start_block_number,
-                      end_block_number=end_block_number,
+        scrape_blocks(list_block_numbers=list_block_numbers,
                       mode=mode)
     elif mode == 'single':
         scrape_blocks(list_block_numbers=list_block_numbers,
