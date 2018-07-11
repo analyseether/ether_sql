@@ -1,5 +1,6 @@
 import click
 import logging
+from ether_sql.tasks.worker import app
 
 
 logger = logging.getLogger(__name__)
@@ -11,7 +12,8 @@ def celery(ctx):
     """Manages the celery workers (start and stop celery)."""
 
 
-@celery.command()
+@celery.command(context_settings=dict(ignore_unknown_options=True,
+                                      allow_extra_args=True,))
 @click.pass_context
 @click.option('-l', '--loglevel', default='info',
               help='Specifies the log level for the celery workers')
@@ -21,10 +23,12 @@ def start(ctx, loglevel, concurrency):
     """
     Starts the celery workers
     """
-    from ether_sql.tasks.worker import app
-    app.start(argv=['celery', 'worker', '-l',
-              loglevel, '-c{}'.format(concurrency),
-              '-Ofair'])
+    click.echo(ctx.args)
+    list_argument = ['celery', 'worker', '-l', loglevel,
+                     '-c{}'.format(concurrency)]
+    list_argument.extend(ctx.args)
+    click.echo(list_argument)
+    app.start(argv=list_argument)
 
 
 @celery.command()
@@ -33,5 +37,4 @@ def shutdown(ctx):
     """
     Stops the celery workers
     """
-    from ether_sql.tasks.worker import app
     app.start(argv=['celery', 'control', 'shutdown'])
