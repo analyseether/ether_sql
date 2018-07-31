@@ -2,12 +2,12 @@ import os
 from celery.utils.log import get_task_logger
 from sqlalchemy import MetaData
 from ether_sql.globals import get_current_session
-from ether_sql.tasks.worker import celery
+from ether_sql.tasks.worker import app
 
 logger = get_task_logger(__name__)
 
 
-@celery.task()
+@app.task()
 def export_to_csv(directory='.'):
     """
     Export the data in the psql to a csv

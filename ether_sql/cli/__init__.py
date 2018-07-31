@@ -1,12 +1,10 @@
 import click
 import logging
-from sqlalchemy import func
 from ether_sql.cli import sql, ether, celery
 from ether_sql.session import Session
 from ether_sql.tasks.scrapper import scrape_blocks, add_block_number
 from ether_sql.models import Blocks
 from ether_sql.globals import push_session, get_current_session
-from ether_sql.utils.blocks import get_max_block_number
 logger = logging.getLogger(__name__)
 
 
@@ -32,49 +30,61 @@ cli.add_command(celery.celery, "celery")
 @click.option('--mode', default='single',
               help='Choose single is using same thread or parallel if \
               using multiple threads')
+@click.option('--fill_gaps/--no-fill_gaps', default=True)
 @click.pass_context
-def scrape_block_range(ctx, start_block_number, end_block_number, mode):
+def scrape_block_range(ctx, start_block_number, end_block_number, mode, fill_gaps):
     """
     Pushes the data between start_block_number and end_block_number in the
     database. If no values are provided, the start_block_number is the last
     block_number+1 in sql and end_block_number is the current block_number in
-    node
+    node. Also checks for missing blocks and adds them to the list of required
+    block numbers
 
     :param int start_block_number: starting block number of scraping
     :param int end_block_number: end block number of scraping
+    :param str mode: Mode of data sync 'parallel' or single
+    :param bool fill_gaps: If switched on instructs to also fill missing blocks
     """
 
-    # A DBSession() instance establishes all conversations with the database
-    # and represents a "staging zone" for all the objects loaded into the
-    # database session object. Any change made against the objects in the
     current_session = get_current_session()
-
+    with current_session.db_session_scope():
+        sql_block_number = Blocks.get_max_block_number()
     if end_block_number is None:
         end_block_number = current_session.w3.eth.blockNumber
         logger.debug(end_block_number)
     if start_block_number is None:
-        with current_session.db_session_scope():
-            sql_block_number = get_max_block_number()
         if sql_block_number is None:
             start_block_number = 0
+        elif sql_block_number == end_block_number:
+            start_block_number = sql_block_number
         else:
             start_block_number = sql_block_number+1
     logger.debug(start_block_number)
 
     # casting numbers to integers
-    start_block_number = int(start_block_number)
-    end_block_number = int(end_block_number)
-
     if start_block_number == end_block_number:
-        logger.warning('Start block: {}; end block: {}; no data scrapped'
-                       .format(start_block_number, end_block_number))
+        list_block_numbers = []
+    else:
+        start_block_number = int(start_block_number)
+        end_block_number = int(end_block_number)
+        list_block_numbers = list(range(start_block_number, end_block_number+1))
+
+    if fill_gaps and start_block_number != 0:
+        missing_blocks = Blocks.missing_blocks(sql_block_number)
+        logger.debug(missing_blocks)
+        logger.info('{} missing blocks detected'.format(len(missing_blocks)))
+        for missing in missing_blocks:
+            logger.debug(missing.block_number)
+            list_block_numbers.append(missing.block_number)
+
+    logger.debug(list_block_numbers)
+    if len(list_block_numbers) == 0:
+        logger.warning('No blocks pushed in database')
     if mode == 'parallel':
-        scrape_blocks(start_block_number=start_block_number,
-                      end_block_number=end_block_number,
+        scrape_blocks(list_block_numbers=list_block_numbers,
                       mode=mode)
     elif mode == 'single':
-        scrape_blocks(start_block_number=start_block_number,
-                      end_block_number=end_block_number,
+        scrape_blocks(list_block_numbers=list_block_numbers,
                       mode=mode)
     else:
         raise ValueError('The mode: {} is not recognized'.format(mode))

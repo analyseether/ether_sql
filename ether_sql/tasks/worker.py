@@ -1,8 +1,6 @@
 import os
 import logging
 from celery import Celery
-import celery.bin.base
-import celery.bin.celery
 from celery.signals import (
     worker_process_init,
     worker_process_shutdown,

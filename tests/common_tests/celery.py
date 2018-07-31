@@ -7,20 +7,19 @@ from ether_sql.cli import cli
 from ether_sql.models import base
 from ether_sql.globals import get_current_session
 from ether_sql.tasks.scrapper import scrape_blocks
-from .block_range import verify_block_range
+from tests.common_tests.blocks import verify_block_range_56160_56170
 
 
 logger = logging.getLogger(__name__)
 
 
 def push_block_range_multiple_thread():
-    task_list = scrape_blocks(start_block_number=56160,
-                              end_block_number=56170,
+    list_block_numbers = list(range(56160, 56171))
+    task_list = scrape_blocks(list_block_numbers=list_block_numbers,
                               mode='parallel')
     for task in task_list:
         task.wait()
-    current_session = get_current_session()
-    verify_block_range(current_session)
+    verify_block_range_56160_56170()
 
 
 def export_to_csv_multiple_threads(settings_name):

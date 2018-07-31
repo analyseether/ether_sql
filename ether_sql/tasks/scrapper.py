@@ -1,9 +1,8 @@
 from datetime import datetime
 from celery.utils.log import get_task_logger
-from celery import group
 from web3.utils.encoding import to_int
 from ether_sql.globals import get_current_session
-from ether_sql.tasks.worker import celery
+from ether_sql.tasks.worker import app
 from ether_sql.models import (
     Blocks,
     Transactions,
@@ -18,20 +17,18 @@ from ether_sql.models import (
 logger = get_task_logger(__name__)
 
 
-def scrape_blocks(start_block_number, end_block_number, mode):
+def scrape_blocks(list_block_numbers, mode):
     """
-    Main function which starts scrapping data from the node and pushes it into
+    Function which starts scrapping data from the node and pushes it into
     the sql database
 
-    :param int start_block_number: starting block number of scraping
-    :param int end_block_number: end block number of scraping
+    :param list list_block_numbers: List of block numbers to push in the database
+    :param str mode: Mode to be used weather parallel or single
     """
 
-    logger.debug("Start block: {}".format(start_block_number))
-    logger.debug('End block: {}'.format(end_block_number))
-
     task_list = []
-    for block_number in range(start_block_number, end_block_number+1):
+
+    for block_number in list_block_numbers:
         logger.debug('Adding block: {}'.format(block_number))
         if mode == 'parallel':
             r = add_block_number.delay(block_number)
@@ -43,7 +40,7 @@ def scrape_blocks(start_block_number, end_block_number, mode):
     return task_list
 
 
-@celery.task()
+@app.task()
 def add_block_number(block_number):
     """
     Adds the block, transactions, uncles, logs and traces of a given block
@@ -61,22 +58,31 @@ def add_block_number(block_number):
     iso_timestamp = datetime.utcfromtimestamp(timestamp).isoformat()
     block = Blocks.add_block(block_data=block_data,
                              iso_timestamp=iso_timestamp)
-    if current_session.settings.PARSE_TRACE and block_number != 0:
+
+    if current_session.settings.PARSE_TRACE and \
+       current_session.settings.PARSE_STATE_DIFF and \
+       block_number != 0:
         block_trace_list = current_session.w3.parity.\
             traceReplayBlockTransactions(block_number,
-                                         mode=['trace'])
+                                         mode=['trace', 'stateDiff'])
+    elif block_number != 0:
+        if current_session.settings.PARSE_TRACE:
+            block_trace_list = current_session.w3.parity.\
+                traceReplayBlockTransactions(block_number,
+                                             mode=['trace'])
 
-    if current_session.settings.PARSE_STATE_DIFF and block_number != 0:
-        block_state_list = current_session.w3.parity.\
-            traceReplayBlockTransactions(block_number,
-                                         mode=['stateDiff'])
+        if current_session.settings.PARSE_STATE_DIFF:
+            block_trace_list = current_session.w3.parity.\
+                traceReplayBlockTransactions(block_number,
+                                             mode=['stateDiff'])
 
     # added the block data in the db session
     with current_session.db_session_scope():
         current_session.db_session.add(block)
 
-        uncle_list = block_data['uncles']
-        for i in range(0, len(uncle_list)):
+        uncle_hashes = block_data['uncles']
+        uncle_list = []
+        for i in range(0, len(uncle_hashes)):
             # Unfortunately there is no command eth_getUncleByHash
             uncle_data = current_session.w3.eth.getUncleByBlock(
                                 block_number, i)
@@ -84,6 +90,7 @@ def add_block_number(block_number):
                                      block_number=block_number,
                                      iso_timestamp=iso_timestamp)
             current_session.db_session.add(uncle)
+            uncle_list.append(uncle)
 
         transaction_list = block_data['transactions']
         # loop to get the transaction, receipts, logs and traces of the block
@@ -119,7 +126,7 @@ def add_block_number(block_number):
                         timestamp=transaction.timestamp)
 
             if current_session.settings.PARSE_STATE_DIFF:
-                state_diff_dict = block_state_list[index]['stateDiff']
+                state_diff_dict = block_trace_list[index]['stateDiff']
                 if state_diff_dict is not None:
                     StateDiff.add_state_diff_dict(
                         current_session=current_session,
@@ -130,16 +137,13 @@ def add_block_number(block_number):
                         timestamp=transaction.timestamp,
                         miner=block.miner,
                         fees=fees)
-
-        StateDiff.add_mining_rewards(current_session=current_session,
-                                     block=block)
-        # updating the meta info table
-        meta_info = current_session.db_session.query(MetaInfo).first()
-        if meta_info is None:
-            # No rows have been inserted yet
-            meta_info = MetaInfo(last_pushed_block=block_number)
+        if block_number == 0:
+            StateDiff.parse_genesis_rewards(current_session=current_session,
+                                            block=block)
         else:
-            meta_info.last_pushed_block = block_number
-        current_session.db_session.add(meta_info)
-        logger.debug('{}'.format(meta_info.to_dict()))
+            StateDiff.add_mining_rewards(current_session=current_session,
+                                         block=block,
+                                         uncle_list=uncle_list)
+        # updating the meta info table
+        MetaInfo.set_last_pushed_block(current_session, block_number)
     logger.info("Commiting block: {} to sql".format(block_number))

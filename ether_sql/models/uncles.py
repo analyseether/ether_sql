@@ -3,7 +3,7 @@ from sqlalchemy import Text
 from web3.utils.encoding import to_int
 from web3.utils.formatters import hex_to_integer
 import logging
-
+from eth_utils import to_checksum_address
 from ether_sql.models import base
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class Uncles(base):
                     difficulty=hex_to_integer(uncle_data['difficulty']),  # 'difficulty
                     current_blocknumber=block_number,  # current_blocknumber
                     gas_used=hex_to_integer(uncle_data['gasUsed']),  # gas_used
-                    miner=uncle_data['miner'],  # miner
+                    miner=to_checksum_address(uncle_data['miner']),  # miner
                     timestamp=iso_timestamp,
                     sha3uncles=uncle_data['sha3Uncles'],  # SHA3uncles
                     extra_data=uncle_data['extraData'],  # extra_data

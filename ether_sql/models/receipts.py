@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Numeric, ForeignKey, TIMESTAMP, Boolean
 from web3.utils.encoding import to_int, to_hex
-
+from eth_utils import to_checksum_address
 from ether_sql.models import base
-from ether_sql import constants
+from ether_sql.constants import mainnet
 
 
 class Receipts(base):
@@ -56,16 +56,20 @@ class Receipts(base):
         :param int timestamp: timestamp of the block where this transaction was included
         :param int block_number: block number of the block where this transaction was included
         """
-        if block_number > constants.FORK_BLOCK_NUMBER['Byzantium']:
+        if block_number > mainnet.FORK_BLOCK_NUMBER['Byzantium']:
             status = bool(to_int(receipt_data['status']))
         else:
             status = None
+        try:
+            contract_address = to_checksum_address(receipt_data['contractAddress'])
+        except TypeError:
+            contract_address = None
 
         receipt = cls(transaction_hash=to_hex(receipt_data['transactionHash']),
                       status=status,
                       gas_used=to_int(receipt_data['gasUsed']),
                       cumulative_gas_used=to_int(receipt_data['cumulativeGasUsed']),
-                      contract_address=receipt_data['contractAddress'],
+                      contract_address=contract_address,
                       block_number=block_number,
                       timestamp=timestamp,
                       transaction_index=to_int(receipt_data['transactionIndex']))

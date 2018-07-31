@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Numeric, ForeignKey, Text, Integer
 import logging
 from web3.utils.encoding import to_hex
 from web3.utils.formatters import hex_to_integer
-
+from eth_utils import to_checksum_address
 from ether_sql.models import base
 
 
@@ -107,8 +107,8 @@ class Traces(base):
 
         if trace.trace_type == 'call':
             # parsing action
-            trace.sender = action['from']
-            trace.receiver = action['to']
+            trace.sender = to_checksum_address(action['from'])
+            trace.receiver = to_checksum_address(action['to'])
             trace.start_gas = hex_to_integer(action['gas'])
             trace.value = hex_to_integer(action['value'])
             trace.input_data = action['input']
@@ -130,14 +130,14 @@ class Traces(base):
                 result = dict_trace['result']
                 trace.gas_used = hex_to_integer(result['gasUsed'])
                 trace.output = result['code']
-                trace.contract_address = result['address']
+                trace.contract_address = to_checksum_address(result['address'])
             else:
                 trace.error = dict_trace['error']
         elif trace.trace_type == 'suicide':
             logger.debug('Type {}, action {}'.format(dict_trace['type'], action))
             # parsing action
-            trace.sender = action['address']
-            trace.receiver = action['refundAddress']
+            trace.sender = to_checksum_address(action['address'])
+            trace.receiver = to_checksum_address(action['refundAddress'])
             trace.value = hex_to_integer(action['balance'])
             # parsing result
             logger.debug('Type encountered {}'.format(dict_trace['type']))

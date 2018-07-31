@@ -8,6 +8,7 @@ from sqlalchemy import (
 )
 import logging
 from ether_sql.models import base
+from eth_utils import to_checksum_address
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ class StorageDiff(base):
                            timestamp=timestamp,
                            transaction_hash=transaction_hash,
                            transaction_index=transaction_index,
-                           address=address,
+                           address=to_checksum_address(address),
                            position=position,
                            state_diff_id=state_diff_id,
                            storage_from=storage_from,
