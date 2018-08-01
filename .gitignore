@@ -29,3 +29,6 @@ docs/_build/*
 
 # removing redis connection files
 dump.rdb
+
+# removing celery beat schedule
+celerybeat-schedule
