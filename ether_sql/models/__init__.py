@@ -16,3 +16,4 @@ from ether_sql.models.state_diff import StateDiff
 from ether_sql.models.storage_diff import StorageDiff
 from ether_sql.models.state import State
 from ether_sql.models.storage import Storage
+from ether_sql.models.block_task_meta import BlockTaskMeta
