@@ -36,7 +36,9 @@ class Session():
         self.db_engine, self.url = setup_db_engine(settings=self.settings)
 
         self.w3 = setup_node_session(settings=self.settings)
-        self.setup_filters()
+
+        if self.settings.NEW_BLOCKS:
+            self.setup_filters()
 
     @contextmanager
     def db_session_scope(self):

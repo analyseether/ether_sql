@@ -28,7 +28,8 @@ app.conf.update(CELERY_RESULT_BACKEND=settings.CELERY_BACKEND,
                 CELERY_TIMEZONE='UTC',
                 CELERYD_LOG_FORMAT=settings.CELERYD_LOG_FORMAT,
                 CELERYD_TASK_LOG_FORMAT=settings.CELERYD_TASK_LOG_FORMAT,
-                CELERYBEAT_SCHEDULE = celery_schedule)
+                CELERYBEAT_SCHEDULE = celery_schedule,
+                CELERY_ACKS_LATE=True)
 
 
 @worker_process_init.connect

@@ -33,6 +33,7 @@ class DefaultSettings():
     # Use this option to parse traces, needs parity with cli --tracing=on
     PARSE_TRACE = False
     PARSE_STATE_DIFF = False
+    NEW_BLOCKS = False
 
 
 class PersonalInfuraSettings(DefaultSettings):
