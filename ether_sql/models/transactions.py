@@ -27,7 +27,7 @@ class Transactions(base):
     """
     __tablename__ = 'transactions'
     transaction_hash = Column(String(66), primary_key=True, index=True)
-    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    block_number = Column(Numeric, ForeignKey('blocks.block_number', ondelete='CASCADE'))
     nonce = Column(Numeric, nullable=False)
     sender = Column(String(42), nullable=False)
     receiver = Column(String(42))

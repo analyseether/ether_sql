@@ -1,6 +1,5 @@
 import logging
 from sqlalchemy import Column, String, Numeric, TIMESTAMP, Text, Integer
-from sqlalchemy.orm import relationship
 from sqlalchemy import func
 from web3.utils.encoding import (to_int, to_hex)
 from eth_utils import to_checksum_address

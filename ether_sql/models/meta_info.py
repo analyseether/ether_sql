@@ -18,7 +18,7 @@ class MetaInfo(base):
 
     __tablename__ = 'meta_info'
     id = Column(Integer, primary_key=True)
-    last_pushed_block = Column(Numeric, ForeignKey('blocks.block_number'))
+    last_pushed_block = Column(Numeric, ForeignKey('blocks.block_number', ondelete='CASCADE'))
     current_state_block = Column(Numeric)
 
     def to_dict(self):

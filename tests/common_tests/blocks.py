@@ -17,6 +17,7 @@ from ether_sql.models import (
     StateDiff,
     StorageDiff,
 )
+from ether_sql.tasks.scrapper import remove_block_number
 from tests.common_tests.utils import match_state_dump_to_state_table
 from tests.fixtures.expected_data import (
     EXPECTED_BLOCK_PROPERTIES,
@@ -156,3 +157,18 @@ def verify_block_56160_contents():
             for i in range(0, len(storage_diff_property_in_sql)):
                 assert storage_diff_property_in_sql[i].to_dict() == \
                     EXPECTED_STORAGE_DIFF_PROPERTIES[i]
+
+
+def verify_removed_block_range_56160_56170():
+    for i in range(56160, 56171):
+        remove_block_number(i)
+    session = get_current_session()
+    with session.db_session_scope():
+        assert session.db_session.query(Blocks).count() == 0
+        assert session.db_session.query(Transactions).count() == 0
+        assert session.db_session.query(Receipts).count() == 0
+        assert session.db_session.query(Logs).count() == 0
+        assert session.db_session.query(Uncles).count() == 0
+        assert session.db_session.query(Traces).count() == 0
+        assert session.db_session.query(StateDiff).count() == 0
+        assert session.db_session.query(StorageDiff).count() == 0
