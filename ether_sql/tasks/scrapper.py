@@ -1,6 +1,7 @@
 from datetime import datetime
 from celery.utils.log import get_task_logger
 from celery.task import Task
+from celery.signals import task_prerun
 from web3.utils.encoding import to_int
 from ether_sql.globals import get_current_session
 from ether_sql.tasks.worker import app
@@ -44,12 +45,13 @@ def scrape_blocks(list_block_numbers, mode):
     :param list list_block_numbers: List of block numbers to push in the database
     :param str mode: Mode to be used weather parallel or single
     """
-
+    task_list = []
     current_session = get_current_session()
     for block_number in list_block_numbers:
         logger.debug('Adding block: {}'.format(block_number))
         if mode == 'parallel':
             r = add_block_number.delay(block_number)
+            task_list.append(r)
             block_task_meta = BlockTaskMeta(task_id=r.id,
                                             task_name='add_block_number',
                                             state='PENDING',
@@ -60,6 +62,7 @@ def scrape_blocks(list_block_numbers, mode):
             add_block_number(block_number)
         else:
             raise ValueError('Mode {} is unavailable'.format(mode))
+    return task_list
 
 
 @app.task(base=BlockTaskTracker, max_retries=5)
@@ -173,6 +176,16 @@ def add_block_number(block_number):
     return block_hash
 
 
-@app.task(base=BlockTaskTracker, max_retries=5)
+@app.task()
 def remove_block_number(block_number):
-    
+    """
+    Removes the block, transactions, uncles, logs and traces of a given block
+    number into the database to perform chain reorgs.
+
+    :param int block_number: The block number to add to the database
+    """
+    current_session = get_current_session()
+    with current_session.db_session_scope():
+        current_session.db_session.query(Blocks).\
+            filter_by(block_number=block_number).delete()
+        logger.info("Removed block {}".format(block_number))

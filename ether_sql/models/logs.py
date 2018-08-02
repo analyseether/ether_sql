@@ -29,11 +29,11 @@ class Logs(base):
     __tablename__ = 'logs'
     id = Column(Integer, primary_key=True)
     transaction_hash = Column(String(66),
-                              ForeignKey('transactions.transaction_hash'),
+                              ForeignKey('transactions.transaction_hash', ondelete='CASCADE'),
                               index=True)
     address = Column(String(42), nullable=False)
     data = Column(Text)
-    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    block_number = Column(Numeric, ForeignKey('blocks.block_number', ondelete='CASCADE'))
     timestamp = Column(TIMESTAMP)
     transaction_index = Column(Numeric, nullable=False)
     log_index = Column(Numeric, nullable=False)

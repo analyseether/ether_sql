@@ -33,7 +33,7 @@ class Uncles(base):
     uncle_blocknumber = Column(Numeric, nullable=False)
     parent_hash = Column(String(66), nullable=False)
     difficulty = Column(String(66), nullable=False)
-    current_blocknumber = Column(Numeric,  ForeignKey('blocks.block_number'))
+    current_blocknumber = Column(Numeric,  ForeignKey('blocks.block_number', ondelete='CASCADE'))
     gas_used = Column(Numeric, nullable=False)
     miner = Column(String(42), nullable=False)
     timestamp = Column(TIMESTAMP)

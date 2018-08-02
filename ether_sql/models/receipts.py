@@ -21,13 +21,13 @@ class Receipts(base):
     __tablename__ = 'receipts'
 
     transaction_hash = Column(String(66),
-                              ForeignKey('transactions.transaction_hash'),
+                              ForeignKey('transactions.transaction_hash', ondelete='CASCADE'),
                               primary_key=True, index=True)
     status = Column(Boolean, nullable=True)
     gas_used = Column(Numeric, nullable=False)
     cumulative_gas_used = Column(Numeric, nullable=False)
     contract_address = Column(String(42))
-    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    block_number = Column(Numeric, ForeignKey('blocks.block_number', ondelete='CASCADE'))
     timestamp = Column(TIMESTAMP)
     transaction_index = Column(Numeric, nullable=False)
 

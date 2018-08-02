@@ -42,11 +42,11 @@ class StateDiff(base):
 
     __tablename__ = 'state_diff'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    block_number = Column(Numeric, ForeignKey('blocks.block_number', ondelete='CASCADE'))
     timestamp = Column(TIMESTAMP)
     # nullable because some state changes also occour because of miner rewards
     transaction_hash = Column(String(66),
-                              ForeignKey('transactions.transaction_hash'),
+                              ForeignKey('transactions.transaction_hash', ondelete='CASCADE'),
                               nullable=True,
                               index=True)
     transaction_index = Column(Numeric, nullable=True)
