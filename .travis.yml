@@ -11,6 +11,7 @@ cache:
     - $TRAVIS_BUILD_DIR/paritybin
 before_install:
   - createdb ether_sql_tests
+  - sudo -u postgres psql -U travis -d postgres -c "alter user travis with password 'develop';"
   - sudo rabbitmqctl add_user myuser mypassword
   - sudo rabbitmqctl add_vhost myvhost
   - sudo rabbitmqctl set_user_tags myuser mytag
@@ -20,6 +21,6 @@ install:
   - travis_retry bash <(curl https://get.parity.io -L) -r stable
 before_script:
   - parity --tracing=on --pruning==archive &
-  - sleep 120
+  - sleep 10
 script:
 - python -m pytest -vv tests
