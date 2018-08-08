@@ -4,13 +4,23 @@ python:
 services:
   - postgresql
   - rabbitmq
+cache:
+  - pip: true
+  - directories:
+    - $HOME/.local/share/io.parity.ethereum/
+    - $TRAVIS_BUILD_DIR/paritybin
 before_install:
   - createdb ether_sql_tests
+  - sudo -u postgres psql -U travis -d postgres -c "alter user travis with password 'develop';"
   - sudo rabbitmqctl add_user myuser mypassword
   - sudo rabbitmqctl add_vhost myvhost
   - sudo rabbitmqctl set_user_tags myuser mytag
   - sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
 install:
   - travis_retry pip install -e . -r requirements.txt
+  - bash <(curl https://get.parity.io -L) -r stable
+before_script:
+  - parity --tracing=on --pruning==archive &
+  - sleep 120
 script:
-- python -m pytest tests/infura
+- python -m pytest -vv tests
