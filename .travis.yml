@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.6"
+services:
+  - postgresql
+  - rabbitmq
+before_install:
+  - createdb ether_sql_tests
+  - sudo rabbitmqctl add_user myuser mypassword
+  - sudo rabbitmqctl add_vhost myvhost
+  - sudo rabbitmqctl set_user_tags myuser mytag
+  - sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
+install:
+  - travis_retry pip install -e . -r requirements.txt
+script:
+- python -m pytest tests/infura
