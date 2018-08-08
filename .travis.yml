@@ -5,7 +5,6 @@ services:
   - postgresql
   - rabbitmq
 before_install:
-  - sudo -u postgres createuser -s -e $USER
   - createdb ether_sql_tests
   - sudo rabbitmqctl add_user myuser mypassword
   - sudo rabbitmqctl add_vhost myvhost
