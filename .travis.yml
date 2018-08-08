@@ -21,6 +21,6 @@ install:
   - travis_retry bash <(curl https://get.parity.io -L) -r stable
 before_script:
   - parity --tracing=on --pruning==archive &
-  - sleep 10
+  - sleep 120
 script:
 - python -m pytest -vv tests
