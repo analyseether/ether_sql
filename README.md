@@ -10,6 +10,8 @@ It is written in Python 3.5+, uses [web3.py](https://github.com/ethereum/web3.py
 This is currently in very alpha stage, and not recommended for production use until it has received sufficient testing.
 Currently supports Geth, Infura and Parity node, but transaction traces (eg. internal transactions) are currently available only with Parity node.
 
+[![Build Status](https://travis-ci.org/analyseether/ether_sql.svg?branch=master)](https://travis-ci.org/analyseether/ether_sql)
+
 Documentation available at: http://ether-sql.readthedocs.io
 
 # Installation guide
