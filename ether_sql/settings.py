@@ -3,7 +3,7 @@ import os
 # Task queue settings
 RABBIT_MQ_URL = 'amqp://myuser:mypassword@localhost:5672/myvhost'
 CELERY_BROKER = RABBIT_MQ_URL
-CELERY_BACKEND = 'redis://'
+CELERY_BACKEND = 'rpc://'
 CELERYD_TASK_SOFT_TIME_LIMIT = 60
 CELERYD_TASK_TIME_LIMIT = 120
 CELERYD_LOG_FORMAT = '[%(asctime)s][PID:%(process)d][%(levelname)s][%(processName)s] %(message)s'
