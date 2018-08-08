@@ -18,7 +18,7 @@ before_install:
   - sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
 install:
   - travis_retry pip install -e . -r requirements.txt
-  - travis_retry bash <(curl https://get.parity.io -L) -r stable
+  - bash <(curl https://get.parity.io -L) -r stable
 before_script:
   - parity --tracing=on --pruning==archive &
   - sleep 120
