@@ -22,4 +22,4 @@ before_script:
   - parity --tracing=on --pruning==archive &
   - sleep 120
 script:
-- python -m pytest tests
+- python -m pytest -vv tests
