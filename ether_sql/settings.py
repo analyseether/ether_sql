@@ -55,7 +55,7 @@ class PersonalGethSettings(DefaultSettings):
 
 class TestSettings(DefaultSettings):
     # SQLALCHEMY settings
-    SQLALCHEMY_PASSWORD = ''
+    SQLALCHEMY_PASSWORD = 'develop'
     SQLALCHEMY_DB = 'ether_sql_tests'
 
     # Logging settings
