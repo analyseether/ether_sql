@@ -30,12 +30,8 @@ docs/_build/*
 # removing redis connection files
 dump.rdb
 
-<<<<<<< b8348d6b2516f49265704d1673ff8b93174db091
 # removing celery beat schedule
 celerybeat-schedule
 
 # removing ftp config
-=======
-# removing ftpconfig
->>>>>>> first commit
 .ftpconfig
