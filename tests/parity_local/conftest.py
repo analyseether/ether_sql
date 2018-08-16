@@ -5,6 +5,8 @@ from utils import get_process, wait_for_socket
 from tests.fixtures.common import session_settings, drop_session_tables
 from ether_sql.session import Session
 from ether_sql.globals import push_session
+from click.testing import CliRunner
+from ether_sql.cli import cli
 from web3 import Web3
 from subprocess import call
 
@@ -74,5 +76,12 @@ def parity_local_settings(parity_process, ipc_path):
     parity_settings = session_settings(setting_name=PARITY_LOCAL_SETTINGS)
     session = Session(PARITY_LOCAL_SETTINGS)
     push_session(session)
-    yield
-    # drop_session_tables(setting_name=PARITY_LOCAL_SETTINGS)
+    yield PARITY_LOCAL_SETTINGS
+    drop_session_tables(setting_name=PARITY_LOCAL_SETTINGS)
+
+@pytest.fixture(scope="module")
+def parity_push_blocks_in_sql(parity_local_settings):
+    runner = CliRunner()
+    runner.invoke(cli, ['--settings', parity_local_settings,
+                        'scrape_block_range',
+                        '--start_block_number', 1])

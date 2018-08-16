@@ -18,6 +18,7 @@ before_install:
   - sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
 install:
   - travis_retry pip install -e . -r requirements.txt
+  - bash <(curl https://get.parity.io -L) -r stable
 script:
 - python -m pytest -vv tests/infura
 - python -m pytest -vv tests/parity_local

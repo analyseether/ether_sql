@@ -74,17 +74,11 @@ class ParitySyncedTestSettings(TestSettings):
     PARSE_STATE_DIFF = True
     TIMEOUT = 60
 
-class ParityLocalTestSettings(TestSettings):
-    NODE_TYPE = "Parity"
+class ParityLocalTestSettings(ParitySyncedTestSettings):
     IPC_PATH = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..',
         'tests/parity_local/parity-local-fixture/jsonrpc.ipc'))
-    # Tables to parse
-    # Use this option to parse traces, needs parity with cli --tracing=on
-    PARSE_TRACE = True
-    PARSE_STATE_DIFF = True
-
-    TIMEOUT = 60
+    
 
 
 SETTINGS_MAP = {'DefaultSettings': DefaultSettings,
