@@ -20,3 +20,4 @@ install:
   - travis_retry pip install -e . -r requirements.txt
 script:
 - python -m pytest -vv tests/infura
+- python -m pytest -vv tests/parity_local

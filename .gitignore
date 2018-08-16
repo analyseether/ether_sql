@@ -32,3 +32,8 @@ dump.rdb
 
 # removing ftpconfig
 .ftpconfig
+
+# removing parity local chains while testing
+tests/parity_local/parity-local-fixture/chains/*
+tests/parity_local/parity-local-fixture/signer/*
+tests/parity_local/parity-local-fixture/cache/*
