@@ -105,7 +105,10 @@ def setup_node_session(settings):
     """
     if settings.NODE_TYPE == 'Parity':
         # checking if trace tables should be parsed
-        w3 = Web3(IPCProvider(timeout=settings.TIMEOUT))
+        if settings.IPC_PATH:
+            w3 = Web3(IPCProvider(ipc_path=settings.IPC_PATH, timeout=settings.TIMEOUT))
+        else:
+            w3 = Web3(IPCProvider(timeout=settings.TIMEOUT))
 
     elif settings.NODE_TYPE == 'Geth':
         w3 = Web3(IPCProvider())

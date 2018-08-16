@@ -28,6 +28,7 @@ class DefaultSettings():
     # Available options 'Geth', 'Parity', 'Infura'
     NODE_TYPE = "Infura"
     NODE_URL = 'https://mainnet.infura.io/'
+    IPC_PATH = None
     TIMEOUT = 10
     # Tables to parse
     # Use this option to parse traces, needs parity with cli --tracing=on
@@ -61,7 +62,7 @@ class TestSettings(DefaultSettings):
     LOG_LEVEL = "DEBUG"
 
 
-class ParityTestSettings(TestSettings):
+class ParitySyncedTestSettings(TestSettings):
 
     # Node settings
     # Available options 'Geth', 'Parity', 'Infura'
@@ -73,10 +74,23 @@ class ParityTestSettings(TestSettings):
     PARSE_STATE_DIFF = True
     TIMEOUT = 60
 
+class ParityLocalTestSettings(TestSettings):
+    NODE_TYPE = "Parity"
+    IPC_PATH = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..',
+        'tests/parity_local/parity-local-fixture/jsonrpc.ipc'))
+    # Tables to parse
+    # Use this option to parse traces, needs parity with cli --tracing=on
+    PARSE_TRACE = True
+    PARSE_STATE_DIFF = True
+
+    TIMEOUT = 60
+
 
 SETTINGS_MAP = {'DefaultSettings': DefaultSettings,
                 'TestSettings': TestSettings,
-                'ParityTestSettings': ParityTestSettings,
+                'ParitySyncedTestSettings': ParitySyncedTestSettings,
+                'ParityLocalTestSettings': ParityLocalTestSettings,
                 'PersonalInfuraSettings': PersonalInfuraSettings,
                 'PersonalParitySettings': PersonalParitySettings,
                 'PersonalGethSettings': PersonalGethSettings}
