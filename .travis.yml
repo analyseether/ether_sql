@@ -10,6 +10,8 @@ services:
   - postgresql
   - rabbitmq
 before_install:
+  - sudo apt-get update
+  - sudo apt-get install gcc g++ libudev-dev pkg-config file make cmake
   - createdb ether_sql_tests
   - sudo -u postgres psql -U travis -d postgres -c "alter user travis with password 'develop';"
   - sudo rabbitmqctl add_user myuser mypassword
