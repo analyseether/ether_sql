@@ -12,6 +12,7 @@ Click==6.7
 # Testing and coverage
 pytest==3.0.0
 pytest-cov==2.2.1
+tqdm
 
 # For building docs
 sphinx==1.7.4

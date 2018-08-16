@@ -10,8 +10,6 @@ services:
   - postgresql
   - rabbitmq
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install gcc g++ libudev-dev pkg-config file make cmake
   - createdb ether_sql_tests
   - sudo -u postgres psql -U travis -d postgres -c "alter user travis with password 'develop';"
   - sudo rabbitmqctl add_user myuser mypassword
@@ -20,7 +18,7 @@ before_install:
   - sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
 install:
   - travis_retry pip install -e . -r requirements.txt
-  - bash <(curl https://get.parity.io -L) -r stable
+  - python tests/parity_local/install_parity.py v1.11.7
 script:
 - # python -m pytest -vv tests/infura
 - python -m pytest -svv tests/parity_local
