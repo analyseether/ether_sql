@@ -11,6 +11,7 @@ Install postgresql as database::
 Install python3 headers::
 
   $ sudo apt-get install python3-pip
+  $ sudo apt-get install python3.6-dev
 
 Install redis server::
 
