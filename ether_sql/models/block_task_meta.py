@@ -14,7 +14,7 @@ class BlockTaskMeta(base):
     """
     __tablename__ = 'block_task_meta'
     id = Column(Integer, primary_key=True)
-    task_id = Column(Text, nullable=False)
+    task_id = Column(Text, nullable=True)
     task_name = Column(Text, nullable=False)
     state = Column(Text, nullable=False)
     block_number = Column(Numeric, nullable=False)
