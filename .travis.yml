@@ -20,5 +20,5 @@ install:
   - travis_retry pip install -e . -r requirements.txt
   - bash <(curl https://get.parity.io -L) -r stable
 script:
-- python -m pytest -vv tests/infura
-- python -m pytest -vv tests/parity_local
+- # python -m pytest -vv tests/infura
+- python -m pytest -svv tests/parity_local
