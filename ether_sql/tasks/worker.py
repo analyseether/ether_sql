@@ -21,8 +21,14 @@ celery_schedule = {
     'new_blocks': {
         'task': 'ether_sql.tasks.filters.new_blocks',
         'schedule': timedelta(seconds=30),
+        'options': {'queue' : 'celery_filters'}
     },
-    }
+    'push_blocks_in_queue': {
+        'task': 'ether_sql.tasks.filters.push_blocks_in_queue',
+        'schedule': timedelta(seconds=30),
+        'options': {'queue' : 'celery_filters'}
+    },
+}
 
 app.conf.update(CELERY_RESULT_BACKEND=settings.CELERY_BACKEND,
                 CELERY_TIMEZONE='UTC',
