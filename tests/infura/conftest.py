@@ -1,14 +1,17 @@
 import pytest
-from tests.fixtures.common import (
+from tests.fixtures.session_fixtures import (
     session_settings,
     session_block_56160,
     drop_session_tables,
     session_block_range_56160_56170,
     session_missing_blocks,
     session_first_10_blocks,
+)
+from tests.fixtures.celery_fixtures import (
     celery_worker,
     celery_shutdown,
 )
+
 import logging
 
 logger = logging.getLogger(__name__)

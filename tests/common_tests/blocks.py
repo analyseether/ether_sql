@@ -82,6 +82,14 @@ def verify_block_range_56160_56170():
         assert session.db_session.query(Uncles).count() == 1
         # assert session.db_session.query(MetaInfo).count() == 1
 
+        number_of_rows_in_meta_info = session.db_session.\
+            query(MetaInfo).count()
+        meta_info_properties_in_sql = session.db_session.\
+            query(MetaInfo).first().to_dict()
+        assert number_of_rows_in_meta_info == 1
+        print(meta_info_properties_in_sql)
+        assert meta_info_properties_in_sql == EXPECTED_META_INFO
+
         if session.settings.PARSE_TRACE:
             assert session.db_session.query(Traces).count() == 3
 
@@ -102,14 +110,6 @@ def verify_block_56160_contents():
     # comparing values of blocks
     session = get_current_session()
     with session.db_session_scope():
-
-        number_of_rows_in_meta_info = session.db_session.\
-            query(MetaInfo).count()
-        meta_info_properties_in_sql = session.db_session.\
-            query(MetaInfo).first().to_dict()
-        assert number_of_rows_in_meta_info == 1
-        print(meta_info_properties_in_sql)
-        assert meta_info_properties_in_sql == EXPECTED_META_INFO
 
         block_properties_in_sql = session.db_session.\
             query(Blocks).filter_by(block_number=56160).first().to_dict()

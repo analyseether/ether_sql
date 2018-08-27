@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def cli(ctx, settings):
     """:code:`ether_sql` is the most basic CLI group with 4 subsequent
     commands."""
-    current_session = Session(settings=settings)
+    current_session = Session(setting_name=settings)
     push_session(current_session)
 
 

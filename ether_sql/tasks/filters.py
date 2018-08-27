@@ -18,6 +18,7 @@ def new_blocks():
     :param block_filter: block filter as described in session.py
     """
     current_session = get_current_session()
+    logger.debug("Reached at new blocks to get block hashes")
     block_hashes = current_session.block_filter.get_new_entries()
     for block_hash in block_hashes:
         block_data = current_session.w3.eth.getBlock(block_hash)
@@ -27,7 +28,6 @@ def new_blocks():
                               block_number=block_number,
                               block_hash=to_hex(block_hash))
     logger.info(block_hashes)
-
 
 @app.task()
 def push_blocks_in_queue():
