@@ -31,10 +31,3 @@ _Put an `x` in the boxes that apply. You can also fill these out after creating 
 
 
 ## Any other comments?
-
-
-## Where has this been tested?
-
-**Operating System:** …
-
-**Node:** …
