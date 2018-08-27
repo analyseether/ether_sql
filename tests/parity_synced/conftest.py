@@ -12,14 +12,14 @@ from tests.fixtures.common import (
 import logging
 
 logger = logging.getLogger(__name__)
-INFURA_SETTING = "TestSettings"
+PARITY_SETTINGS = "ParitySyncedTestSettings"
 
 
 @pytest.yield_fixture(scope="class")
 def parity_settings():
-    parity_settings = session_settings(setting_name=INFURA_SETTING)
+    parity_settings = session_settings(setting_name=PARITY_SETTINGS)
     yield parity_settings
-    drop_session_tables(setting_name=INFURA_SETTING)
+    drop_session_tables(setting_name=PARITY_SETTINGS)
 
 
 @pytest.fixture(scope="class")
