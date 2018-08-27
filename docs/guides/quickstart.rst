@@ -18,21 +18,6 @@ To sync blocks in a particular range use the options :code:`--start_block_number
 
   $ ether_sql scrape_block_range --help
 
-To use multiple workers to perform the sync, first switch on celery workers in a separate terminal.
-
-.. code :: shell
-
-  $ ether_sql --settings=YourSettings celery start -c4
-
-The above command will start 4 workers using the settings :code:`YourSettings`
-Then start the sync, which will automatically use the setting used to start workers.
-
-.. code :: shell
-
-  $ ether_sql scrape_block_range
-
-Here is a demo of the process: https://www.youtube.com/watch?v=rnkfyAgGJwI&feature=youtu.be
-
 Current progress
 ----------------
 To get the current status of sync progress you can use the following command to get the highest block number in the sql.

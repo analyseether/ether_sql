@@ -21,7 +21,7 @@ def celery(ctx):
               help='Number of parallel workers')
 def start(ctx, loglevel, concurrency):
     """
-    Starts the celery workers
+    Starts the celery workers, also allows for passing celery specific arguements.
     """
     click.echo(ctx.args)
     list_argument = ['celery', 'worker', '-l', loglevel,
