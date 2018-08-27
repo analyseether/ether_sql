@@ -37,9 +37,9 @@ class Traces(base):
 
     __tablename__ = 'traces'
     id = Column(Integer, primary_key=True)
-    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    block_number = Column(Numeric, ForeignKey('blocks.block_number', ondelete='CASCADE'))
     transaction_hash = Column(String(66),
-                              ForeignKey('transactions.transaction_hash'),
+                              ForeignKey('transactions.transaction_hash', ondelete='CASCADE'),
                               index=True)
     trace_type = Column(String, nullable=False)
     trace_address = Column(String, nullable=False)

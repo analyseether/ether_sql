@@ -8,5 +8,6 @@ This section aims to provide basic guides on how to make most use of the library
    :name: toc-guide
 
    quickstart
+   syncing-blockchain
    basic-sql
    contribution

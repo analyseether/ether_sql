@@ -33,7 +33,9 @@ class DefaultSettings():
     # Use this option to parse traces, needs parity with cli --tracing=on
     PARSE_TRACE = False
     PARSE_STATE_DIFF = False
-
+    NEW_BLOCKS = False
+    BLOCK_LAG = 100
+    FILTER_TIME = 30
 
 class PersonalInfuraSettings(DefaultSettings):
     NODE_TYPE = "Infura"
@@ -56,9 +58,10 @@ class TestSettings(DefaultSettings):
     # SQLALCHEMY settings
     SQLALCHEMY_PASSWORD = 'develop'
     SQLALCHEMY_DB = 'ether_sql_tests'
-
+    NEW_BLOCKS = False
     # Logging settings
     LOG_LEVEL = "DEBUG"
+    BLOCK_LAG = 1
 
 
 class ParityTestSettings(TestSettings):
@@ -66,17 +69,11 @@ class ParityTestSettings(TestSettings):
     # Node settings
     # Available options 'Geth', 'Parity', 'Infura'
     NODE_TYPE = "Parity"
-
     # Tables to parse
     # Use this option to parse traces, needs parity with cli --tracing=on
     PARSE_TRACE = True
     PARSE_STATE_DIFF = True
     TIMEOUT = 60
-
-
-SETTINGS_MAP = {'DefaultSettings': DefaultSettings,
-                'TestSettings': TestSettings,
-                'ParityTestSettings': ParityTestSettings,
-                'PersonalInfuraSettings': PersonalInfuraSettings,
-                'PersonalParitySettings': PersonalParitySettings,
-                'PersonalGethSettings': PersonalGethSettings}
+    NEW_BLOCKS = True
+    BLOCK_LAG = 1
+    FILTER_TIME = 1

@@ -6,7 +6,8 @@ from tests.common_tests.blocks import (
     fill_missing_blocks,
     verify_block_range_56160_56170,
     verify_state_at_block,
-    verify_block_56160_contents
+    verify_block_56160_contents,
+    verify_removed_block_range_56160_56170,
 )
 
 
@@ -41,4 +42,9 @@ class TestParityBlocks_56160_56170():
     def test_parity_verify_block_56160_contents(
             self, parity_session_block_range_56160_56170):
         verify_block_56160_contents()
+        pass
+
+    def test_parity_verify_removed_block_range_56160_56170(
+            self, parity_session_block_range_56160_56170):
+        verify_removed_block_range_56160_56170()
         pass

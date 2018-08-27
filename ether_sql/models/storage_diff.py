@@ -29,13 +29,13 @@ class StorageDiff(base):
     """
     __tablename__ = 'storage_diff'
     id = Column(Integer, primary_key=True)
-    block_number = Column(Numeric, ForeignKey('blocks.block_number'))
+    block_number = Column(Numeric, ForeignKey('blocks.block_number', ondelete='CASCADE'))
     timestamp = Column(TIMESTAMP)
     transaction_hash = Column(String(66),
-                              ForeignKey('transactions.transaction_hash'),
+                              ForeignKey('transactions.transaction_hash', ondelete='CASCADE'),
                               index=True)
     transaction_index = Column(Numeric, nullable=True)
-    state_diff_id = Column(Integer, ForeignKey('state_diff.id'), nullable=False)
+    state_diff_id = Column(Integer, ForeignKey('state_diff.id', ondelete='CASCADE'), nullable=False)
     address = Column(String(42), index=True, nullable=False)
     position = Column(String(66), nullable=False)
     storage_from = Column(String(66), nullable=True)

@@ -26,7 +26,7 @@ class Storage(base):
     """
     __tablename__ = 'storage'
     id = Column(Integer, primary_key=True)
-    address = Column(String(42), ForeignKey('state.address'))
+    address = Column(String(42), ForeignKey('state.address', ondelete='CASCADE'))
     position = Column(String(66), index=True, nullable=False)
     storage = Column(String(66), nullable=False)
 

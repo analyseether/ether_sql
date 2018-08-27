@@ -11,31 +11,35 @@ from web3 import (
 )
 from contextlib import contextmanager
 from ether_sql.models import base
-from ether_sql.settings import SETTINGS_MAP
+import ether_sql.settings as settings
 from sqlalchemy.orm import sessionmaker
 logger = logging.getLogger(__name__)
 
 
 class Session():
 
-    def __init__(self, settings=None):
+    def __init__(self, setting_name=None):
 
-        if settings is None:
+        if setting_name is None:
             self.setting_name = 'DefaultSettings'
         else:
-            self.setting_name = settings
+            self.setting_name = setting_name
 
         try:
-            self.settings = SETTINGS_MAP[self.setting_name]
+            self.settings = getattr(settings, self.setting_name)
         except KeyError:
-            raise ValueError('Invalid setting, choose one of these {}'
-                             .format([key for key in SETTINGS_MAP.keys()]))
+            raise ValueError('The desired setting does not exist')
+
         setup_logging(settings=self.settings)
         logger.debug(self.settings.LOG_LEVEL)
 
         self.db_engine, self.url = setup_db_engine(settings=self.settings)
 
         self.w3 = setup_node_session(settings=self.settings)
+
+        if self.settings.NEW_BLOCKS:
+            print("Adding block filters")
+            self.setup_filters()
 
     @contextmanager
     def db_session_scope(self):
@@ -44,6 +48,8 @@ class Session():
 
         try:
             yield self.db_session
+            logger.debug("New data {}".format(self.db_session.new))
+            logger.debug("Updated data {}".format(self.db_session.dirty))
             self.db_session.commit()
         except Exception as e:
             self.db_session.rollback()
@@ -51,6 +57,8 @@ class Session():
         finally:
             self.db_session.close()
 
+    def setup_filters(self):
+        self.block_filter = self.w3.eth.filter('latest')
 
 def setup_logging(settings):
     """

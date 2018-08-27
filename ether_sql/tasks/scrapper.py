@@ -1,5 +1,7 @@
 from datetime import datetime
 from celery.utils.log import get_task_logger
+from celery.task import Task
+from celery.signals import task_prerun
 from web3.utils.encoding import to_int
 from ether_sql.globals import get_current_session
 from ether_sql.tasks.worker import app
@@ -12,9 +14,31 @@ from ether_sql.models import (
     Traces,
     MetaInfo,
     StateDiff,
+    BlockTaskMeta,
 )
 
 logger = get_task_logger(__name__)
+
+
+class BlockTaskTracker(Task):
+    def on_success(self, retval, task_id, args, kwargs):
+        current_session = get_current_session()
+        with current_session.db_session_scope():
+            block_task_meta = BlockTaskMeta.get_block_task_meta_from_task_id(task_id)
+            for i_block_task_meta in block_task_meta:
+                if i_block_task_meta.block_hash == retval or i_block_task_meta is None:
+                    i_block_task_meta.state = 'SUCCESS'
+                    current_session.db_session.add(i_block_task_meta)
+                else:
+                    i_block_task_meta.state = 'FORKED'
+                    current_session.db_session.add(i_block_task_meta)
+                    
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        current_session = get_current_session()
+        with current_session.db_session_scope():
+            block_task_meta = BlockTaskMeta.get_block_task_meta_from_task_id(task_id)
+            block_task_meta.state = 'FAILURE'
+            current_session.db_session.add(block_task_meta)
 
 
 def scrape_blocks(list_block_numbers, mode):
@@ -25,14 +49,19 @@ def scrape_blocks(list_block_numbers, mode):
     :param list list_block_numbers: List of block numbers to push in the database
     :param str mode: Mode to be used weather parallel or single
     """
-
     task_list = []
-
+    current_session = get_current_session()
     for block_number in list_block_numbers:
         logger.debug('Adding block: {}'.format(block_number))
         if mode == 'parallel':
             r = add_block_number.delay(block_number)
             task_list.append(r)
+            block_task_meta = BlockTaskMeta(task_id=r.id,
+                                            task_name='add_block_number',
+                                            state='PENDING',
+                                            block_number=block_number)
+            with current_session.db_session_scope():
+                current_session.db_session.add(block_task_meta)
         elif mode == 'single':
             add_block_number(block_number)
         else:
@@ -40,7 +69,7 @@ def scrape_blocks(list_block_numbers, mode):
     return task_list
 
 
-@app.task()
+@app.task(base=BlockTaskTracker, max_retries=5)
 def add_block_number(block_number):
     """
     Adds the block, transactions, uncles, logs and traces of a given block
@@ -49,6 +78,9 @@ def add_block_number(block_number):
     :param int block_number: The block number to add to the database
     """
     current_session = get_current_session()
+    block_task_meta = BlockTaskMeta.update_block_task_meta_from_block_number(
+        block_number=block_number,
+        state='STARTED')
 
     # getting the block_data from the node
     block_data = current_session.w3.eth.getBlock(
@@ -58,6 +90,7 @@ def add_block_number(block_number):
     iso_timestamp = datetime.utcfromtimestamp(timestamp).isoformat()
     block = Blocks.add_block(block_data=block_data,
                              iso_timestamp=iso_timestamp)
+    block_hash = block.block_hash
 
     if current_session.settings.PARSE_TRACE and \
        current_session.settings.PARSE_STATE_DIFF and \
@@ -147,3 +180,19 @@ def add_block_number(block_number):
         # updating the meta info table
         MetaInfo.set_last_pushed_block(current_session, block_number)
     logger.info("Commiting block: {} to sql".format(block_number))
+    return block_hash
+
+
+@app.task()
+def remove_block_number(block_number):
+    """
+    Removes the block, transactions, uncles, logs and traces of a given block
+    number into the database to perform chain reorgs.
+
+    :param int block_number: The block number to add to the database
+    """
+    current_session = get_current_session()
+    with current_session.db_session_scope():
+        current_session.db_session.query(Blocks).\
+            filter_by(block_number=block_number).delete()
+        logger.info("Removed block {}".format(block_number))

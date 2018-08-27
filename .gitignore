@@ -32,3 +32,6 @@ dump.rdb
 
 # removing ftpconfig
 .ftpconfig
+
+# removing celery beat schedule
+celerybeat-schedule
