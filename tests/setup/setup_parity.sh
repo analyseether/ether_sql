@@ -8,4 +8,4 @@ sudo apt update
 sudo apt-get -t testing install libstdc++6
 curl -O "https://storage.googleapis.com/ether_sql/export_blocks_mainnet.rlp"
 ./parity import ./export_blocks_mainnet.rlp --tracing on
-./parity &> /dev/null
+(./parity &)
