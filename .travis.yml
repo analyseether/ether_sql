@@ -7,11 +7,12 @@ cache:
   - pip: true
   - directories:
     - $HOME/.local/share/io.parity.ethereum/
-    - $TRAVIS_BUILD_DIR/paritybin
+    - $HOME/.parity-bin/
 services:
   - postgresql
   - rabbitmq
 before_install:
+  - sudo apt-get install -y dpkg
   - tests/setup/setup_psql.sh
   - tests/setup/setup_rabbitmq.sh
   - tests/setup/setup_parity.sh
