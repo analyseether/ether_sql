@@ -10,15 +10,9 @@ services:
   - postgresql
   - rabbitmq
 before_install:
-  - createdb ether_sql_tests
-  - sudo -u postgres psql -U travis -d postgres -c "alter user travis with password 'develop';"
-  - sudo rabbitmqctl add_user myuser mypassword
-  - sudo rabbitmqctl add_vhost myvhost
-  - sudo rabbitmqctl set_user_tags myuser mytag
-  - sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
-  - bash <(curl https://get.parity.io -L) -r stable
-  - curl -O https://storage.googleapis.com/ether_sql/export_blocks_mainnet.rlp
-  - parity import ./export_blocks_mainnet.rlp --tracing on
+  - tests/setup/setup_psql.sh
+  - tests/setup/setup_rabbitmq.sh
+  - tests/setup/setup_parity.sh
 install:
   - travis_retry pip install -e . -r requirements.txt
 script:
