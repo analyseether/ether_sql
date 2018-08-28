@@ -1,4 +1,6 @@
+sudo: required
 language: python
+dist: trusty
 python:
   - "3.6"
 cache:
