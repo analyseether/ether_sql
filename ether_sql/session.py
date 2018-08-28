@@ -48,8 +48,8 @@ class Session():
 
         try:
             yield self.db_session
-            logger.debug("New data {}".format(self.db_session.new))
-            logger.debug("Updated data {}".format(self.db_session.dirty))
+            # logger.debug("New data {}".format(self.db_session.new))
+            # logger.debug("Updated data {}".format(self.db_session.dirty))
             self.db_session.commit()
         except Exception as e:
             self.db_session.rollback()
