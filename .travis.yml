@@ -16,7 +16,11 @@ before_install:
   - sudo rabbitmqctl add_vhost myvhost
   - sudo rabbitmqctl set_user_tags myuser mytag
   - sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
+  - bash <(curl https://get.parity.io -L) -r stable
+  - curl -O https://storage.googleapis.com/ether_sql/export_blocks_mainnet.rlp
+  - parity import ./export_blocks_mainnet.rlp --tracing on
 install:
   - travis_retry pip install -e . -r requirements.txt
 script:
 - python -m pytest -vv tests/infura
+- python -m pytest -vv tests/parity
