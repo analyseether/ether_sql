@@ -18,5 +18,7 @@ before_install:
 install:
   - travis_retry pip install -e . -r requirements.txt
 script:
-- python -m pytest -vv tests/infura
-- python -m pytest -svv tests/parity
+  - python -m pytest -vv tests/infura
+  - python -m pytest -vv tests/parity
+after_script:
+  - pkill -f parity

@@ -7,5 +7,5 @@ echo "deb [trusted=yes] http://ftp.debian.org/debian testing main" > testing.lis
 sudo apt update
 sudo apt-get -t testing install libstdc++6
 curl -O "https://storage.googleapis.com/ether_sql/export_blocks_mainnet.rlp"
-./parity import ./export_blocks_mainnet.rlp --tracing on
-(./parity &)
+./parity import ./export_blocks_mainnet.rlp --tracing=on --pruning=archive
+nohup ./parity --tracing=on --pruning=archive &
