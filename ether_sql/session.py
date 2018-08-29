@@ -48,8 +48,8 @@ class Session():
 
         try:
             yield self.db_session
-            logger.debug("New data {}".format(self.db_session.new))
-            logger.debug("Updated data {}".format(self.db_session.dirty))
+            # logger.debug("New data {}".format(self.db_session.new))
+            # logger.debug("Updated data {}".format(self.db_session.dirty))
             self.db_session.commit()
         except Exception as e:
             self.db_session.rollback()
@@ -97,7 +97,9 @@ def setup_db_engine(settings):
                      settings.SQLALCHEMY_DB)
 
     # Create an engine that stores data in the PostgreSQL
-    engine = sqlalchemy.create_engine(url, client_encoding='utf8')
+    engine = sqlalchemy.create_engine(url, client_encoding='utf8',
+                isolation_level="AUTOCOMMIT")
+
     base.metadata.bind = engine
     logger.info('Connected to the db {}'.format(settings.SQLALCHEMY_DB))
 

@@ -5,13 +5,15 @@ from ether_sql.cli import cli
 from eth_utils import to_checksum_address
 from web3.utils.formatters import hex_to_integer
 from ether_sql.models import State
+import logging
 
+logger = logging.getLogger(__name__)
 
 def add_block(setting_name, block_number):
     runner = CliRunner()
-    runner.invoke(cli, ['--settings', setting_name,
+    result = runner.invoke(cli, ['--settings', setting_name,
                         'scrape_block', '--block_number', block_number])
-
+    logger.debug(result.output)
 
 def match_state_dump_to_state_table(block_number):
     current_session = get_current_session()
