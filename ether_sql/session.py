@@ -97,7 +97,9 @@ def setup_db_engine(settings):
                      settings.SQLALCHEMY_DB)
 
     # Create an engine that stores data in the PostgreSQL
-    engine = sqlalchemy.create_engine(url, client_encoding='utf8')
+    engine = sqlalchemy.create_engine(url, client_encoding='utf8',
+                isolation_level="AUTOCOMMIT")
+
     base.metadata.bind = engine
     logger.info('Connected to the db {}'.format(settings.SQLALCHEMY_DB))
 
