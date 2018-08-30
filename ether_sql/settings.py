@@ -1,4 +1,6 @@
 import os
+import inspect
+import sys
 
 # Task queue settings
 RABBIT_MQ_URL = 'amqp://myuser:mypassword@localhost:5672/myvhost'
@@ -77,3 +79,11 @@ class ParityTestSettings(TestSettings):
     NEW_BLOCKS = True
     BLOCK_LAG = 1
     FILTER_TIME = 1
+
+def get_setting_names():
+    setting_names = []
+    settings_module = sys.modules[__name__]
+    for name, obj in inspect.getmembers(settings_module):
+        if inspect.isclass(obj):
+            setting_names.append(name)
+    return setting_names

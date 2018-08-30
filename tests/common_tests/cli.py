@@ -24,3 +24,12 @@ def export_to_csv_single_thread():
     for sql_table in tables_in_sql:
         assert sql_table+'.csv' in files_in_directory
     call(["rm", "-rf", directory])
+
+
+def fail_on_wrong_setting_name():
+    wrong_setting_name = 'Yo'
+    runner = CliRunner()
+    result = runner.invoke(cli, ['--settings',
+                                 wrong_setting_name])
+    print(result.output)
+    assert result.exit_code is not 0

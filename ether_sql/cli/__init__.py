@@ -5,12 +5,15 @@ from ether_sql.session import Session
 from ether_sql.tasks.scrapper import scrape_blocks, add_block_number
 from ether_sql.models import Blocks
 from ether_sql.globals import push_session, get_current_session
+from ether_sql.settings import get_setting_names
 logger = logging.getLogger(__name__)
 
+setting_names = get_setting_names()
 
 @click.group()
 @click.option('--settings', default='DefaultSettings',
-              help='settings to run ether_sql')
+              help='Settings to run ether_sql, choose from ' + ', '.join(setting_names)
+              , show_default=True, type=click.Choice(setting_names), metavar="")
 @click.pass_context
 def cli(ctx, settings):
     """:code:`ether_sql` is the most basic CLI group with 4 subsequent
