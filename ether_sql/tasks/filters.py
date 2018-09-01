@@ -37,12 +37,14 @@ def push_blocks_in_queue():
     pushes the blocks in waiting to the queue.
     """
     current_session = get_current_session()
-
-    blocks_in_waiting = BlockTaskMeta.get_blocks_to_be_pushed_in_queue()
-    for blocks in blocks_in_waiting:
-        block_number = int(blocks.block_number)
-        add_block_task = add_block_number.delay(block_number)
-        BlockTaskMeta.update_block_task_meta_from_block_number(
+    with current_session.db_session_scope():
+        blocks_in_waiting = BlockTaskMeta.get_blocks_to_be_pushed_in_queue(
+                                current_session)
+        for blocks in blocks_in_waiting:
+            block_number = int(blocks.block_number)
+            add_block_task = add_block_number.delay(block_number)
+            BlockTaskMeta.update_block_task_meta_from_block_number(
+                current_session=current_session,
                 block_number=block_number,
                 task_id=add_block_task.id,
                 state='PENDING',
