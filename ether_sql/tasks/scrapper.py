@@ -24,7 +24,7 @@ class BlockTaskTracker(Task):
     def on_success(self, retval, task_id, args, kwargs):
         current_session = get_current_session()
         with current_session.db_session_scope():
-            block_task_meta = BlockTaskMeta.get_block_task_meta_from_task_id(task_id)
+            block_task_meta = BlockTaskMeta.get_block_task_meta_from_task_id(current_session, task_id)
             for i_block_task_meta in block_task_meta:
                 if i_block_task_meta.block_hash == retval or i_block_task_meta is None:
                     i_block_task_meta.state = 'SUCCESS'
@@ -32,11 +32,11 @@ class BlockTaskTracker(Task):
                 else:
                     i_block_task_meta.state = 'FORKED'
                     current_session.db_session.add(i_block_task_meta)
-                    
+
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         current_session = get_current_session()
         with current_session.db_session_scope():
-            block_task_meta = BlockTaskMeta.get_block_task_meta_from_task_id(task_id)
+            block_task_meta = BlockTaskMeta.get_block_task_meta_from_task_id(current_session, task_id)
             block_task_meta.state = 'FAILURE'
             current_session.db_session.add(block_task_meta)
 
@@ -78,9 +78,11 @@ def add_block_number(block_number):
     :param int block_number: The block number to add to the database
     """
     current_session = get_current_session()
-    block_task_meta = BlockTaskMeta.update_block_task_meta_from_block_number(
-        block_number=block_number,
-        state='STARTED')
+    with current_session.db_session_scope():
+        block_task_meta = BlockTaskMeta.update_block_task_meta_from_block_number(
+            current_session=current_session,
+            block_number=block_number,
+            state='STARTED')
 
     # getting the block_data from the node
     block_data = current_session.w3.eth.getBlock(
