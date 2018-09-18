@@ -8,7 +8,7 @@ from setuptools import (
 
 setup(
     name='ether_sql',
-    version='0.1.0',
+    version='0.1.3',
     description="""A python library to push ethereum blockchain data into an sql database.""",
     long_description_markdown_filename='README.md',
     author='Ankit Chiplunkar',
@@ -16,14 +16,15 @@ setup(
     url='https://github.com/analyseether/ether_sql',
     include_package_data=True,
     install_requires=[
-        "web3",
+        "web3==4.4.1",
         "sqlalchemy==1.2.4",
         "alembic==0.9.9",
         "psycopg2-binary==2.7.4",
         "Click==6.7",
+	"Celery==4.1.1",
     ],
     setup_requires=['setuptools-markdown'],
-    python_requires='>=3.5, <4',
+    python_requires='>=3.6, <4',
     extras_require={
         'tester': [
             "pytest==3.0.0",
@@ -47,7 +48,6 @@ setup(
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
 )
