@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "web3==4.4.1",
-        "sqlalchemy==1.2.4",
+        "sqlalchemy==1.3.17",
         "alembic==0.9.9",
         "psycopg2-binary==2.7.4",
         "Click==6.7",
