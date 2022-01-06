@@ -19,5 +19,5 @@ sphinx_rtd_theme==0.3.1
 sphinx_click==1.2.0
 
 # Task queue
-Celery==4.1.1
+Celery==5.2.2
 flower==0.9.2

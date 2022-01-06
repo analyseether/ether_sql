@@ -21,7 +21,7 @@ setup(
         "alembic==0.9.9",
         "psycopg2-binary==2.7.4",
         "Click==6.7",
-	"Celery==4.1.1",
+	"Celery==5.2.2",
     ],
     setup_requires=['setuptools-markdown'],
     python_requires='>=3.6, <4',
